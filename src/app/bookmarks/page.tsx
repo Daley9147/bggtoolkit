@@ -1,13 +1,12 @@
 import Header from '@/components/layout/header';
-import ToolkitClient from '@/components/toolkit/toolkit-client';
-import { allSections } from '@/lib/content-data';
+import BookmarksClient from '@/components/bookmarks/bookmarks-client';
 
-export default function Home() {
+export default function BookmarksPage() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <Header />
       <main className="flex-1">
-        <ToolkitClient sections={allSections} />
+        <BookmarksClient />
       </main>
     </div>
   );
