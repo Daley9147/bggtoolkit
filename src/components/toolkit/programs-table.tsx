@@ -180,6 +180,66 @@ const StrategyActionReviewInfoPopover = () => (
     </Popover>
 );
 
+const PowerReviewInfoPopover = () => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="ml-2 h-5 w-5 text-muted-foreground hover:text-foreground">
+          <Info className="h-4 w-4" />
+          <span className="sr-only">Power Review Information</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <h4 className="font-headline font-medium leading-none">Power Review Details</h4>
+            <p className="text-sm text-muted-foreground">
+              A comprehensive mentor-led review session.
+            </p>
+          </div>
+          <div className="grid gap-2 text-sm">
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="font-semibold">Length</span>
+              <span className="col-span-2">2–2.5 hours</span>
+            </div>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="font-semibold">Frequency</span>
+              <span className="col-span-2">Twice (6 & 12 months)</span>
+            </div>
+            <div>
+                <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Conduct a full review of business and program progress.</li>
+                    <li>Revisit goals to assess overall performance.</li>
+                    <li>Apply course corrections if needed.</li>
+                    <li>Amplify successful strategies.</li>
+                    <li>Ensure mentee is positioned for strong growth.</li>
+                </ul>
+            </div>
+            <div>
+                <h5 className="font-semibold mt-2 mb-1">Key Activities:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Review all areas of the AEROPS framework.</li>
+                    <li>Assess ROI and set targets for the next stage.</li>
+                    <li>Recalibrate goals, KPIs, and action plans.</li>
+                    <li>Address unresolved or emerging challenges.</li>
+                    <li>Capture success stories and lessons learned.</li>
+                </ul>
+            </div>
+             <div>
+                <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Provides a milestone to measure business transformation.</li>
+                    <li>Keeps focus on long-term objectives.</li>
+                    <li>Ensures program remains personalised and effective.</li>
+                    <li>Creates a renewed sense of direction and energy.</li>
+                </ul>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+);
+
 
 export default function ProgramsTable({ section }: ProgramsTableProps) {
   return (
@@ -209,6 +269,7 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                     {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
                     {item.feature === 'Crisis Calls (15 min)' && <CrisisCallInfoPopover />}
                     {item.feature === 'Strategy &amp; Action Reviews' && <StrategyActionReviewInfoPopover />}
+                    {item.feature === 'Power Review' && <PowerReviewInfoPopover />}
                   </TableCell>
                   <TableCell className="text-center">
                     {typeof item.elevate === 'boolean' ? (
@@ -257,6 +318,7 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                         {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
                         {item.feature === 'Crisis Calls (15 min)' && <CrisisCallInfoPopover />}
                         {item.feature === 'Strategy &amp; Action Reviews' && <StrategyActionReviewInfoPopover />}
+                        {item.feature === 'Power Review' && <PowerReviewInfoPopover />}
                       </span>
                        <span className="text-right font-medium">
                         {typeof value === 'boolean' ? (
