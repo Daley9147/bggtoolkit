@@ -150,7 +150,6 @@ export const allSections: SectionData[] = [
       { feature: 'Strategy & Action Reviews', elevate: '6 per year', intensive: '12 per year', boardroom: '12 per year' },
       { feature: 'Participants', elevate: '1', intensive: '1', boardroom: 'Up to 3' },
       { feature: 'Price', elevate: '£1,500/month', intensive: '£2,500/month', boardroom: '£5,000/month' },
-      { feature: 'Guarantee', elevate: '100% guaranteed', intensive: '100% guaranteed', boardroom: '100% guaranteed' },
     ],
   },
   {
