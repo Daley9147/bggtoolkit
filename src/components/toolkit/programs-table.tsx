@@ -121,6 +121,65 @@ const CrisisCallInfoPopover = () => (
     </Popover>
 );
 
+const StrategyActionReviewInfoPopover = () => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="ml-2 h-5 w-5 text-muted-foreground hover:text-foreground">
+          <Info className="h-4 w-4" />
+          <span className="sr-only">Strategy & Action Review Information</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <h4 className="font-headline font-medium leading-none">Strategy & Action Review Details</h4>
+            <p className="text-sm text-muted-foreground">
+              A mentor-led deep-dive session.
+            </p>
+          </div>
+          <div className="grid gap-2 text-sm">
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="font-semibold">Length</span>
+              <span className="col-span-2">60–90 minutes</span>
+            </div>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="font-semibold">Format</span>
+              <span className="col-span-2">Mentor-led deep-dive</span>
+            </div>
+            <div>
+                <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Review overall business strategy.</li>
+                    <li>Assess progress against long-term goals.</li>
+                    <li>Identify gaps, risks, or new opportunities.</li>
+                    <li>Refine or reset the action plan.</li>
+                    <li>Ensure alignment with AEROPS framework.</li>
+                </ul>
+            </div>
+            <div>
+                <h5 className="font-semibold mt-2 mb-1">Key Activities:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Review performance metrics and results.</li>
+                    <li>Evaluate effectiveness of previous actions.</li>
+                    <li>Re-align business priorities with goals.</li>
+                    <li>Agree clear action steps for the next phase.</li>
+                </ul>
+            </div>
+             <div>
+                <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Provides structured accountability.</li>
+                    <li>Maintains strategic focus.</li>
+                    <li>Ensures progress toward sustainable growth.</li>
+                    <li>Builds clarity and confidence.</li>
+                </ul>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+);
+
 
 export default function ProgramsTable({ section }: ProgramsTableProps) {
   return (
@@ -149,6 +208,7 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                     {item.feature}
                     {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
                     {item.feature === 'Crisis Calls (15 min)' && <CrisisCallInfoPopover />}
+                    {item.feature === 'Strategy &amp; Action Reviews' && <StrategyActionReviewInfoPopover />}
                   </TableCell>
                   <TableCell className="text-center">
                     {typeof item.elevate === 'boolean' ? (
@@ -196,6 +256,7 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                         {item.feature}
                         {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
                         {item.feature === 'Crisis Calls (15 min)' && <CrisisCallInfoPopover />}
+                        {item.feature === 'Strategy &amp; Action Reviews' && <StrategyActionReviewInfoPopover />}
                       </span>
                        <span className="text-right font-medium">
                         {typeof value === 'boolean' ? (
