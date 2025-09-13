@@ -12,8 +12,8 @@ export default function Header() {
             <Image
                 src="https://umwvwdiphmjchbwagtlc.supabase.co/storage/v1/object/public/site-logos/Business-Global-Growth-logo.png"
                 alt="BGG Logo"
-                width={64}
-                height={64}
+                width={250}
+                height={75}
             />
           </Link>
         </div>
