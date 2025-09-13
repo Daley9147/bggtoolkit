@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Book, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -7,7 +8,14 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex items-center">
-          <Link href="/" className="mr-4 flex items-center">
+          <Link href="/" className="mr-4 flex items-center gap-2">
+            <Image
+                src="https://umwvwdiphmjchbwagtlc.supabase.co/storage/v1/object/public/site-logos/Business-Global-Growth-logo.png"
+                alt="BGG Logo"
+                width={40}
+                height={40}
+                className="h-8 w-auto"
+            />
             <span className="font-headline text-lg font-bold">
               BGG Sales Toolkit
             </span>
