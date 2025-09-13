@@ -11,6 +11,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ProgramsTableProps {
   section: ProgramSection;
@@ -25,43 +26,45 @@ const SessionInfoPopover = () => (
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-headline font-medium leading-none">Session Details</h4>
-            <p className="text-sm text-muted-foreground">
-              Additional information about the mentoring sessions.
-            </p>
-          </div>
-          <div className="grid gap-2 text-sm">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <span className="font-semibold">Length</span>
-              <span className="col-span-2">45–60 minutes</span>
+        <ScrollArea className="max-h-96 pr-4">
+            <div className="grid gap-4">
+            <div className="space-y-2">
+                <h4 className="font-headline font-medium leading-none">Session Details</h4>
+                <p className="text-sm text-muted-foreground">
+                Additional information about the mentoring sessions.
+                </p>
             </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <span className="font-semibold">Format</span>
-              <span className="col-span-2">Mentee-led, mentor-guided</span>
+            <div className="grid gap-2 text-sm">
+                <div className="grid grid-cols-3 items-center gap-4">
+                <span className="font-semibold">Length</span>
+                <span className="col-span-2">45–60 minutes</span>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                <span className="font-semibold">Format</span>
+                <span className="col-span-2">Mentee-led, mentor-guided</span>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Provide a structured, safe space for open discussion.</li>
+                        <li>Review current progress and celebrate wins.</li>
+                        <li>Explore challenges in business and life.</li>
+                        <li>Conduct an action check on previous commitments.</li>
+                        <li>Identify next steps to maintain momentum.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Keeps the mentee accountable.</li>
+                        <li>Builds confidence in decision-making.</li>
+                        <li>Provides clarity on priorities.</li>
+                        <li>Ensures consistent progress toward goals.</li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Provide a structured, safe space for open discussion.</li>
-                    <li>Review current progress and celebrate wins.</li>
-                    <li>Explore challenges in business and life.</li>
-                    <li>Conduct an action check on previous commitments.</li>
-                    <li>Identify next steps to maintain momentum.</li>
-                </ul>
             </div>
-             <div>
-                <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Keeps the mentee accountable.</li>
-                    <li>Builds confidence in decision-making.</li>
-                    <li>Provides clarity on priorities.</li>
-                    <li>Ensures consistent progress toward goals.</li>
-                </ul>
-            </div>
-          </div>
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
 );
@@ -75,48 +78,50 @@ const CrisisCallInfoPopover = () => (
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-headline font-medium leading-none">Crisis Call Details</h4>
-            <p className="text-sm text-muted-foreground">
-              Rapid support for time-sensitive issues.
-            </p>
-          </div>
-          <div className="grid gap-2 text-sm">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <span className="font-semibold">Length</span>
-              <span className="col-span-2">15 minutes</span>
+        <ScrollArea className="max-h-96 pr-4">
+            <div className="grid gap-4">
+            <div className="space-y-2">
+                <h4 className="font-headline font-medium leading-none">Crisis Call Details</h4>
+                <p className="text-sm text-muted-foreground">
+                Rapid support for time-sensitive issues.
+                </p>
             </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <span className="font-semibold">Availability</span>
-              <span className="col-span-2">Bookable within 2 hours</span>
+            <div className="grid gap-2 text-sm">
+                <div className="grid grid-cols-3 items-center gap-4">
+                <span className="font-semibold">Length</span>
+                <span className="col-span-2">15 minutes</span>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                <span className="font-semibold">Availability</span>
+                <span className="col-span-2">Bookable within 2 hours</span>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Provide rapid support for time-sensitive issues.</li>
+                        <li>Navigate urgent problems or challenges.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Common Examples:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Disciplinary action for an employee</li>
+                        <li>Conflict resolution within the team</li>
+                        <li>Unexpected client or supplier issues</li>
+                        <li>Financial or operational emergencies</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Ensures you are never "stuck" without guidance.</li>
+                        <li>Helps prevent small problems from escalating.</li>
+                        <li>Provides reassurance and stability.</li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Provide rapid support for time-sensitive issues.</li>
-                    <li>Navigate urgent problems or challenges.</li>
-                </ul>
             </div>
-            <div>
-                <h5 className="font-semibold mt-2 mb-1">Common Examples:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Disciplinary action for an employee</li>
-                    <li>Conflict resolution within the team</li>
-                    <li>Unexpected client or supplier issues</li>
-                    <li>Financial or operational emergencies</li>
-                </ul>
-            </div>
-             <div>
-                <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Ensures you are never "stuck" without guidance.</li>
-                    <li>Helps prevent small problems from escalating.</li>
-                    <li>Provides reassurance and stability.</li>
-                </ul>
-            </div>
-          </div>
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
 );
@@ -130,52 +135,54 @@ const StrategyActionReviewInfoPopover = () => (
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-headline font-medium leading-none">Strategy & Action Review Details</h4>
-            <p className="text-sm text-muted-foreground">
-              A mentor-led deep-dive session.
-            </p>
-          </div>
-          <div className="grid gap-2 text-sm">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <span className="font-semibold">Length</span>
-              <span className="col-span-2">60–90 minutes</span>
+        <ScrollArea className="max-h-96 pr-4">
+            <div className="grid gap-4">
+            <div className="space-y-2">
+                <h4 className="font-headline font-medium leading-none">Strategy & Action Review Details</h4>
+                <p className="text-sm text-muted-foreground">
+                A mentor-led deep-dive session.
+                </p>
             </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <span className="font-semibold">Format</span>
-              <span className="col-span-2">Mentor-led deep-dive</span>
+            <div className="grid gap-2 text-sm">
+                <div className="grid grid-cols-3 items-center gap-4">
+                <span className="font-semibold">Length</span>
+                <span className="col-span-2">60–90 minutes</span>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                <span className="font-semibold">Format</span>
+                <span className="col-span-2">Mentor-led deep-dive</span>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Review overall business strategy.</li>
+                        <li>Assess progress against long-term goals.</li>
+                        <li>Identify gaps, risks, or new opportunities.</li>
+                        <li>Refine or reset the action plan.</li>
+                        <li>Ensure alignment with AEROPS framework.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Key Activities:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Review performance metrics and results.</li>
+                        <li>Evaluate effectiveness of previous actions.</li>
+                        <li>Re-align business priorities with goals.</li>
+                        <li>Agree clear action steps for the next phase.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Provides structured accountability.</li>
+                        <li>Maintains strategic focus.</li>
+                        <li>Ensures progress toward sustainable growth.</li>
+                        <li>Builds clarity and confidence.</li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Review overall business strategy.</li>
-                    <li>Assess progress against long-term goals.</li>
-                    <li>Identify gaps, risks, or new opportunities.</li>
-                    <li>Refine or reset the action plan.</li>
-                    <li>Ensure alignment with AEROPS framework.</li>
-                </ul>
             </div>
-            <div>
-                <h5 className="font-semibold mt-2 mb-1">Key Activities:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Review performance metrics and results.</li>
-                    <li>Evaluate effectiveness of previous actions.</li>
-                    <li>Re-align business priorities with goals.</li>
-                    <li>Agree clear action steps for the next phase.</li>
-                </ul>
-            </div>
-             <div>
-                <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Provides structured accountability.</li>
-                    <li>Maintains strategic focus.</li>
-                    <li>Ensures progress toward sustainable growth.</li>
-                    <li>Builds clarity and confidence.</li>
-                </ul>
-            </div>
-          </div>
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
 );
@@ -189,53 +196,55 @@ const PowerReviewInfoPopover = () => (
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
-        <div className="grid gap-4">
-          <div className="space-y-2">
-            <h4 className="font-headline font-medium leading-none">Power Review Details</h4>
-            <p className="text-sm text-muted-foreground">
-              A comprehensive mentor-led review session.
-            </p>
-          </div>
-          <div className="grid gap-2 text-sm">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <span className="font-semibold">Length</span>
-              <span className="col-span-2">2–2.5 hours</span>
+        <ScrollArea className="max-h-96 pr-4">
+            <div className="grid gap-4">
+            <div className="space-y-2">
+                <h4 className="font-headline font-medium leading-none">Power Review Details</h4>
+                <p className="text-sm text-muted-foreground">
+                A comprehensive mentor-led review session.
+                </p>
             </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <span className="font-semibold">Frequency</span>
-              <span className="col-span-2">Twice (6 & 12 months)</span>
+            <div className="grid gap-2 text-sm">
+                <div className="grid grid-cols-3 items-center gap-4">
+                <span className="font-semibold">Length</span>
+                <span className="col-span-2">2–2.5 hours</span>
+                </div>
+                <div className="grid grid-cols-3 items-center gap-4">
+                <span className="font-semibold">Frequency</span>
+                <span className="col-span-2">Twice (6 & 12 months)</span>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Conduct a full review of business and program progress.</li>
+                        <li>Revisit goals to assess overall performance.</li>
+                        <li>Apply course corrections if needed.</li>
+                        <li>Amplify successful strategies.</li>
+                        <li>Ensure mentee is positioned for strong growth.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Key Activities:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Review all areas of the AEROPS framework.</li>
+                        <li>Assess ROI and set targets for the next stage.</li>
+                        <li>Recalibrate goals, KPIs, and action plans.</li>
+                        <li>Address unresolved or emerging challenges.</li>
+                        <li>Capture success stories and lessons learned.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                        <li>Provides a milestone to measure business transformation.</li>
+                        <li>Keeps focus on long-term objectives.</li>
+                        <li>Ensures program remains personalised and effective.</li>
+                        <li>Creates a renewed sense of direction and energy.</li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Conduct a full review of business and program progress.</li>
-                    <li>Revisit goals to assess overall performance.</li>
-                    <li>Apply course corrections if needed.</li>
-                    <li>Amplify successful strategies.</li>
-                    <li>Ensure mentee is positioned for strong growth.</li>
-                </ul>
             </div>
-            <div>
-                <h5 className="font-semibold mt-2 mb-1">Key Activities:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Review all areas of the AEROPS framework.</li>
-                    <li>Assess ROI and set targets for the next stage.</li>
-                    <li>Recalibrate goals, KPIs, and action plans.</li>
-                    <li>Address unresolved or emerging challenges.</li>
-                    <li>Capture success stories and lessons learned.</li>
-                </ul>
-            </div>
-             <div>
-                <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
-                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                    <li>Provides a milestone to measure business transformation.</li>
-                    <li>Keeps focus on long-term objectives.</li>
-                    <li>Ensures program remains personalised and effective.</li>
-                    <li>Creates a renewed sense of direction and energy.</li>
-                </ul>
-            </div>
-          </div>
-        </div>
+        </ScrollArea>
       </PopoverContent>
     </Popover>
 );
