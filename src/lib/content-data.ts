@@ -147,7 +147,7 @@ export const allSections: SectionData[] = [
     features: [
       { feature: '1-to-1 Sessions (per year)', elevate: '24 × 45-min sessions', intensive: '48 × 45-min sessions', boardroom: '24 1-to-1 & 24 group sessions' },
       { feature: 'Crisis Calls (15 min)', elevate: '1 per week', intensive: '2 per week', boardroom: '1 per week' },
-      { feature: 'Strategy/Action Reviews', elevate: '6 per year', intensive: '12 per year', boardroom: '12 per year' },
+      { feature: 'Strategy & Action Reviews', elevate: '6 per year', intensive: '12 per year', boardroom: '12 per year' },
       { feature: 'Participants', elevate: '1', intensive: '1', boardroom: 'Up to 3' },
       { feature: 'Price', elevate: '£1,500/month', intensive: '£2,500/month', boardroom: '£5,000/month' },
       { feature: 'Guarantee', elevate: '100% guaranteed', intensive: '100% guaranteed', boardroom: '100% guaranteed' },
