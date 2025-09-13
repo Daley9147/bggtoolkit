@@ -145,7 +145,7 @@ export const allSections: SectionData[] = [
     icon: 'Briefcase',
     description: 'All programs are 12-month enrolments and include our ROI & Satisfaction Guarantees. They are mentor-led and based on the Business Growth Blueprint + AEROPS framework.',
     features: [
-      { feature: 'Sessions', elevate: '24 × 45-min sessions', intensive: '48 × 45-min sessions', boardroom: '24 1-to-1 & 24 group sessions' },
+      { feature: '1-to-1 Sessions (per year)', elevate: '24 × 45-min sessions', intensive: '48 × 45-min sessions', boardroom: '24 1-to-1 & 24 group sessions' },
       { feature: 'Crisis Calls (15 min)', elevate: '1 per week', intensive: '2 per week', boardroom: '1 per week' },
       { feature: 'Strategy/Action Reviews', elevate: '6 per year', intensive: '12 per year', boardroom: '12 per year' },
       { feature: 'Participants', elevate: '1', intensive: '1', boardroom: 'Up to 3' },
