@@ -268,7 +268,7 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                     {item.feature}
                     {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
                     {item.feature === 'Crisis Calls (15 min)' && <CrisisCallInfoPopover />}
-                    {item.feature === 'Strategy &amp; Action Reviews' && <StrategyActionReviewInfoPopover />}
+                    {item.feature === 'Strategy & Action Reviews' && <StrategyActionReviewInfoPopover />}
                     {item.feature === 'Power Review' && <PowerReviewInfoPopover />}
                   </TableCell>
                   <TableCell className="text-center">
@@ -317,7 +317,7 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                         {item.feature}
                         {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
                         {item.feature === 'Crisis Calls (15 min)' && <CrisisCallInfoPopover />}
-                        {item.feature === 'Strategy &amp; Action Reviews' && <StrategyActionReviewInfoPopover />}
+                        {item.feature === 'Strategy & Action Reviews' && <StrategyActionReviewInfoPopover />}
                         {item.feature === 'Power Review' && <PowerReviewInfoPopover />}
                       </span>
                        <span className="text-right font-medium">
