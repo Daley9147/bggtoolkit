@@ -12,9 +12,8 @@ export default function Header() {
             <Image
                 src="https://umwvwdiphmjchbwagtlc.supabase.co/storage/v1/object/public/site-logos/Business-Global-Growth-logo.png"
                 alt="BGG Logo"
-                width={40}
-                height={40}
-                className="h-8 w-auto"
+                width={32}
+                height={32}
             />
             <span className="font-headline text-lg font-bold">
               BGG Sales Toolkit
