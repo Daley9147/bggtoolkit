@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Book, Home } from 'lucide-react';
-import AppLogo from '@/components/common/app-logo';
 import { Button } from '@/components/ui/button';
 
 export default function Header() {
@@ -8,8 +7,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex items-center">
-          <Link href="/" className="mr-4 flex items-center space-x-2">
-            <AppLogo className="h-8 w-8" />
+          <Link href="/" className="mr-4 flex items-center">
             <span className="font-headline text-lg font-bold">
               BGG Sales Toolkit
             </span>
