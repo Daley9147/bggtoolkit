@@ -66,6 +66,61 @@ const SessionInfoPopover = () => (
     </Popover>
 );
 
+const CrisisCallInfoPopover = () => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="ml-2 h-5 w-5 text-muted-foreground hover:text-foreground">
+          <Info className="h-4 w-4" />
+          <span className="sr-only">Crisis Call Information</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <h4 className="font-headline font-medium leading-none">Crisis Call Details</h4>
+            <p className="text-sm text-muted-foreground">
+              Rapid support for time-sensitive issues.
+            </p>
+          </div>
+          <div className="grid gap-2 text-sm">
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="font-semibold">Length</span>
+              <span className="col-span-2">15 minutes</span>
+            </div>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="font-semibold">Availability</span>
+              <span className="col-span-2">Bookable within 2 hours</span>
+            </div>
+            <div>
+                <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Provide rapid support for time-sensitive issues.</li>
+                    <li>Navigate urgent problems or challenges.</li>
+                </ul>
+            </div>
+            <div>
+                <h5 className="font-semibold mt-2 mb-1">Common Examples:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Disciplinary action for an employee</li>
+                    <li>Conflict resolution within the team</li>
+                    <li>Unexpected client or supplier issues</li>
+                    <li>Financial or operational emergencies</li>
+                </ul>
+            </div>
+             <div>
+                <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Ensures you are never "stuck" without guidance.</li>
+                    <li>Helps prevent small problems from escalating.</li>
+                    <li>Provides reassurance and stability.</li>
+                </ul>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+);
+
 
 export default function ProgramsTable({ section }: ProgramsTableProps) {
   return (
@@ -93,6 +148,7 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                   <TableCell className="font-medium flex items-center">
                     {item.feature}
                     {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
+                    {item.feature === 'Crisis Calls (15 min)' && <CrisisCallInfoPopover />}
                   </TableCell>
                   <TableCell className="text-center">
                     {typeof item.elevate === 'boolean' ? (
@@ -139,6 +195,7 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                       <span className="text-muted-foreground flex items-center">
                         {item.feature}
                         {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
+                        {item.feature === 'Crisis Calls (15 min)' && <CrisisCallInfoPopover />}
                       </span>
                        <span className="text-right font-medium">
                         {typeof value === 'boolean' ? (
