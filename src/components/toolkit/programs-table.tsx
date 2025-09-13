@@ -25,8 +25,8 @@ const SessionInfoPopover = () => (
           <span className="sr-only">Session Information</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <ScrollArea className="max-h-96 pr-4">
+      <PopoverContent className="w-80" asChild>
+        <ScrollArea className="max-h-[var(--radix-popover-content-available-height)] pr-4">
             <div className="grid gap-4">
             <div className="space-y-2">
                 <h4 className="font-headline font-medium leading-none">Session Details</h4>
@@ -77,8 +77,8 @@ const CrisisCallInfoPopover = () => (
           <span className="sr-only">Crisis Call Information</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <ScrollArea className="max-h-96 pr-4">
+      <PopoverContent className="w-80" asChild>
+        <ScrollArea className="max-h-[var(--radix-popover-content-available-height)] pr-4">
             <div className="grid gap-4">
             <div className="space-y-2">
                 <h4 className="font-headline font-medium leading-none">Crisis Call Details</h4>
@@ -134,8 +134,8 @@ const StrategyActionReviewInfoPopover = () => (
           <span className="sr-only">Strategy & Action Review Information</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <ScrollArea className="max-h-96 pr-4">
+      <PopoverContent className="w-80" asChild>
+        <ScrollArea className="max-h-[var(--radix-popover-content-available-height)] pr-4">
             <div className="grid gap-4">
             <div className="space-y-2">
                 <h4 className="font-headline font-medium leading-none">Strategy & Action Review Details</h4>
@@ -195,8 +195,8 @@ const PowerReviewInfoPopover = () => (
           <span className="sr-only">Power Review Information</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
-        <ScrollArea className="max-h-96 pr-4">
+      <PopoverContent className="w-80" asChild>
+        <ScrollArea className="max-h-[var(--radix-popover-content-available-height)] pr-4">
             <div className="grid gap-4">
             <div className="space-y-2">
                 <h4 className="font-headline font-medium leading-none">Power Review Details</h4>
