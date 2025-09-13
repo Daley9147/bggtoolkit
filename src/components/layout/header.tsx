@@ -15,9 +15,6 @@ export default function Header() {
                 width={64}
                 height={64}
             />
-            <span className="font-headline text-lg font-bold">
-              BGG Sales Toolkit
-            </span>
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
