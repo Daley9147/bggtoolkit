@@ -1,5 +1,5 @@
 import type { ProgramSection } from '@/lib/types';
-import { Check, X } from 'lucide-react';
+import { Check, X, Info } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -8,11 +8,64 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 interface ProgramsTableProps {
   section: ProgramSection;
 }
+
+const SessionInfoPopover = () => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="icon" className="ml-2 h-5 w-5 text-muted-foreground hover:text-foreground">
+          <Info className="h-4 w-4" />
+          <span className="sr-only">Session Information</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80">
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <h4 className="font-headline font-medium leading-none">Session Details</h4>
+            <p className="text-sm text-muted-foreground">
+              Additional information about the mentoring sessions.
+            </p>
+          </div>
+          <div className="grid gap-2 text-sm">
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="font-semibold">Length</span>
+              <span className="col-span-2">45–60 minutes</span>
+            </div>
+            <div className="grid grid-cols-3 items-center gap-4">
+              <span className="font-semibold">Format</span>
+              <span className="col-span-2">Mentee-led, mentor-guided</span>
+            </div>
+            <div>
+                <h5 className="font-semibold mt-2 mb-1">Purpose:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Provide a structured, safe space for open discussion.</li>
+                    <li>Review current progress and celebrate wins.</li>
+                    <li>Explore challenges in business and life.</li>
+                    <li>Conduct an action check on previous commitments.</li>
+                    <li>Identify next steps to maintain momentum.</li>
+                </ul>
+            </div>
+             <div>
+                <h5 className="font-semibold mt-2 mb-1">Benefits:</h5>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Keeps the mentee accountable.</li>
+                    <li>Builds confidence in decision-making.</li>
+                    <li>Provides clarity on priorities.</li>
+                    <li>Ensures consistent progress toward goals.</li>
+                </ul>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+);
+
 
 export default function ProgramsTable({ section }: ProgramsTableProps) {
   return (
@@ -37,7 +90,10 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
             <TableBody>
               {section.features.map((item) => (
                 <TableRow key={item.feature}>
-                  <TableCell className="font-medium">{item.feature}</TableCell>
+                  <TableCell className="font-medium flex items-center">
+                    {item.feature}
+                    {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
+                  </TableCell>
                   <TableCell className="text-center">
                     {typeof item.elevate === 'boolean' ? (
                       item.elevate ? <Check className="mx-auto h-5 w-5 text-green-600" /> : <X className="mx-auto h-5 w-5 text-destructive" />
@@ -79,8 +135,11 @@ export default function ProgramsTable({ section }: ProgramsTableProps) {
                   const programKey = program.toLowerCase() as 'elevate' | 'intensive' | 'boardroom';
                   const value = item[programKey];
                   return (
-                    <li key={item.feature} className="flex justify-between">
-                      <span className="text-muted-foreground">{item.feature}</span>
+                    <li key={item.feature} className="flex justify-between items-center">
+                      <span className="text-muted-foreground flex items-center">
+                        {item.feature}
+                        {item.feature === '1-to-1 Sessions (per year)' && <SessionInfoPopover />}
+                      </span>
                        <span className="text-right font-medium">
                         {typeof value === 'boolean' ? (
                             value ? <Check className="h-5 w-5 text-green-600" /> : <X className="h-5 w-5 text-destructive" />
