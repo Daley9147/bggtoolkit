@@ -15,7 +15,7 @@ type BaseSection = {
 };
 
 export type ContentSection = BaseSection & {
-  id: 'founder' | 'method' | 'testimonials' | 'objections' | 'competition';
+  id: 'about-bgg' | 'about-lee' | 'about-program' | 'aerops' | 'social-proof' | 'faq';
   content: ContentDetail[];
 };
 

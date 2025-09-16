@@ -191,4 +191,51 @@ export const allSections: SectionData[] = [
       },
     ],
   },
+  {
+    id: 'faq',
+    title: 'Frequently Asked Questions',
+    icon: 'HelpCircle',
+    content: [
+      {
+        id: 'faq-1',
+        summary: 'How is this different from a normal business coach?',
+        details: 'We don’t just “coach” — we implement a framework. AEROPS gives a clear roadmap for growth, backed by experienced mentors with real business-building track records.',
+      },
+      {
+        id: 'faq-2',
+        summary: 'We’ve tried other programs before, why will this work?',
+        details: 'Other programs are often generic. AEROPS is structured, measurable, and personalised. We focus on outcomes, not theory.',
+      },
+      {
+        id: 'faq-3',
+        summary: 'What kind of ROI can I expect?',
+        details: 'On average, clients see improved revenue, efficiency, and leadership within 6–12 months. The ROI comes from improved decision-making, better use of resources, and scaling with confidence.',
+      },
+      {
+        id: 'faq-4',
+        summary: 'What’s the time commitment?',
+        details: 'Most programs require a few focused hours each week. The goal is to fit growth strategies into your current operations, not overwhelm your schedule.',
+      },
+      {
+        id: 'faq-5',
+        summary: 'We don’t have the budget right now.',
+        details: 'Scaling requires investment. Our programs are designed to generate returns that outweigh the cost. We can also phase programs to suit cash flow.',
+      },
+      {
+        id: 'faq-6',
+        summary: 'My business is too small/big for this.',
+        details: 'The framework works at every stage. For small businesses, it builds strong foundations. For larger ones, it sharpens strategy and operations for scaling.',
+      },
+      {
+        id: 'faq-7',
+        summary: 'Do you guarantee results?',
+        details: 'We guarantee a proven framework, experienced mentors, and accountability. Results depend on commitment, but our track record shows consistent business growth.',
+      },
+      {
+        id: 'faq-8',
+        summary: 'What’s the first step if we want to go ahead?',
+        details: 'Book the discovery call → we qualify fit → we present a tailored growth plan → once agreed, onboarding begins.',
+      },
+    ],
+  }
 ];
