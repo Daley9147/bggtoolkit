@@ -9,6 +9,7 @@ import * as icons from 'lucide-react';
 import ProgramsTable from './programs-table';
 import BookmarkButton from './bookmark-button';
 import AiRefinementDialog from './ai-refinement-dialog';
+import ReactMarkdown from 'react-markdown';
 
 interface ToolkitClientProps {
   sections: SectionData[];
@@ -26,7 +27,7 @@ export default function ToolkitClient({ sections }: ToolkitClientProps) {
       .map((section) => {
         if (section.id === 'programs') {
           const programSection = section as ProgramSection;
-          const isMatch =
+          const isMatch = 
             programSection.title.toLowerCase().includes(lowercasedFilter) ||
             programSection.description.toLowerCase().includes(lowercasedFilter) ||
             programSection.features.some(
@@ -124,7 +125,7 @@ function ContentList({ section }: { section: ContentSection }) {
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pb-3">
                    <div className="prose prose-sm max-w-none border-t pt-3">
-                    <p>{item.details}</p>
+                    <ReactMarkdown>{item.details}</ReactMarkdown>
                    </div>
                    <div className="mt-2 flex items-center justify-end gap-2">
                       <AiRefinementDialog content={`${item.summary}\n\n${item.details}`} />

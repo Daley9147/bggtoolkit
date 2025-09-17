@@ -2,7 +2,40 @@ import type { SectionData } from './types';
 
 export const allSections: SectionData[] = [
   {
+    id: 'qualification-questions',
+    title: 'Qualification Questions',
+    icon: 'HelpCircle',
+    content: [
+      {
+        id: 'decision-maker',
+        summary: '1. Decision Maker',
+        details: 'Question: “Are you the main decision maker in the business for strategy and investments?”\nIf no: → “Who else needs to be involved?”',
+      },
+      {
+        id: 'price-awareness',
+        summary: '2. Price Awareness',
+        details: 'Question: “Our programs start from £1,500/month. Does that fit your expectations?”\nPurpose: Confirm comfort with investment level.',
+      },
+      {
+        id: 'growth-readiness',
+        summary: '3. Growth Readiness',
+        details: 'Question: “Is growing or scaling your business a priority right now?”\nNote: Capture specific growth goals such as revenue targets, team expansion, or market growth.',
+      },
+      {
+        id: 'commitment-to-change',
+        summary: '4. Commitment to Change',
+        details: 'Question: “Are you open and committed to making changes in your business to reach your goals?”\nPurpose: Check for genuine willingness, not just surface-level interest.',
+      },
+      {
+        id: 'capacity-check',
+        summary: '5. Capacity Check',
+        details: 'Question: “Do you and your business have the time and resources to implement strategies?”\nPurpose: Ensure they are realistic, prepared, and able to follow through.',
+      },
+    ],
+  },
+  {
     id: 'about-bgg',
+
     title: 'About Business Growth Global',
     icon: 'Building2',
     content: [
@@ -160,34 +193,121 @@ export const allSections: SectionData[] = [
     icon: 'Star',
     content: [
       {
-        id: 'testimonial-1',
-        summary: 'Client Testimonial Snippet 1',
-        details: 'Full testimonial content for snippet 1 goes here. This section can be expanded to provide more detail.',
+        id: 'breaking-1mill-turnover',
+        summary: 'Breaking £1mill Turnover',
+        details: `**Situation / Challenge**
+The business had £468,000 revenue, but profit margins were very tight — 14% gross, 3% net, limiting ability to reinvest.
+Founder was a bottleneck: working ~60 hours/week in day-to-day operations.
+Demand was growing, but with low profits and no reliable tracking of operational metrics, the growth was unsustainable.
+
+**Solution Approach**
+They implemented Business Growth Global’s AEROPS framework, including:
+- Establishing a cost-to-serve pricing model to ensure pricing reflects true costs.
+- SKU rationalisation — focusing on fewer, higher-margin products.
+- Introducing operational cadence: weekly Sales & Operations Planning (S&OP) meetings and daily huddles.
+- Systematising core processes with LPAD (Document, Perfect, Automate, Delegate).
+- Setting up a simple B2B sales pipeline to make demand more predictable.
+
+**Results Achieved**
+- Revenue increased from £468,000 → £1,248,000 in 12 months — a +167% growth.
+- Gross margin rose from 14% → 21%, and net margin doubled.
+- Founder reduced operational time from ~60 hours/week to ~30 hours/week.
+- Unit throughput grew from 300 units/day → 800 units/day (also ~+167%).
+- The team doubled in size.
+
+**Impact / Takeaways**
+- Pricing based on true cost-to-serve can unlock margin improvement.
+- Operational cadence (regular meetings, tracking) helps stabilise workflows and expose inefficiencies.
+- Process documentation, automation, delegation relieve bottlenecks — especially of key people.
+- Focusing on fewer, better products (SKU rationalisation) can be more effective than trying to serve everything.`,
       },
       {
-        id: 'testimonial-2',
-        summary: 'Client Testimonial Snippet 2',
-        details: 'Full testimonial content for snippet 2 goes here. This section can be expanded to provide more detail.',
+        id: 'uk-services-business-case-study',
+        summary: 'Case Study: UK Services Business — £8m → £12m+ Growth in 24 Months',
+        details: `**Situation / Challenge**
+The business had plateaued at £8 million in revenue.
+There was delivery strain and inconsistent utilisation of staff.
+Founder was heavily involved in day‑to‑day operations, acting as a bottleneck.
+Leadership gaps, weak processes, and underdeveloped KPIs, especially around utilisation and project margins.
+Missed opportunities, especially in referrals, due to lack of structure.
+
+**Solution Approach**
+Used the AEROPS framework to diagnose issues.
+Clarified the Ideal Customer Profiles (ICPs) and refined their service offers.
+Built a Senior Management Team (SMT) with clearly defined role‑scorecards.
+Instituted a weekly leadership cadence, with KPIs to track utilisation, project margins, etc.
+Created a structured referrals engine to capitalise on existing relationships.
+
+**Results Achieved**
+Revenue grew from £8 million → over £12 million in 24 months (at least +50% growth).
+A functional SMT was established, improving clarity, accountability, and speed of decision‑making.
+Founder shifted role from being deeply involved in operations to focusing on strategy, partnerships, networking.
+A culture of expansion and innovation was developed. Strategic hires supported that culture.
+
+**Key Takeaways**
+Breaking past revenue plateaus often requires more than sales/marketing — leadership structure and process clarity are critical.
+Defining ICPs helps sharpen focus on the right customers.
+Regular metrics, KPIs, and operational cadence (meetings, scorecards) keep utilisation, performance, margins visible and actionable.
+Delegation and formation of a senior management team allow the founder to focus on growth, rather than being bogged down in daily operations.
+Leverage existing relationships through referrals can be a powerful accelerator when put on a structured basis.`,
       },
       {
-        id: 'case-study-1',
-        summary: 'Case Study: Client A',
-        details: 'A brief summary of the case study for Client A, with a link to the full story if available.',
+        id: 'exit-readiness-case-study',
+        summary: 'Case Study: Exit Readiness — From ~£1.5m Valuation to £6m Exit',
+        details: `**Situation / Challenge**
+The business was valued at ~£1.5 million, largely because buyers viewed it as high risk.
+Key‑person risk: the founder was heavily involved in all operations, sales, and decision‑making.
+Processes and documentation were lacking (everything depended on the founder; no leadership bench; inconsistent reporting).
+The sale was contingent on the founder staying on for 24 months post‑exit because buyers lacked confidence the business could run without them.
+
+**Solution Approach**
+Established a senior leadership layer (e.g., adding an Operations Lead and a Financial Controller), with defined role scorecards to distribute responsibility.
+Systemised core operations via the LPAD framework (Learn → Perfect → Automate → Delegate).
+Created diligence‑ready financial reporting: monthly information packs, management reporting.
+Strengthened customer contracts, renewed and extended key contracts, widened referral channels to build more repeatable and stable revenue.
+Assembled a clean data room: standard operating procedures (SOPs), organisation chart, contracts, KPIs, and a transition runbook to ease the transfer to a buyer.
+
+**Results Achieved**
+Sale price escalated from ~£1.5 million to £6 million within 12 months (a 300% increase).
+The 24‑month post‑sale consultancy requirement for the founder was eliminated (replaced with a minimal handover).
+Revenue increased during the 12‑month engagement period.
+The business was transformed into a demonstrably “buy‑and‑run” asset, rather than a risky “buy‑and‑rebuild” proposition.
+
+**Key Takeaways You Can Use in Sales Conversations**
+Buyers place high value on businesses that are not founder‑dependent. Showing leadership delegation and documented processes can dramatically improve valuation.
+Preparing “diligence‑ready” financials and contracts reduces friction in exit negotiations and removes buyer concerns.
+Strengthening repeatable revenue streams (via contract renewals, referrals) makes the business more attractive.
+Investing in exit readiness (systems, leadership, documentation) can lead to a substantially higher and cleaner exit—both in price and in founder liability.`,
       },
       {
-        id: 'case-study-2',
-        summary: 'Case Study: Client B',
-        details: 'A brief summary of the case study for Client B, with a link to the full story if available.',
-      },
-      {
-        id: 'stats-1',
-        summary: '% average revenue growth across clients',
-        details: 'Example: 85% average revenue growth across all clients in the first 12 months.',
-      },
-      {
-        id: 'stats-2',
-        summary: '% of clients who scaled to £X turnover',
-        details: 'Example: 60% of clients scaled to over £1M turnover after our program.',
+        id: 'executive-coaching-case-study',
+        summary: 'Case Study: Executive Coaching — From Imposter Syndrome to Expanded Leadership Role',
+        details: `**Situation / Challenge**
+A C‑Suite executive was struggling with persistent imposter syndrome, which undermined their confidence and visibility.
+They were under‑communicating their achievements and felt uncomfortable advocating for resources.
+Communication effectiveness was inconsistent: both upwards toward other executives, and downwards with direct reports.
+
+**Solution Approach**
+A 6‑month coaching programme combining both mindset work and practical communication strategy.
+Key interventions included:
+• Crafting a leadership narrative (origin, impact, horizon) to anchor their presence.
+• Establishing a “visibility rhythm” to highlight wins, maintain consistent communication.
+• Mapping stakeholders and sponsors to create meaningful touchpoints.
+• Tools and structure: 5‑15‑5 executive updates, feedback loops (SBI+), repeatable agendas for team 1:1s and all‑hands meetings.
+• Fortnightly coaching sessions + monthly deep dives, with reflection prompts/experiments between sessions.
+
+**Results Achieved**
+Role & scope expanded: the executive was given additional responsibility.
+Confidence and credibility in their C‑Suite role increased.
+Better upward communication and more empathetic leadership downward.
+Improved team engagement, as reported by key stakeholders.
+
+**Key Takeaways for Use in Sales Conversations**
+Imposter syndrome can significantly limit leadership impact; addressing mindset is as important as process.
+Structured visibility (narrative + regular updates) helps executives own their achievements.
+Improving communication both up & down the organisation strengthens leadership credibility.
+Stakeholder mapping and feedback loops can enable leaders to build trust and align more effectively.
+Even C‑Suite roles benefit from coaching: measurable changes in confidence, role expansion, and influence.`,
       },
     ],
   },
