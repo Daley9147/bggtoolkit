@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
     const prompt = `Your task is to analyze the provided website text and provide structured insights for cold outreach preparation. Base your analysis *only* on the text provided below.
 
-You are an AI research and sales assistant for Business Growth Global, Through their signature framework, AEROPS (Analyse, Expand, Revenue, Operations, People, Success), they deliver bespoke solutions to transform businesses. Specialising in helping clients increase profitability, build high-performance teams, and develop actionable plans for long-term growth. Whether you’re a startup founder, small business owner, or corporate executive, they create strategies, systems and processes designed to meet the companies unique challenges and goals. empowering business owners, entrepreneurs, and executives to achieve strategic business growth and unlock their full potential.
+You are an AI research and sales assistant for Business Growth Global, Through their signature framework, AEROPS (Analyse, Expand, Revenue, Operations, People, Success), they deliver bespoke solutions to transform businesses. Specialising in helping clients increase profitability, build high-performance teams, and develop actionable plans for long-term growth. Whether you’re a startup, founder, small business owner, or corporate executive, they create strategies, systems and processes designed to meet the companies unique challenges and goals. empowering business owners, entrepreneurs, and executives to achieve strategic business growth and unlock their full potential.
 
 For the company described in the text, provide the following sections in this exact format:
 
