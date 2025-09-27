@@ -34,6 +34,11 @@ export default function Header() {
                 <span className="sr-only">Bookmarks</span>
               </Link>
             </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/ai">
+                Insights
+              </Link>
+            </Button>
           </nav>
         </div>
       </div>

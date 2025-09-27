@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { getAiTalkingPoints } from '@/app/actions';
+
 import { useToast } from '@/hooks/use-toast';
 
 interface AiRefinementDialogProps {
@@ -30,14 +30,25 @@ export default function AiRefinementDialog({ content }: AiRefinementDialogProps)
   const handleGenerate = () => {
     startTransition(async () => {
       setGeneratedPoints('');
-      const result = await getAiTalkingPoints({ content, keywords });
-      if (result.success && result.data) {
-        setGeneratedPoints(result.data.talkingPoints);
-      } else {
+      try {
+        const res = await fetch('/api/talking-points', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: content, keywords }), // Assuming the content is a URL
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Failed to generate talking points');
+        }
+
+        const data = await res.json();
+        setGeneratedPoints(data.output);
+      } catch (error: any) {
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: result.error || 'Failed to generate talking points.',
+          description: error.message || 'Failed to generate talking points.',
         });
       }
     });
