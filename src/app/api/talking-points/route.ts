@@ -56,7 +56,7 @@ For the company described in the text, provide the following sections in this ex
 
 **How Business Growth Global Could Help:** [Write a sales-oriented point connecting the company’s current stage and challenges (inferred from the text) to how the AEROPS Framework can help them scale efficiently.]
 
-**Suggested Outreach Hook:** [Craft a one-sentence cold outreach hook that references the company’s services or recent developments from the text. Humanise this sentence with the conversational tone of an expert sales person]
+**Outreach Hook Example:** [Craft a one-sentence cold outreach hook that references the company’s services or recent developments from the text. Humanise this sentence with the conversational tone of an expert sales person]
 
 **Contact Information (if available):** [Extract any Phone, email, website, HQ, and LinkedIn from the text.]
 

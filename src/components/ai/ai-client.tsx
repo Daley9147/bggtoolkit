@@ -45,7 +45,7 @@ export default function AiClient() {
       <h1 className="text-2xl font-bold mb-4">AI Sales Assistant</h1>
       <p className="mb-4">
         Enter a company's website URL to generate talking points and insights for
-        cold outreach.
+        cold outreach. (AI can misinterpret and make mistakes, double checking results is advised)
       </p>
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
         <Input
