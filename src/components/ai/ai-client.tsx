@@ -5,16 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ReactMarkdown from 'react-markdown';
+import { CaseStudy, caseStudies } from '@/lib/case-studies';
 
 export default function AiClient() {
   const [url, setUrl] = useState('');
   const [result, setResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [caseStudy, setCaseStudy] = useState<CaseStudy | null>(null);
+  const [caseStudyExplanation, setCaseStudyExplanation] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setResult('');
+    setCaseStudy(null);
+    setCaseStudyExplanation('');
 
     try {
       const res = await fetch('/api/talking-points', {
@@ -31,7 +36,26 @@ export default function AiClient() {
       }
 
       const data = await res.json();
-      setResult(data.output);
+      const output = data.output;
+
+      // Extract the case study reference from the output
+      const caseStudyRegex = /\*\*Case Study to Reference:\*\* \[?(Case Study #(\d+))\]?([\s\S]*)/;
+      const match = output.match(caseStudyRegex);
+
+      if (match) {
+        const caseStudyId = parseInt(match[2], 10);
+        const explanation = match[3].trim();
+        const recommendedCaseStudy = caseStudies.find(cs => cs.id === caseStudyId);
+        if (recommendedCaseStudy) {
+          setCaseStudy(recommendedCaseStudy);
+          setCaseStudyExplanation(explanation);
+        }
+        // Remove the case study section from the main result
+        setResult(output.replace(caseStudyRegex, '').trim());
+      } else {
+        setResult(output);
+      }
+
     } catch (error: any) {
       console.error('Error generating talking points:', error);
       setResult('An error occurred while generating insights.');
@@ -69,6 +93,26 @@ export default function AiClient() {
           <CardContent>
             <div className="prose dark:prose-invert max-w-none">
               <ReactMarkdown>{result}</ReactMarkdown>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {caseStudy && (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Recommended Case Study</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {caseStudyExplanation && (
+              <div className="prose dark:prose-invert max-w-none mb-4">
+                <ReactMarkdown>{caseStudyExplanation}</ReactMarkdown>
+              </div>
+            )}
+            <h3 className="font-bold">{caseStudy.headline}</h3>
+            <p className="text-sm text-muted-foreground">{caseStudy.industry}</p>
+            <div className="prose dark:prose-invert max-w-none mt-2">
+              <ReactMarkdown>{caseStudy.story}</ReactMarkdown>
             </div>
           </CardContent>
         </Card>

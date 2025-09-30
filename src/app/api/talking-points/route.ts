@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
+import { caseStudies } from '@/lib/case-studies';
 
 async function fetchWebsiteContent(url: string): Promise<string> {
   try {
@@ -56,7 +57,9 @@ For the company described in the text, provide the following sections in this ex
 
 **How Business Growth Global Could Help:** [Write a sales-oriented point connecting the company’s current stage and challenges (inferred from the text) to how the AEROPS Framework can help them scale efficiently.]
 
-**Outreach Hook Example:** [Craft a one-sentence cold outreach hook that references the company’s services or recent developments from the text. Humanise this sentence with the conversational tone of an expert sales person]
+**Outreach Hook Example:** [Craft a one-sentence cold outreach hook that references the company’s services or recent developments from the text. Humanise this sentence with the conversational conversational tone of an expert sales person]
+
+**Case Study to Reference:** [Analyze the company's industry and challenges and recommend the most relevant case study from the list provided below. Explain in 2-3 sentences how the challenges and solutions in the case study apply to the company being researched, making a clear connection between the case study and the company's specific situation.]
 
 **Contact Information (if available):** [Extract any Phone, email, website, HQ, and LinkedIn from the text.]
 
@@ -66,6 +69,11 @@ Rules:
 - Base your analysis *strictly* on the text provided. Do not use any external knowledge.
 - If the text is unclear or insufficient, state that you cannot provide a complete analysis.
 - Ensure each section is separated by a blank line.
+
+Case Studies:
+---
+${JSON.stringify(caseStudies, null, 2)}
+---
 
 Website Text to Analyze:
 ---
