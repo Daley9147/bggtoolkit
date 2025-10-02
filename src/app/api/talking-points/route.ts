@@ -104,6 +104,22 @@ Hi ${contactFirstName || '[First Name]'}, I’m curious to learn more about your
 Thanks for connecting, ${contactFirstName || '[First Name]'}. I help ${jobTitle || '[Job Title]'}s in the [INDUSTRY] space scale revenue without getting stuck in daily firefighting. Would you be open to a quick, no-cost 1:1 to share practical approaches? Even if it’s not a fit, you’ll walk away with insights you can apply immediately.
 
 ---
+COLD CALL SCRIPT
+---
+
+Fourth, complete and refine the following cold call script. Use the **First Name** and the **Specific Initiative Text** to fill in the placeholders.
+
+“Hi [First Name],
+
+This is YOUR NAME from Business Growth Global. Have I caught you at a bad time?
+
+I'll be brief. I saw you [specific initiative/product/news].
+
+The reason I'm calling is that after a big push like that, many leaders find the operational cracks start to show. Processes that initially worked break when you scale. We help prevent that breakage.
+
+Would it make sense to grab 20 minutes this week so I can share how we’ve helped firms like yours navigate this exact stage?”
+
+---
 
 Rules:
 - Base your analysis *strictly* on the texts provided. Do not use any external knowledge.
@@ -133,14 +149,18 @@ ${specificText.substring(0, 10000)}
     const response = await result.response;
     const text = response.text();
 
-    // Split the response into insights, email, and linkedin
+    // Split the response into insights, email, linkedin and cold call script
     const emailParts = text.split(/\s*---\s*EMAIL BODY\s*---\s*/);
     const insights = emailParts[0].trim();
-    const emailAndLinkedin = emailParts.length > 1 ? emailParts[1] : '';
+    const emailAndRest = emailParts.length > 1 ? emailParts[1] : '';
     
-    const linkedinParts = emailAndLinkedin.split(/\s*---\s*LINKEDIN OUTREACH\s*---\s*/);
+    const linkedinParts = emailAndRest.split(/\s*---\s*LINKEDIN OUTREACH\s*---\s*/);
     let email = linkedinParts[0].trim();
-    const linkedinText = linkedinParts.length > 1 ? linkedinParts[1] : '';
+    const linkedinAndRest = linkedinParts.length > 1 ? linkedinParts[1] : '';
+
+    const coldCallParts = linkedinAndRest.split(/\s*---\s*COLD CALL SCRIPT\s*---\s*/);
+    const linkedinText = coldCallParts[0].trim();
+    const coldCallScript = coldCallParts.length > 1 ? coldCallParts[1].trim() : '';
 
     // Prepend the correct greeting
     const greeting = contactFirstName ? `Hi ${contactFirstName},` : 'Hi,';
@@ -160,7 +180,7 @@ ${specificText.substring(0, 10000)}
       linkedinFollowUpDm = followUpDmMatch[1].trim();
     }
 
-    return new Response(JSON.stringify({ insights, email, linkedinConnectionNote, linkedinFollowUpDm }), { status: 200 });
+    return new Response(JSON.stringify({ insights, email, linkedinConnectionNote, linkedinFollowUpDm, coldCallScript }), { status: 200 });
   } catch (error: any) {
     console.error('Error in POST /api/talking-points:', error);
     return new Response(JSON.stringify({ message: error.message || 'An error occurred while generating insights.' }), { status: 500 });

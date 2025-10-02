@@ -18,6 +18,7 @@ export default function AiClient() {
   const [email, setEmail] = useState('');
   const [linkedinConnectionNote, setLinkedinConnectionNote] = useState('');
   const [linkedinFollowUpDm, setLinkedinFollowUpDm] = useState('');
+  const [coldCallScript, setColdCallScript] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [caseStudy, setCaseStudy] = useState<CaseStudy | null>(null);
   const [caseStudyExplanation, setCaseStudyExplanation] = useState('');
@@ -30,6 +31,7 @@ export default function AiClient() {
     setEmail('');
     setLinkedinConnectionNote('');
     setLinkedinFollowUpDm('');
+    setColdCallScript('');
     setCaseStudy(null);
     setCaseStudyExplanation('');
 
@@ -48,7 +50,7 @@ export default function AiClient() {
       }
       
       const data = await res.json();
-      const { insights: insightsOutput, email: emailOutput, linkedinConnectionNote: connOutput, linkedinFollowUpDm: dmOutput } = data;
+      const { insights: insightsOutput, email: emailOutput, linkedinConnectionNote: connOutput, linkedinFollowUpDm: dmOutput, coldCallScript: scriptOutput } = data;
 
       // Extract the case study reference from the insights
       const caseStudyRegex = /\*\*Case Study to Reference:\*\* \[?(Case Study #(\d+))\]?([\s\S]*)/;
@@ -73,12 +75,11 @@ export default function AiClient() {
       setEmail(cleanedEmail);
       setLinkedinConnectionNote(connOutput);
       setLinkedinFollowUpDm(dmOutput);
+      setColdCallScript(scriptOutput);
 
     } catch (error: any) {
       console.error('Error generating talking points:', error);
       setInsights('An error occurred while generating insights.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -136,6 +137,7 @@ export default function AiClient() {
             <TabsTrigger value="insights">Insights</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>
             <TabsTrigger value="linkedin">LinkedIn</TabsTrigger>
+            <TabsTrigger value="coldcall">Cold Call</TabsTrigger>
           </TabsList>
           <TabsContent value="insights">
             <Card>
@@ -193,6 +195,21 @@ export default function AiClient() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+          <TabsContent value="coldcall">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Cold Call Script</CardTitle>
+                <Button onClick={() => handleCopyToClipboard(coldCallScript, 'cold call script')} size="sm">
+                  Copy
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
+                  <ReactMarkdown>{coldCallScript}</ReactMarkdown>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       )}
