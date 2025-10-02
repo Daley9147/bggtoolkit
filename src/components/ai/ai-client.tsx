@@ -16,6 +16,8 @@ export default function AiClient() {
   const [jobTitle, setJobTitle] = useState('');
   const [insights, setInsights] = useState('');
   const [email, setEmail] = useState('');
+  const [linkedinConnectionNote, setLinkedinConnectionNote] = useState('');
+  const [linkedinFollowUpDm, setLinkedinFollowUpDm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [caseStudy, setCaseStudy] = useState<CaseStudy | null>(null);
   const [caseStudyExplanation, setCaseStudyExplanation] = useState('');
@@ -26,6 +28,8 @@ export default function AiClient() {
     setIsLoading(true);
     setInsights('');
     setEmail('');
+    setLinkedinConnectionNote('');
+    setLinkedinFollowUpDm('');
     setCaseStudy(null);
     setCaseStudyExplanation('');
 
@@ -44,7 +48,7 @@ export default function AiClient() {
       }
       
       const data = await res.json();
-      const { insights: insightsOutput, email: emailOutput } = data;
+      const { insights: insightsOutput, email: emailOutput, linkedinConnectionNote: connOutput, linkedinFollowUpDm: dmOutput } = data;
 
       // Extract the case study reference from the insights
       const caseStudyRegex = /\*\*Case Study to Reference:\*\* \[?(Case Study #(\d+))\]?([\s\S]*)/;
@@ -67,6 +71,8 @@ export default function AiClient() {
       // Normalize newlines to ensure consistent paragraph spacing
       const cleanedEmail = emailOutput.replace(/\n\s*\n/g, '\n\n');
       setEmail(cleanedEmail);
+      setLinkedinConnectionNote(connOutput);
+      setLinkedinFollowUpDm(dmOutput);
 
     } catch (error: any) {
       console.error('Error generating talking points:', error);
@@ -76,11 +82,11 @@ export default function AiClient() {
     }
   };
 
-  const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(email);
+  const handleCopyToClipboard = (textToCopy: string, type: string) => {
+    navigator.clipboard.writeText(textToCopy);
     toast({
       title: 'Copied to clipboard!',
-      description: 'The email content has been copied to your clipboard.',
+      description: `The ${type} has been copied to your clipboard.`,
     });
   };
 
@@ -129,6 +135,7 @@ export default function AiClient() {
           <TabsList>
             <TabsTrigger value="insights">Insights</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="linkedin">LinkedIn</TabsTrigger>
           </TabsList>
           <TabsContent value="insights">
             <Card>
@@ -146,7 +153,7 @@ export default function AiClient() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Email Outreach</CardTitle>
-                <Button onClick={handleCopyToClipboard} size="sm">
+                <Button onClick={() => handleCopyToClipboard(email, 'email content')} size="sm">
                   Copy
                 </Button>
               </CardHeader>
@@ -156,6 +163,36 @@ export default function AiClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+          <TabsContent value="linkedin">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Connection Note</CardTitle>
+                  <Button onClick={() => handleCopyToClipboard(linkedinConnectionNote, 'connection note')} size="sm">
+                    Copy
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
+                    <ReactMarkdown>{linkedinConnectionNote}</ReactMarkdown>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Follow-Up DM</CardTitle>
+                  <Button onClick={() => handleCopyToClipboard(linkedinFollowUpDm, 'follow-up DM')} size="sm">
+                    Copy
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
+                    <ReactMarkdown>{linkedinFollowUpDm}</ReactMarkdown>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       )}

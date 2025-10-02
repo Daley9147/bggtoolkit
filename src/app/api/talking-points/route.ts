@@ -90,6 +90,20 @@ At Business Growth Global, we’ve worked with high-growth companies to:
 Would you be open to a 20-minute call where I can share the core approach? Even if it’s not a fit, you’ll leave with practical insights you can apply immediately.
 
 ---
+LINKEDIN OUTREACH
+---
+
+Third, complete and refine the following two LinkedIn messages. Use the **First Name** and **Job Title** provided. Your task is to replace the remaining bracketed placeholders like **[Their Company]** and **[INDUSTRY]** based on your analysis.
+
+**Linkedin Step 1 – Connection Note (light, no pitch yet)**
+
+Hi ${contactFirstName || '[First Name]'}, I’m curious to learn more about your journey at [Their Company]. I also work with Founders and ${jobTitle || '[Job Title]'}s on scaling growth and freeing up leadership from daily firefighting, would love to connect.
+
+**Linkedin Step 2 – Follow-Up DM (once they accept)**
+
+Thanks for connecting, ${contactFirstName || '[First Name]'}. I help ${jobTitle || '[Job Title]'}s in the [INDUSTRY] space scale revenue without getting stuck in daily firefighting. Would you be open to a quick, no-cost 1:1 to share practical approaches? Even if it’s not a fit, you’ll walk away with insights you can apply immediately.
+
+---
 
 Rules:
 - Base your analysis *strictly* on the texts provided. Do not use any external knowledge.
@@ -119,17 +133,34 @@ ${specificText.substring(0, 10000)}
     const response = await result.response;
     const text = response.text();
 
-    // Split the response into insights and email
-    const parts = text.split(/\s*---\s*EMAIL BODY\s*---\s*/);
-    const insights = parts[0].trim();
-    let email = parts.length > 1 ? parts[1].trim() : '';
+    // Split the response into insights, email, and linkedin
+    const emailParts = text.split(/\s*---\s*EMAIL BODY\s*---\s*/);
+    const insights = emailParts[0].trim();
+    const emailAndLinkedin = emailParts.length > 1 ? emailParts[1] : '';
+    
+    const linkedinParts = emailAndLinkedin.split(/\s*---\s*LINKEDIN OUTREACH\s*---\s*/);
+    let email = linkedinParts[0].trim();
+    const linkedinText = linkedinParts.length > 1 ? linkedinParts[1] : '';
 
     // Prepend the correct greeting
     const greeting = contactFirstName ? `Hi ${contactFirstName},` : 'Hi,';
     email = `${greeting}\n\n${email}`;
 
+    // Extract LinkedIn messages
+    let linkedinConnectionNote = '';
+    let linkedinFollowUpDm = '';
 
-    return new Response(JSON.stringify({ insights, email }), { status: 200 });
+    const connectionNoteMatch = linkedinText.match(/\*\*Linkedin Step 1 – Connection Note \(light, no pitch yet\)\*\*\s*([\s\S]*?)\s*\*\*Linkedin Step 2/);
+    if (connectionNoteMatch) {
+      linkedinConnectionNote = connectionNoteMatch[1].trim();
+    }
+
+    const followUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM \(once they accept\)\*\*\s*([\s\S]*)/);
+    if (followUpDmMatch) {
+      linkedinFollowUpDm = followUpDmMatch[1].trim();
+    }
+
+    return new Response(JSON.stringify({ insights, email, linkedinConnectionNote, linkedinFollowUpDm }), { status: 200 });
   } catch (error: any) {
     console.error('Error in POST /api/talking-points:', error);
     return new Response(JSON.stringify({ message: error.message || 'An error occurred while generating insights.' }), { status: 500 });
