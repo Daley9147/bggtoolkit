@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
 import { caseStudies } from '@/lib/case-studies';
+import { createClient } from '@/lib/supabase/server';
 
 async function fetchWebsiteContent(url: string): Promise<string> {
   try {
@@ -78,16 +79,11 @@ Second, draft a personalized cold outreach email.
 - If a **Job Title** is provided, subtly reference their role or potential responsibilities in the email body to make it more relevant.
 - Use the **Specific Initiative Text** to personalize the first paragraph.
 
-I’ve been following [COMPANY]’s work with [specific initiative/product/news from the **Specific Initiative Text**], and it looks like revenue growth is a key focus right now.
+I’ve been following [COMPANY]’s work with [specific initiative/product/news from the **Specific Initiative Text**], and it looks like revenue growth is a key focus right now. 
 
-Many of our partners tell us the challenge isn’t finding growth opportunities, but scaling revenue profitably without adding operational drag. For example, we recently helped a founder led company grow revenue +52% while freeing the ${jobTitle || 'CEO'} from daily bottlenecks.
+You likely have a growth plan and processes in place. Even the best growth plans can have hidden bottlenecks that stall progress. We help identify and fix those. This approach recently helped one client increase revenue by 52% and gave their leadership team more time to focus on what's next
 
-At Business Growth Global, we’ve worked with high-growth companies to:
-- Reduce operational drag to unlock faster revenue growth
-- Free leadership time to focus on strategy, not firefighting
-- Balance ambitious growth with reduced risk exposure
-
-Would you be open to a 20-minute call where I can share the core approach? Even if it’s not a fit, you’ll leave with practical insights you can apply immediately.
+Do you have time over the next week or two to learn more? Let me know what works for you and I’ll send over a calendar invite
 
 ---
 LINKEDIN OUTREACH
@@ -175,9 +171,54 @@ ${specificText.substring(0, 10000)}
       linkedinConnectionNote = connectionNoteMatch[1].trim();
     }
 
-    const followUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM \(once they accept\)\*\*\s*([\s\S]*)/);
-    if (followUpDmMatch) {
-      linkedinFollowUpDm = followUpDmMatch[1].trim();
+    const linkedinFollowUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM \(once they accept\)\*\*\s*([\s\S]*)/);
+    if (linkedinFollowUpDmMatch) {
+      linkedinFollowUpDm = linkedinFollowUpDmMatch[1].trim();
+    }
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .insert([
+          {
+            name: insights.match(/Full Company Name:\s*(.*)/)?.[1],
+            industry: insights.match(/Industry:\s*(.*)/)?.[1],
+            website: url,
+            summary: insights.match(/Summary:\s*(.*)/)?.[1],
+            developments: insights.match(/Recent Developments:\s*(.*)/)?.[1],
+            user_id: user.id,
+          },
+        ])
+        .select();
+
+      if (companyError) {
+        console.error('Error inserting company data:', companyError);
+      }
+
+      if (companyData) {
+        const { error: templateError } = await supabase
+          .from('outreach_templates')
+          .insert([
+            {
+              company_id: companyData[0].id,
+              contact_first_name: contactFirstName,
+              job_title: jobTitle,
+              insights,
+              email,
+              linkedin_connection_note: linkedinConnectionNote,
+              linkedin_follow_up_dm: linkedinFollowUpDm,
+              cold_call_script: coldCallScript,
+              user_id: user.id,
+            },
+          ]);
+
+        if (templateError) {
+          console.error('Error inserting template data:', templateError);
+        }
+      }
     }
 
     return new Response(JSON.stringify({ insights, email, linkedinConnectionNote, linkedinFollowUpDm, coldCallScript }), { status: 200 });

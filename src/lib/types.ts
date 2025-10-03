@@ -1,42 +1,27 @@
-import type { LucideIcon } from 'lucide-react';
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
-export type ContentDetail = {
-  id: string;
-  summary: string;
-  details: string;
-};
-
-export type IconName = keyof typeof import('lucide-react');
-
-type BaseSection = {
-  id: string;
-  title: string;
-  icon: IconName;
-};
-
-export type ContentSection = BaseSection & {
-  id: 'about-bgg' | 'about-lee' | 'about-program' | 'aerops' | 'social-proof' | 'faq';
-  content: ContentDetail[];
-};
-
-export type ProgramFeature = {
-  feature: string;
-  elevate: string | boolean;
-  intensive: string | boolean;
-  boardroom: string | boolean;
-};
-
-export type ProgramSection = BaseSection & {
-  id: 'programs';
-  description: string;
-  features: ProgramFeature[];
-};
-
-export type SectionData = ContentSection | ProgramSection;
-
-export type Bookmark = {
-    id: string;
-    summary: string;
-    details: string;
-    sectionTitle: string;
-};
+export type Database = {
+  public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
