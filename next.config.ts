@@ -1,6 +1,10 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
+  env: {
+    // This is a dummy variable to force Vercel to refresh its cache.
+    FORCE_CACHE_INVALIDATION: Date.now().toString(),
+  },
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
