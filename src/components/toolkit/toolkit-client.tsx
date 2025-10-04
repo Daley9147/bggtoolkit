@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, createElement } from 'react';
+import { useState, useMemo } from 'react';
 import type { SectionData, ContentSection, ProgramSection, IconName } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import ProgramsTable from './programs-table';
 import BookmarkButton from './bookmark-button';
 import AiRefinementDialog from './ai-refinement-dialog';
 import ReactMarkdown from 'react-markdown';
+import DynamicIcon from '../common/dynamic-icon';
 
 interface ToolkitClientProps {
   sections: SectionData[];
@@ -89,14 +90,13 @@ export default function ToolkitClient({ sections }: ToolkitClientProps) {
 }
 
 function CardWithAccordion({ section }: { section: SectionData }) {
-    const Icon = icons[section.icon as IconName] || icons.HelpCircle;
     return (
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
             <Accordion type="single" collapsible>
                 <AccordionItem value={section.id} className="border-b-0">
                     <AccordionTrigger className="p-6 text-lg hover:no-underline">
                         <div className="flex items-center gap-4">
-                            <Icon className="h-6 w-6 text-primary" />
+                            <DynamicIcon name={section.icon} className="h-6 w-6 text-primary" />
                             <h2 className="font-headline text-xl font-semibold">{section.title}</h2>
                         </div>
                     </AccordionTrigger>

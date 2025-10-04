@@ -64,7 +64,7 @@ export default async function SavedPage({
     console.error('Error fetching industries:', industriesError);
   }
 
-  const uniqueIndustries = [...new Set(industriesData?.map(item => item.industry).filter(Boolean) || [])];
+  const uniqueIndustries = [...new Set(industriesData?.map(item => item.industry).filter(Boolean) as string[] || [])];
 
 
   return (

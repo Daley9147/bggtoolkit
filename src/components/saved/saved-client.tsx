@@ -11,10 +11,11 @@ import { deleteCompany } from '@/app/saved/actions';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Company, OutreachTemplate } from '@/lib/types';
 
 // Helper function to parse insights
-const parseInsights = (insights) => {
-  const getVal = (regex) => {
+const parseInsights = (insights: string | null | undefined) => {
+  const getVal = (regex: RegExp) => {
     const match = insights?.match(regex);
     // Clean up leading/trailing asterisks and whitespace
     return match?.[1]?.replace(/^\s*\*\*/, '')
@@ -29,7 +30,13 @@ const parseInsights = (insights) => {
   };
 };
 
-export default function SavedClient({ companies, count, industries }) {
+interface SavedClientProps {
+  companies: Company[];
+  count: number;
+  industries: string[];
+}
+
+export default function SavedClient({ companies, count, industries }: SavedClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -42,11 +49,11 @@ export default function SavedClient({ companies, count, industries }) {
   const ITEMS_PER_PAGE = 10;
   const totalPages = Math.ceil(count / ITEMS_PER_PAGE);
 
-  const handleUrlUpdate = (params) => {
+  const handleUrlUpdate = (params: { [key: string]: string | number }) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
     for (const key in params) {
       if (params[key]) {
-        current.set(key, params[key]);
+        current.set(key, String(params[key]));
       } else {
         current.delete(key);
       }
@@ -73,11 +80,11 @@ export default function SavedClient({ companies, count, industries }) {
     };
   }, [inputValue, searchTerm]);
 
-  const handleIndustryChange = (value) => {
+  const handleIndustryChange = (value: string) => {
     handleUrlUpdate({ industry: value === 'all' ? '' : value });
   };
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       handleUrlUpdate({ page: newPage });
     }
@@ -102,13 +109,13 @@ export default function SavedClient({ companies, count, industries }) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Industries</SelectItem>
-            {industries.map(ind => <SelectItem key={ind} value={ind}>{ind}</SelectItem>)}
+            {industries.map((ind: string) => <SelectItem key={ind} value={ind}>{ind}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
       <div className="space-y-6">
-        {companies.map((company) => (
+        {companies.map((company: Company) => (
           <CompanyCard key={company.id} company={company} />
         ))}
         {companies.length === 0 && (
@@ -134,7 +141,7 @@ export default function SavedClient({ companies, count, industries }) {
   );
 }
 
-function CompanyCard({ company }) {
+function CompanyCard({ company }: { company: Company }) {
   const { industry, summary, developments, howBGGCanHelp } = parseInsights(company.outreach_templates?.[0]?.insights);
   const cleanedCompanyName = company.name?.replace(/\*\*/g, '');
 
@@ -151,7 +158,7 @@ function CompanyCard({ company }) {
                 </CardTitle>
                 <div className="text-sm text-muted-foreground mt-2 flex items-center gap-4">
                   <span>{industry}</span>
-                  <a href={company.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
+                  <a href={company.website || '#'} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
                     <Globe className="h-4 w-4" />
                     Website
                   </a>
@@ -161,7 +168,7 @@ function CompanyCard({ company }) {
           </AccordionTrigger>
           <AccordionContent className="p-6 pt-0">
             <div className="flex items-center justify-end">
-              <form action={deleteCompany}>
+              <form action={deleteCompany as any}>
                 <input type="hidden" name="companyId" value={company.id} />
                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
                   <Trash className="h-5 w-5" />
@@ -191,7 +198,7 @@ function CompanyCard({ company }) {
                       <ReactMarkdown>{howBGGCanHelp}</ReactMarkdown>
                   </div>
               </div>
-              {company.outreach_templates.map(template => (
+              {company.outreach_templates.map((template: OutreachTemplate) => (
                 <TemplateTabs key={template.id} template={template} />
               ))}
             </div>
@@ -202,7 +209,7 @@ function CompanyCard({ company }) {
   );
 }
 
-function TemplateTabs({ template }) {
+function TemplateTabs({ template }: { template: OutreachTemplate }) {
   return (
     <div className="pt-4">
        <h3 className="font-semibold mb-4 flex items-center gap-2">
