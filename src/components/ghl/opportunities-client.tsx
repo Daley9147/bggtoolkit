@@ -164,48 +164,50 @@ export default function OpportunitiesClient() {
 
   return (
     <>
-      <div className="border rounded-lg">
-        <div className="flex justify-between items-center p-6">
-          <h2 className="font-headline text-xl font-semibold">GHL Opportunities</h2>
-          <div className="flex gap-4">
-            <Input
-              placeholder="Search opportunities..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-[280px]"
-            />
-            <Select onValueChange={handlePipelineChange} value={selectedPipelineId}>
-              <SelectTrigger className="w-[280px]">
-                <SelectValue placeholder="Select a pipeline" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Pipelines</SelectItem>
-                {pipelines.map((pipeline) => (
-                  <SelectItem key={pipeline.id} value={pipeline.id}>
-                    {pipeline.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select onValueChange={setSelectedStage} value={selectedStage} disabled={selectedPipelineId === 'all'}>
-              <SelectTrigger className="w-[280px]">
-                <SelectValue placeholder="Select a stage" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stages</SelectItem>
-                {selectedPipeline?.stages.map((stage) => (
-                  <SelectItem key={stage.id} value={stage.id}>
-                    {stage.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <div className="border rounded-lg overflow-hidden">
+        <div className="bg-primary text-primary-foreground p-6">
+          <div className="flex justify-between items-center">
+            <h2 className="font-headline text-xl font-semibold text-primary-foreground">GHL Opportunities</h2>
+            <div className="flex gap-4">
+              <Input
+                placeholder="Search opportunities..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-[280px] bg-white text-gray-900"
+              />
+              <Select onValueChange={handlePipelineChange} value={selectedPipelineId}>
+                <SelectTrigger className="w-[280px] bg-white text-gray-900">
+                  <SelectValue placeholder="Select a pipeline" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Pipelines</SelectItem>
+                  {pipelines.map((pipeline) => (
+                    <SelectItem key={pipeline.id} value={pipeline.id}>
+                      {pipeline.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select onValueChange={setSelectedStage} value={selectedStage} disabled={selectedPipelineId === 'all'}>
+                <SelectTrigger className="w-[280px] bg-white text-gray-900">
+                  <SelectValue placeholder="Select a stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stages</SelectItem>
+                  {selectedPipeline?.stages.map((stage) => (
+                    <SelectItem key={stage.id} value={stage.id}>
+                      {stage.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
-        <div className="space-y-4">
+        <div className="p-6 space-y-4">
           {opportunities.length > 0 && pipelines.length > 0 ? (
             opportunities.map((opp) => (
-              <Card key={opp.id}>
+              <Card key={opp.id} className="bg-secondary">
                 <CardContent className="p-4">
                   <OpportunityCard 
                     opp={opp}
@@ -224,7 +226,7 @@ export default function OpportunitiesClient() {
         opportunity={selectedOpp}
         isOpen={isWorkspaceOpen}
         onOpenChange={handleWorkspaceClose}
-        onOpportunityUpdate={() => fetchOpportunities(selectedPipelineId, selectedStage)}
+        onOpportunityUpdate={() => fetchOpportunities(selectedPipelineId, selectedStage, searchTerm)}
         pipelines={pipelines}
         outreachPlan={selectedOpp ? outreachPlans[selectedOpp.id] : null}
         onPlanGenerated={handlePlanGenerated}

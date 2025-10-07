@@ -74,10 +74,10 @@ export default function UserProfile() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
+        <Button variant="ghost" className="flex items-center gap-2 text-primary-foreground hover:text-primary-foreground/90">
           {isLoading && !userName ? (
              <div className="flex items-center gap-2">
-                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-8 w-8 rounded-full bg-blue-500/50" />
                 <Skeleton className="h-4 w-24" />
             </div>
           ) : (

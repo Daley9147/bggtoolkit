@@ -174,7 +174,7 @@ export default function CalendarsClient() {
                 </h2>
                 <div className="space-y-4">
                   {dayAppointments.map((app) => (
-                    <Card key={app.id}>
+                    <Card key={app.id} className="bg-secondary">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
                           <div>
