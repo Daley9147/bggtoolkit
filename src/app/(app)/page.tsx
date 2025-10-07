@@ -1,8 +1,10 @@
-import ToolkitClient from '@/components/toolkit/toolkit-client';
-import { allSections } from '@/lib/content-data';
+import AnalyticsClient from '@/components/analytics/analytics-client';
 
-export default function Home() {
+export default function AnalyticsPage() {
   return (
-    <ToolkitClient sections={allSections} />
+    <div>
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      <AnalyticsClient />
+    </div>
   );
 }

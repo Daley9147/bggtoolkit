@@ -106,6 +106,14 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json();
+
+    // Log the successful action
+    await supabase.from('logged_actions').insert({
+      user_id: user.id,
+      contact_id: contactId,
+      action_type: 'email_sent',
+    });
+
     return NextResponse.json(data);
   } catch (error: unknown) {
     console.error('Error sending email via GHL:', error);

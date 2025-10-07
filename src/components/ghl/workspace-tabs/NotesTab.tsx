@@ -29,32 +29,27 @@ export default function NotesTab({
   const [logCallError, setLogCallError] = useState<string | null>(null);
 
   const handleLogCall = async () => {
-    if (!contactId || !callNotes) return;
+    if (!contactId || !newNote) return;
     setIsLoggingCall(true);
-    setLogCallSuccess(false);
-    setLogCallError(null);
-
+    setLogError(null);
     try {
-      const response = await fetch('/api/ghl/add-note', {
+      const response = await fetch('/api/ghl/log-call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contactId: contactId,
-          note: `Call Log:\n${callNotes}`,
+          note: newNote,
         }),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to log call');
       }
-      setLogCallSuccess(true);
-      setCallNotes('');
-      onNoteAdded(); // Callback to refresh notes in parent
+      setNewNote('');
+      onNoteAdded(); // Refresh the notes list
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'An unknown error occurred';
-      setLogCallError(message);
+      const message = err instanceof Error ? err.message : 'An unknown error occurred';
+      setLogError(message);
     } finally {
       setIsLoggingCall(false);
     }

@@ -21,11 +21,11 @@ export default function Sidebar() {
         <div className="flex-1">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
             <Link
-              href="/"
+              href="/toolkit"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname === '/',
+                  'bg-primary-hover': pathname === '/toolkit',
                 }
               )}
             >
