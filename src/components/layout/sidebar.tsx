@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Briefcase, LayoutDashboard, Bookmark, Calendar, Lightbulb, Archive, Sparkles } from 'lucide-react';
+import { Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GhlSettingsDialog from '@/components/ghl/ghl-settings-dialog';
 import UserProfile from '@/components/layout/user-profile';
@@ -57,6 +57,18 @@ export default function Sidebar() {
               Calendar
             </Link>
             <Link
+              href="/workspace"
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
+                {
+                  'bg-primary-hover': pathname.startsWith('/workspace'),
+                }
+              )}
+            >
+              <PenSquare className="h-4 w-4" />
+              Workspace
+            </Link>
+            <Link
               href="/ai"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
@@ -82,7 +94,7 @@ export default function Sidebar() {
             </Link>
           </nav>
         </div>
-        <div className="mt-auto p-4 border-t border-blue-500/30">
+        <div className="mt-auto p-4 border-t border-white/20">
           <GhlSettingsDialog />
           <UserProfile />
         </div>
