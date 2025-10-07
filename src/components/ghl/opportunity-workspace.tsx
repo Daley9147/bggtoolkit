@@ -199,15 +199,15 @@ export default function OpportunityWorkspace({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{opportunity.name}</SheetTitle>
-          <SheetDescription>
+      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto p-0">
+        <SheetHeader className="bg-primary text-primary-foreground p-6 border-b border-white/20">
+          <SheetTitle className="text-primary-foreground">{opportunity.name}</SheetTitle>
+          <SheetDescription className="text-primary-foreground/80">
             {opportunity.contact?.name || 'No Contact'}
           </SheetDescription>
           <div className="pt-4">
             <Select onValueChange={handleStageChange} value={selectedStage}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] bg-white text-gray-900">
                 <SelectValue placeholder="Change Stage" />
               </SelectTrigger>
               <SelectContent>
@@ -220,11 +220,11 @@ export default function OpportunityWorkspace({
                   ))}
               </SelectContent>
             </Select>
-            {isUpdatingStage && <p className="text-sm text-gray-500 mt-2">Updating stage...</p>}
-            {stageUpdateError && <p className="text-sm text-red-500 mt-2">{stageUpdateError}</p>}
+            {isUpdatingStage && <p className="text-sm text-primary-foreground/80 mt-2">Updating stage...</p>}
+            {stageUpdateError && <p className="text-sm text-red-400 mt-2">{stageUpdateError}</p>}
           </div>
         </SheetHeader>
-        <div className="py-8">
+        <div className="p-6">
           {isInitialLoading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>

@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import dynamic from 'next/dynamic';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface OutreachPlan {
   insights: string;
@@ -37,7 +38,6 @@ export default function OutreachPlanTab({
   const [error, setError] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
-  const [syncError, setSyncError] = useState<string | null>(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [sendEmailSuccess, setSendEmailSuccess] = useState(false);
   const [sendEmailError, setSendEmailError] = useState<string | null>(null);
@@ -102,7 +102,6 @@ export default function OutreachPlanTab({
     if (!contactId || !outreachPlan?.insights) return;
     setIsSyncing(true);
     setSyncSuccess(false);
-    setSyncError(null);
 
     try {
       const response = await fetch('/api/ghl/add-note', {
@@ -121,7 +120,7 @@ export default function OutreachPlanTab({
       setSyncSuccess(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unknown error occurred';
-      setSyncError(message);
+      // In a real app, you might want to set an error state here
     } finally {
       setIsSyncing(false);
     }
@@ -197,52 +196,66 @@ export default function OutreachPlanTab({
           <TabsTrigger value="call">Call Script</TabsTrigger>
         </TabsList>
         <TabsContent value="insights" className="mt-4">
-          <div className="prose max-w-none">
-            <ReactMarkdown>{outreachPlan.insights}</ReactMarkdown>
-          </div>
+          <Card>
+            <CardContent className="prose max-w-none p-6">
+              <ReactMarkdown>{outreachPlan.insights}</ReactMarkdown>
+            </CardContent>
+          </Card>
           <div className="mt-6 flex gap-4">
             <Button onClick={handleSyncNotes} disabled={isSyncing || syncSuccess}>
               {isSyncing ? 'Syncing...' : syncSuccess ? 'Synced!' : 'Sync Notes to GHL'}
             </Button>
           </div>
         </TabsContent>
-        <TabsContent value="email" className="mt-4 prose-sm max-w-none">
-          <div className="space-y-2 mb-4">
-            <Label htmlFor="subject-select">Subject Line</Label>
-            <Select id="subject-select" value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a subject line..." />
-              </SelectTrigger>
-              <SelectContent>
-                {outreachPlan.subjectLines && Array.isArray(outreachPlan.subjectLines) && outreachPlan.subjectLines.map((subject, index) => (
-                  <SelectItem key={index} value={subject}>
-                    {subject}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <JoditEditor
-            value={editableEmailBody}
-            onBlur={(newContent) => setEditableEmailBody(newContent)}
-            config={{ readonly: false, height: 300 }}
-          />
-          <div className="mt-6">
-            <Button onClick={handleSendEmail} disabled={isSendingEmail || sendEmailSuccess}>
-              {isSendingEmail ? 'Sending...' : sendEmailSuccess ? 'Sent!' : 'Send Email via GHL'}
-            </Button>
-            {sendEmailError && <p className="text-red-500 text-sm mt-2">{sendEmailError}</p>}
-          </div>
+        <TabsContent value="email" className="mt-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="space-y-2 mb-4">
+                <Label htmlFor="subject-select">Subject Line</Label>
+                <Select id="subject-select" value={selectedSubject} onValueChange={setSelectedSubject}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a subject line..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {outreachPlan.subjectLines && Array.isArray(outreachPlan.subjectLines) && outreachPlan.subjectLines.map((subject, index) => (
+                      <SelectItem key={index} value={subject}>
+                        {subject}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <JoditEditor
+                value={editableEmailBody}
+                onBlur={(newContent) => setEditableEmailBody(newContent)}
+                config={{ readonly: false, height: 300 }}
+              />
+              <div className="mt-6">
+                <Button onClick={handleSendEmail} disabled={isSendingEmail || sendEmailSuccess}>
+                  {isSendingEmail ? 'Sending...' : sendEmailSuccess ? 'Sent!' : 'Send Email via GHL'}
+                </Button>
+                {sendEmailError && <p className="text-red-500 text-sm mt-2">{sendEmailError}</p>}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
-        <TabsContent value="linkedin" className="mt-4 prose max-w-none">
-          <h4 className="font-semibold mb-2 not-prose">Request DM</h4>
-          <ReactMarkdown>{outreachPlan.linkedinConnectionNote}</ReactMarkdown>
-          <hr className="my-4" />
-          <h4 className="font-semibold mb-2 not-prose">Connection DM</h4>
-          <ReactMarkdown>{outreachPlan.linkedinFollowUpDm}</ReactMarkdown>
+        <TabsContent value="linkedin" className="mt-4">
+          <Card>
+            <CardContent className="prose max-w-none p-6">
+              <h4 className="font-semibold mb-2 not-prose">Request DM</h4>
+              <ReactMarkdown>{outreachPlan.linkedinConnectionNote}</ReactMarkdown>
+              <hr className="my-4" />
+              <h4 className="font-semibold mb-2 not-prose">Connection DM</h4>
+              <ReactMarkdown>{outreachPlan.linkedinFollowUpDm}</ReactMarkdown>
+            </CardContent>
+          </Card>
         </TabsContent>
-        <TabsContent value="call" className="mt-4 prose max-w-none">
-          <ReactMarkdown>{outreachPlan.coldCallScript}</ReactMarkdown>
+        <TabsContent value="call" className="mt-4">
+          <Card>
+            <CardContent className="prose max-w-none p-6">
+              <ReactMarkdown>{outreachPlan.coldCallScript}</ReactMarkdown>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
       <div className="mt-6 text-center">

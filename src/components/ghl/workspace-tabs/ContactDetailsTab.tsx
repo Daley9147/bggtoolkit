@@ -1,5 +1,6 @@
 'use client';
 
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface GhlContact {
@@ -48,11 +49,13 @@ export default function ContactDetailsTab({
 
   if (isLoading) {
     return (
-      <div className="space-y-4 mt-4">
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-4 w-1/3" />
-        <Skeleton className="h-4 w-1/4" />
-      </div>
+      <Card className="mt-4">
+        <CardContent className="p-6 space-y-4">
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-4 w-1/4" />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -61,33 +64,35 @@ export default function ContactDetailsTab({
   }
 
   return (
-    <div className="space-y-2 mt-4">
-      <p>
-        <strong>Email:</strong> {contactDetails.email || 'N/A'}
-      </p>
-      <p>
-        <strong>Phone:</strong> {contactDetails.phone || 'N/A'}
-      </p>
-      <p>
-        <strong>Company:</strong> {contactDetails.companyName || 'N/A'}
-      </p>
-      <p>
-        <strong>Website:</strong> {contactDetails.website || 'N/A'}
-      </p>
-      <p>
-        <strong>Source:</strong> {contactDetails.source || 'N/A'}
-      </p>
-      <p>
-        <strong>Tags:</strong> {contactDetails.tags?.join(', ') || 'N/A'}
-      </p>
-      {contactDetails.customFields?.map((field) => {
-        const fieldName = customFieldMap.get(field.id);
-        return field.value && fieldName ? (
-          <p key={field.id}>
-            <strong>{fieldName}:</strong> {String(field.value)}
-          </p>
-        ) : null;
-      })}
-    </div>
+    <Card className="mt-4">
+      <CardContent className="p-6 space-y-2">
+        <p>
+          <strong>Email:</strong> {contactDetails.email || 'N/A'}
+        </p>
+        <p>
+          <strong>Phone:</strong> {contactDetails.phone || 'N/A'}
+        </p>
+        <p>
+          <strong>Company:</strong> {contactDetails.companyName || 'N/A'}
+        </p>
+        <p>
+          <strong>Website:</strong> {contactDetails.website || 'N/A'}
+        </p>
+        <p>
+          <strong>Source:</strong> {contactDetails.source || 'N/A'}
+        </p>
+        <p>
+          <strong>Tags:</strong> {contactDetails.tags?.join(', ') || 'N/A'}
+        </p>
+        {contactDetails.customFields?.map((field) => {
+          const fieldName = customFieldMap.get(field.id);
+          return field.value && fieldName ? (
+            <p key={field.id}>
+              <strong>{fieldName}:</strong> {String(field.value)}
+            </p>
+          ) : null;
+        })}
+      </CardContent>
+    </Card>
   );
 }
