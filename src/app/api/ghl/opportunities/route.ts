@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     url.searchParams.append('location_id', profile.ghl_location_id);
 
     if (query) {
-      url.searchParams.append('query', query);
+      url.searchParams.append('q', query);
     }
     if (pipelineId && pipelineId !== 'all') {
       url.searchParams.append('pipeline_id', pipelineId);
