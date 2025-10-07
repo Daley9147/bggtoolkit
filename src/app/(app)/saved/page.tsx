@@ -1,4 +1,3 @@
-import Header from '@/components/layout/header';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import SavedClient from '@/components/saved/saved-client';
@@ -68,15 +67,10 @@ export default async function SavedPage({
 
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <Header />
-      <main className="flex-1">
-        <SavedClient
-          companies={companies || []}
-          count={count || 0}
-          industries={uniqueIndustries}
-        />
-      </main>
-    </div>
+    <SavedClient
+      companies={companies || []}
+      count={count || 0}
+      industries={uniqueIndustries}
+    />
   );
 }

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Building, Briefcase, Trash, Globe, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import { deleteCompany } from '@/app/saved/actions';
+import { deleteCompany } from '@/lib/actions/company-actions';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter, useSearchParams } from 'next/navigation';

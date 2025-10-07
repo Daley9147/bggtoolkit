@@ -56,8 +56,8 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'GHL credentials not found.' }, { status: 404 });
   }
 
-  const { opportunityId, pipelineId, stageId } = await request.json();
-  if (!opportunityId || !pipelineId || !stageId) {
+  const { opportunityId, pipelineId, pipelineStageId } = await request.json();
+  if (!opportunityId || !pipelineId || !pipelineStageId) {
     return NextResponse.json({ error: 'Opportunity ID, Pipeline ID, and Stage ID are required.' }, { status: 400 });
   }
 
@@ -69,8 +69,7 @@ export async function PUT(request: Request) {
         method: 'PUT',
         body: JSON.stringify({ 
           pipelineId: pipelineId,
-          pipelineStageId: stageId,
-          locationId: profile.ghl_location_id,
+          pipelineStageId: pipelineStageId,
         }),
       }
     );

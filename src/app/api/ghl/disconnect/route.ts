@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export async function POST() {
+export async function GET(request: Request) {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
@@ -16,6 +18,7 @@ export async function POST() {
       ghl_refresh_token: null,
       ghl_token_expires_at: null,
       ghl_location_id: null,
+      ghl_user_id: null,
     })
     .eq('id', user.id);
 

@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format, startOfDay, endOfDay, add, isSameDay, parseISO } from 'date-fns';
 
 interface GhlCalendar {
   id: string;
   name: string;
-  bookingLink: string;
 }
 
 interface Appointment {
@@ -19,12 +18,16 @@ interface Appointment {
   startTime: string;
   endTime: string;
   appointmentStatus: 'confirmed' | 'cancelled' | 'showed' | 'noshow' | 'new';
+  contact?: { 
+    name: string;
+    companyName?: string;
+  };
+  address?: string;
 }
 
 export default function CalendarsClient() {
   const [calendars, setCalendars] = useState<GhlCalendar[]>([]);
   const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAppointmentsLoading, setIsAppointmentsLoading] = useState(false);
@@ -62,36 +65,65 @@ export default function CalendarsClient() {
   }, []);
 
   useEffect(() => {
-    const fetchAppointments = async () => {
-      if (!selectedCalendarId || !selectedDate) return;
-      setIsAppointmentsLoading(true);
-      try {
-        const startDate = new Date(selectedDate);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(selectedDate);
-        endDate.setHours(23, 59, 59, 999);
-
-        const url = new URL('/api/ghl/appointments', window.location.origin);
-        url.searchParams.append('calendarId', selectedCalendarId);
-        url.searchParams.append('startDate', startDate.toISOString());
-        url.searchParams.append('endDate', endDate.toISOString());
+    if (selectedCalendarId) {
+      const fetchAppointments = async () => {
+        setIsAppointmentsLoading(true);
+        const startDate = startOfDay(new Date());
+        const endDate = endOfDay(add(new Date(), { days: 7 }));
         
-        const response = await fetch(url.toString());
-        if (!response.ok) {
-          throw new Error('Failed to fetch appointments');
-        }
-        const data = await response.json();
-        setAppointments(data);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'An unknown error occurred';
-        setError(message);
-      } finally {
-        setIsAppointmentsLoading(false);
-      }
-    };
+        try {
+          const appointmentsUrl = new URL('/api/ghl/appointments', window.location.origin);
+          appointmentsUrl.searchParams.append('calendarId', selectedCalendarId);
+          appointmentsUrl.searchParams.append('startDate', startDate.toISOString());
+          appointmentsUrl.searchParams.append('endDate', endDate.toISOString());
 
-    fetchAppointments();
-  }, [selectedCalendarId, selectedDate]);
+          const blockedSlotsUrl = new URL('/api/ghl/blocked-slots', window.location.origin);
+          blockedSlotsUrl.searchParams.append('calendarId', selectedCalendarId);
+          blockedSlotsUrl.searchParams.append('startDate', startDate.toISOString());
+          blockedSlotsUrl.searchParams.append('endDate', endDate.toISOString());
+
+          const [appointmentsResponse, blockedSlotsResponse] = await Promise.all([
+            fetch(appointmentsUrl.toString()),
+            fetch(blockedSlotsUrl.toString()),
+          ]);
+
+          if (!appointmentsResponse.ok) {
+            const errorData = await appointmentsResponse.json();
+            throw new Error(errorData.error || 'Failed to fetch appointments');
+          }
+          if (!blockedSlotsResponse.ok) {
+            const errorData = await blockedSlotsResponse.json();
+            throw new Error(errorData.error || 'Failed to fetch blocked slots');
+          }
+
+          const appointmentsData = await appointmentsResponse.json();
+          const blockedSlotsData = await blockedSlotsResponse.json();
+
+          const allEvents = [...appointmentsData, ...blockedSlotsData].sort(
+            (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+          );
+          setAppointments(allEvents);
+
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'An unknown error occurred';
+          setError(message);
+        } finally {
+          setIsAppointmentsLoading(false);
+        }
+      };
+      fetchAppointments();
+    }
+  }, [selectedCalendarId]);
+
+  // Group appointments by day
+  const groupedAppointments = appointments.reduce((acc, appt) => {
+    const date = format(parseISO(appt.startTime), 'yyyy-MM-dd');
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(appt);
+    return acc;
+  }, {} as Record<string, Appointment[]>);
 
   if (isLoading) {
     return <div className="text-center p-8">Loading GHL Calendars...</div>;
@@ -113,63 +145,76 @@ export default function CalendarsClient() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div className="md:col-span-1">
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Calendars</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="divide-y">
-              {calendars.map((cal) => (
-                <div 
-                  key={cal.id} 
-                  className={`p-3 cursor-pointer ${selectedCalendarId === cal.id ? 'bg-muted' : 'hover:bg-muted/50'}`}
-                  onClick={() => setSelectedCalendarId(cal.id)}
-                >
-                  <h3 className="font-semibold">{cal.name}</h3>
+    <div className="p-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Upcoming Week</h1>
+        <Select onValueChange={setSelectedCalendarId} value={selectedCalendarId || ''}>
+          <SelectTrigger className="w-[280px]">
+            <SelectValue placeholder="Select a calendar" />
+          </SelectTrigger>
+          <SelectContent>
+            {calendars.map((cal) => (
+              <SelectItem key={cal.id} value={cal.id}>
+                {cal.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {isAppointmentsLoading ? (
+        <p>Loading appointments...</p>
+      ) : (
+        <div className="space-y-6">
+          {Object.keys(groupedAppointments).length > 0 ? (
+            Object.entries(groupedAppointments).map(([date, dayAppointments]) => (
+              <div key={date}>
+                <h2 className="font-headline text-xl font-semibold mb-4 pb-2 border-b">
+                  {format(parseISO(date), 'EEEE, MMMM d')}
+                </h2>
+                <div className="space-y-4">
+                  {dayAppointments.map((app) => (
+                    <Card key={app.id}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold">{app.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {app.contact?.name || 'No contact specified'}
+                            </p>
+                            {app.contact?.companyName && (
+                              <p className="text-xs text-muted-foreground font-medium">
+                                {app.contact.companyName}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">
+                              {format(parseISO(app.startTime), 'p')} - {format(parseISO(app.endTime), 'p')}
+                            </p>
+                            <p className="text-sm capitalize mt-1">{app.appointmentStatus}</p>
+                          </div>
+                        </div>
+                        {app.address && (app.address.startsWith('http://') || app.address.startsWith('https://')) && (
+                          <div className="mt-4">
+                            <Button asChild size="sm">
+                              <a href={app.address} target="_blank" rel="noopener noreferrer">
+                                Join Meeting
+                              </a>
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="md:col-span-2">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="rounded-md border"
-            />
-          </div>
-          <div>
-            <h2 className="font-headline text-xl font-semibold mb-4">
-              Appointments for {selectedDate ? format(selectedDate, 'PPP') : ''}
-            </h2>
-            {isAppointmentsLoading ? (
-              <p>Loading appointments...</p>
-            ) : (
-              <div className="space-y-4">
-                {appointments.length > 0 ? (
-                  appointments.map((app) => (
-                    <div key={app.id} className="p-4 border rounded-lg">
-                      <h3 className="font-semibold">{app.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(app.startTime), 'p')} - {format(new Date(app.endTime), 'p')}
-                      </p>
-                      <p className="text-sm capitalize mt-1">{app.appointmentStatus}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p>No appointments for this day.</p>
-                )}
               </div>
-            )}
-          </div>
+            ))
+          ) : (
+            <p>No upcoming appointments for the next 7 days.</p>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

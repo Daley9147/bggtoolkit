@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import OpportunityWorkspace from '@/components/ghl/opportunity-workspace';
-import { formatDistanceToNow } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import OpportunityCard from './opportunity-card';
 
+// ... (interfaces remain the same)
 interface Opportunity {
   id: string;
   name: string;
@@ -27,28 +29,33 @@ interface Pipeline {
   }[];
 }
 
+interface OutreachPlan {
+  // Define the structure of your outreach plan here
+  [key: string]: unknown;
+}
+
+
 export default function OpportunitiesClient() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
   const [selectedPipelineId, setSelectedPipelineId] = useState<string>('all');
   const [selectedStage, setSelectedStage] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(false);
-  const [outreachPlans, setOutreachPlans] = useState<Record<string, any>>({});
-
-  const fetchOpportunities = async (pipelineId: string = 'all', stageId: string = 'all') => {
+  const [outreachPlans, setOutreachPlans] = useState<Record<string, OutreachPlan>>({});
+  
+  const fetchOpportunities = useCallback(async (pipelineId: string = 'all', stageId: string = 'all', query: string = '') => {
     setIsLoading(true);
     try {
       const url = new URL('/api/ghl/opportunities', window.location.origin);
-      if (pipelineId !== 'all') {
-        url.searchParams.append('pipelineId', pipelineId);
-      }
-      if (stageId !== 'all') {
-        url.searchParams.append('pipelineStageId', stageId);
-      }
+      if (pipelineId !== 'all') url.searchParams.append('pipelineId', pipelineId);
+      if (stageId !== 'all') url.searchParams.append('pipelineStageId', stageId);
+      if (query) url.searchParams.append('query', query);
+      
       const response = await fetch(url.toString());
       if (response.status === 404) {
         setIsConnected(false);
@@ -60,40 +67,59 @@ export default function OpportunitiesClient() {
       }
       const data = await response.json();
       setOpportunities(data);
+      
+      // If an opportunity is selected, find its updated version in the new list
+      if (selectedOpp) {
+        const updatedOpp = data.find((opp: Opportunity) => opp.id === selectedOpp.id);
+        if (updatedOpp) {
+          setSelectedOpp(updatedOpp);
+        }
+      }
+
       setIsConnected(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(message);
-    } finally {
+    }
+  finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchPipelines = async () => {
+  const fetchPipelines = useCallback(async () => {
     try {
       const response = await fetch('/api/ghl/pipelines');
-      if (!response.ok) {
-        throw new Error('Failed to fetch pipelines');
-      }
+      if (!response.ok) throw new Error('Failed to fetch pipelines');
       const data = await response.json();
       setPipelines(data);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(message);
     }
-  };
-
-  useEffect(() => {
-    fetchOpportunities(selectedPipelineId, selectedStage);
-  }, [selectedPipelineId, selectedStage]);
-
-  useEffect(() => {
-    fetchPipelines();
   }, []);
+
+  useEffect(() => {
+    const savedPipelineId = localStorage.getItem('selectedPipelineId');
+    if (savedPipelineId) {
+      setSelectedPipelineId(savedPipelineId);
+    }
+    fetchPipelines();
+  }, [fetchPipelines]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      fetchOpportunities(selectedPipelineId, selectedStage, searchTerm);
+    }, 500); // 500ms debounce delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [selectedPipelineId, selectedStage, searchTerm, fetchOpportunities]);
 
   const handlePipelineChange = (pipelineId: string) => {
     setSelectedPipelineId(pipelineId);
     setSelectedStage('all'); // Reset stage when pipeline changes
+    localStorage.setItem('selectedPipelineId', pipelineId);
   };
 
   const handleOppClick = (opp: Opportunity) => {
@@ -108,12 +134,12 @@ export default function OpportunitiesClient() {
     }
   };
 
-  const handlePlanGenerated = (opportunityId: string, plan: any) => {
+  const handlePlanGenerated = useCallback((opportunityId: string, plan: OutreachPlan) => {
     setOutreachPlans(prevPlans => ({
       ...prevPlans,
       [opportunityId]: plan,
     }));
-  };
+  }, []);
 
   const selectedPipeline = pipelines.find(p => p.id === selectedPipelineId);
 
@@ -142,15 +168,12 @@ export default function OpportunitiesClient() {
         <div className="flex justify-between items-center p-6">
           <h2 className="font-headline text-xl font-semibold">GHL Opportunities</h2>
           <div className="flex gap-4">
-            <Button 
-              variant="outline" 
-              onClick={async () => {
-                await fetch('/api/ghl/disconnect');
-                window.location.reload();
-              }}
-            >
-              Disconnect GHL
-            </Button>
+            <Input
+              placeholder="Search opportunities..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-[280px]"
+            />
             <Select onValueChange={handlePipelineChange} value={selectedPipelineId}>
               <SelectTrigger className="w-[280px]">
                 <SelectValue placeholder="Select a pipeline" />
@@ -179,15 +202,18 @@ export default function OpportunitiesClient() {
             </Select>
           </div>
         </div>
-        <div className="divide-y">
-          {opportunities.length > 0 ? (
+        <div className="space-y-4">
+          {opportunities.length > 0 && pipelines.length > 0 ? (
             opportunities.map((opp) => (
-              <OpportunityCard 
-                key={opp.id}
-                opp={opp}
-                pipelines={pipelines}
-                handleOppClick={handleOppClick}
-              />
+              <Card key={opp.id}>
+                <CardContent className="p-4">
+                  <OpportunityCard 
+                    opp={opp}
+                    pipelines={pipelines}
+                    handleOppClick={handleOppClick}
+                  />
+                </CardContent>
+              </Card>
             ))
           ) : (
             <p className="p-4 text-center text-muted-foreground">No opportunities found.</p>

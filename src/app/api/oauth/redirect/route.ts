@@ -12,9 +12,15 @@ export async function GET(request: Request) {
     scope: [
       'users.readonly',
       'opportunities.readonly',
+      'opportunities.write',
       'contacts.readonly',
       'contacts.write',
       'locations/customFields.readonly',
+      'calendars.readonly',
+      'calendars.write',
+      'calendars/events.readonly',
+      'calendars/events.write',
+      'conversations/message.write',
     ].join(' '),
   });
 

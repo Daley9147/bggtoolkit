@@ -49,16 +49,6 @@ export default async function Header() {
                 <span className="sr-only">Bookmarks</span>
               </Link>
             </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/ai">
-                Insights
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <Link href="/saved">
-                Saved
-              </Link>
-            </Button>
             {user ? (
               <form action={signOut}>
                 <Button variant="ghost">

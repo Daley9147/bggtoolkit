@@ -8,19 +8,19 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const pipelineId = searchParams.get('pipelineId');
   const pipelineStageId = searchParams.get('pipelineStageId');
+  const query = searchParams.get('query');
 
   if (!user) {
     return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
   }
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
     .select('ghl_access_token, ghl_refresh_token, ghl_token_expires_at, ghl_location_id')
     .eq('id', user.id)
     .single();
 
-  if (profileError || !profile) {
-    console.error('Error fetching GHL token from profile:', profileError);
+  if (!profile) {
     return NextResponse.json({ error: 'GHL token or location ID not found or user profile not set up.' }, { status: 404 });
   }
 
@@ -42,12 +42,17 @@ export async function GET(request: Request) {
   }
 
   try {
-    const url = new URL('https://services.leadconnectorhq.com/opportunities/search');
+    const baseUrl = 'https://services.leadconnectorhq.com/opportunities/search';
+    const url = new URL(baseUrl);
     url.searchParams.append('location_id', profile.ghl_location_id);
-    if (pipelineId) {
+
+    if (query) {
+      url.searchParams.append('query', query);
+    }
+    if (pipelineId && pipelineId !== 'all') {
       url.searchParams.append('pipeline_id', pipelineId);
     }
-    if (pipelineStageId) {
+    if (pipelineStageId && pipelineStageId !== 'all') {
       url.searchParams.append('pipeline_stage_id', pipelineStageId);
     }
 
@@ -67,7 +72,8 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data.opportunities);
+    const opportunities = data.opportunities || [];
+    return NextResponse.json(opportunities);
 
   } catch (error) {
     console.error('Error fetching GHL opportunities:', error);

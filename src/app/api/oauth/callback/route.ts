@@ -77,6 +77,7 @@ export async function GET(request: Request) {
         ghl_location_id: data.locationId,
         ghl_user_id: data.userId,
         full_name: `${ghlUser.firstName} ${ghlUser.lastName}`,
+        ghl_email: ghlUser.email,
       });
 
     if (upsertError) {
