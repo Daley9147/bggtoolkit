@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles } from 'lucide-react';
+import { Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, Gamepad2, ListTodo } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GhlSettingsDialog from '@/components/ghl/ghl-settings-dialog';
 import UserProfile from '@/components/layout/user-profile';
@@ -57,18 +57,6 @@ export default function Sidebar() {
               Calendar
             </Link>
             <Link
-              href="/workspace"
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
-                {
-                  'bg-primary-hover': pathname.startsWith('/workspace'),
-                }
-              )}
-            >
-              <PenSquare className="h-4 w-4" />
-              Workspace
-            </Link>
-            <Link
               href="/ai"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
@@ -81,6 +69,18 @@ export default function Sidebar() {
               AI Insights
             </Link>
             <Link
+              href="/tasks"
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
+                {
+                  'bg-primary-hover': pathname === '/tasks',
+                }
+              )}
+            >
+              <ListTodo className="h-4 w-4" />
+              Tasks
+            </Link>
+            <Link
               href="/saved"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
@@ -91,6 +91,30 @@ export default function Sidebar() {
             >
               <Bookmark className="h-4 w-4" />
               Company Research
+            </Link>
+            <Link
+              href="/workspace"
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
+                {
+                  'bg-primary-hover': pathname.startsWith('/workspace'),
+                }
+              )}
+            >
+              <PenSquare className="h-4 w-4" />
+              Workspace
+            </Link>
+            <Link
+              href="/escape"
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
+                {
+                  'bg-primary-hover': pathname === '/escape',
+                }
+              )}
+            >
+              <Gamepad2 className="h-4 w-4" />
+              Escape
             </Link>
           </nav>
         </div>

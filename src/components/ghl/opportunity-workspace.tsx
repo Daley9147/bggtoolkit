@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ContactDetailsTab from './workspace-tabs/ContactDetailsTab';
 import NotesTab from './workspace-tabs/NotesTab';
 import OutreachPlanTab from './workspace-tabs/OutreachPlanTab';
+import TasksTab from './workspace-tabs/TasksTab';
 
 // ... (interfaces remain the same)
 interface Opportunity {
@@ -231,8 +232,9 @@ export default function OpportunityWorkspace({
             </div>
           ) : (
             <Tabs defaultValue="outreach" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="outreach">Outreach Plan</TabsTrigger>
+                <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="contact">Contact Details</TabsTrigger>
                 <TabsTrigger value="notes">Notes</TabsTrigger>
               </TabsList>
@@ -244,6 +246,9 @@ export default function OpportunityWorkspace({
                   onPlanGenerated={(plan) => onPlanGenerated(opportunity.id, plan)}
                   initialHomepageUrl={contactDetails?.website || ''}
                 />
+              </TabsContent>
+              <TabsContent value="tasks">
+                <TasksTab opportunity={opportunity} />
               </TabsContent>
               <TabsContent value="contact">
                 <ContactDetailsTab

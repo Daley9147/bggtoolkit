@@ -78,68 +78,106 @@ export async function GET(request: Request) {
     .gte('created_at', todayStart)
     .lte('created_at', todayEnd);
 
-  const { count: emailsSentToday } = await supabase
-    .from('logged_actions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('action_type', 'email_sent')
-    .gte('created_at', todayStart)
-    .lte('created_at', todayEnd);
-
-  const { count: callsLoggedToday } = await supabase
-    .from('logged_actions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('action_type', 'call_logged')
-    .gte('created_at', todayStart)
-    .lte('created_at', todayEnd);
-
-  const opportunities = opportunitiesData?.opportunities || [];
-  const pipelines = pipelinesData?.pipelines || [];
-
-  let discoveryStageIds: string[] = [];
-  if (pipelineId) {
-    const selectedPipeline = pipelines.find((p: any) => p.id === pipelineId);
-    const discoveryStage = selectedPipeline?.stages?.find((s: any) => s.name === "Discovery Call Booked");
-    if (discoveryStage) {
-      discoveryStageIds.push(discoveryStage.id);
+    const { count: emailsSentToday } = await supabase
+      .from('logged_actions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('action', 'email_sent')
+      .gte('created_at', todayStart)
+      .lte('created_at', todayEnd);
+  
+    const { count: callsLoggedToday } = await supabase
+      .from('logged_actions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('action', 'call_logged')
+      .gte('created_at', todayStart)
+      .lte('created_at', todayEnd);
+  
+    const opportunities = opportunitiesData?.opportunities || [];
+    const pipelines = pipelinesData?.pipelines || [];
+  
+    let discoveryStageIds: string[] = [];
+    if (pipelineId) {
+      const selectedPipeline = pipelines.find((p: any) => p.id === pipelineId);
+      const discoveryStage = selectedPipeline?.stages?.find((s: any) => s.name === "Discovery Call Booked");
+      if (discoveryStage) {
+        discoveryStageIds.push(discoveryStage.id);
+      }
+    } else {
+      discoveryStageIds = pipelines
+        .flatMap((p: any) => p.stages)
+        .filter((s: any) => s.name === "Discovery Call Booked")
+        .map((s: any) => s.id);
     }
-  } else {
-    discoveryStageIds = pipelines
-      .flatMap((p: any) => p.stages)
-      .filter((s: any) => s.name === "Discovery Call Booked")
-      .map((s: any) => s.id);
-  }
-
-  const appointmentsBookedToday = opportunities.filter((opp: any) => {
-    const stageChangeDate = new Date(opp.lastStageChangeAt);
-    return discoveryStageIds.includes(opp.pipelineStageId) &&
-           stageChangeDate >= startOfToday() &&
-           stageChangeDate <= endOfToday();
-  }).length;
-    
-  const opportunitiesWon = opportunities.filter((opp: any) => opp.status === 'won').length;
-
-  const recentActivity = opportunities
-    .sort((a: any, b: any) => new Date(b.lastStageChangeAt).getTime() - new Date(a.lastStageChangeAt).getTime())
-    .slice(0, 5)
-    .map((opp: any) => ({
-      id: opp.id,
-      name: opp.name,
-      stageName: pipelines.flatMap((p: any) => p.stages).find((s: any) => s.id === opp.pipelineStageId)?.name || 'Unknown Stage',
-      lastStageChangeAt: opp.lastStageChangeAt,
-    }));
-
-  const todaysAppointments = appointmentsData?.events?.length || 0;
-
-  return NextResponse.json({
-    pipelines: pipelines,
-    todaysAppointments,
-    insightsCompletedToday,
-    emailsSentToday,
-    callsLoggedToday,
-    appointmentsBookedToday,
-    opportunitiesWon,
-    recentActivity,
-  });
-}
+  
+    const appointmentsBookedToday = opportunities.filter((opp: any) => {
+      const stageChangeDate = new Date(opp.lastStageChangeAt);
+      return discoveryStageIds.includes(opp.pipelineStageId) &&
+             stageChangeDate >= startOfToday() &&
+             stageChangeDate <= endOfToday();
+    }).length;
+      
+    const opportunitiesWon = opportunities.filter((opp: any) => opp.status === 'won').length;
+  
+    const recentActivity = opportunities
+      .sort((a: any, b: any) => new Date(b.lastStageChangeAt).getTime() - new Date(a.lastStageChangeAt).getTime())
+      .slice(0, 5)
+      .map((opp: any) => ({
+        id: opp.id,
+        name: opp.name,
+        stageName: pipelines.flatMap((p: any) => p.stages).find((s: any) => s.id === opp.pipelineStageId)?.name || 'Unknown Stage',
+        lastStageChangeAt: opp.lastStageChangeAt,
+      }));
+  
+          const { count: highPriorityTasksCount } = await supabase
+            .from('tasks')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('priority', 'High')
+            .neq('status', 'Completed');
+      
+          const { count: mediumPriorityTasksCount } = await supabase
+            .from('tasks')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('priority', 'Medium')
+            .neq('status', 'Completed');
+      
+          const { count: lowPriorityTasksCount } = await supabase
+            .from('tasks')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('priority', 'Low')
+            .neq('status', 'Completed');
+            
+          const { data: highPriorityTasks, error: highPriorityTasksError } = await supabase
+            .from('tasks')
+            .select('title')
+            .eq('user_id', user.id)
+            .eq('priority', 'High')
+            .neq('status', 'Completed')
+            .order('created_at', { ascending: true })
+            .limit(4);
+      
+          if (highPriorityTasksError) {
+            console.error('Error fetching high priority tasks:', highPriorityTasksError);
+          }
+      
+          const todaysAppointments = appointmentsData?.events?.length || 0;
+      
+          return NextResponse.json({
+            pipelines: pipelines,
+            todaysAppointments,
+            insightsCompletedToday,
+            emailsSentToday,
+            callsLoggedToday,
+            appointmentsBookedToday,
+            opportunitiesWon,
+            recentActivity,
+            highPriorityTasksCount,
+            mediumPriorityTasksCount,
+            lowPriorityTasksCount,
+            highPriorityTasks: highPriorityTasks || [],
+          });
+      }
