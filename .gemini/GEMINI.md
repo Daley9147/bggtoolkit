@@ -8,6 +8,7 @@ This project is the **BGG Sales Toolkit**, a Next.js web application designed to
 - **Contact Details:** The application fetches and displays full contact details from GHL, including all standard fields, custom fields (e.g., company revenue, address), and historical notes.
 - **AI-Powered Research & Outreach:** The toolkit integrates with the Gemini AI to perform research on a contact's company.
     - Users can provide a company homepage and a specific article/case study URL.
+    - The AI can analyze financial documents (e.g., 10-K, Form 990) for both for-profit and non-profit organizations to generate hyper-personalized outreach.
     - The AI generates a detailed outreach plan, including key insights, a personalized email, LinkedIn messages, and a cold call script.
 - **Workflow Integration:**
     - Generated insights can be synced to the contact's notes in GHL with a single click.

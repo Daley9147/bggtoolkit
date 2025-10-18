@@ -9,11 +9,16 @@ import ReactMarkdown from 'react-markdown';
 import { CaseStudy, caseStudies } from '@/lib/case-studies';
 import { useToast } from '@/hooks/use-toast';
 
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 export default function AiClient() {
   const [url, setUrl] = useState('');
   const [specificUrl, setSpecificUrl] = useState('');
   const [contactFirstName, setContactFirstName] = useState('');
   const [jobTitle, setJobTitle] = useState('');
+  const [organizationType, setOrganizationType] = useState('for-profit');
+  const [financialsUrl, setFinancialsUrl] = useState('');
   const [insights, setInsights] = useState('');
   const [email, setEmail] = useState('');
   const [linkedinConnectionNote, setLinkedinConnectionNote] = useState('');
@@ -41,7 +46,14 @@ export default function AiClient() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url, specificUrl, contactFirstName, jobTitle }),
+        body: JSON.stringify({
+          url,
+          specificUrl,
+          contactFirstName,
+          jobTitle,
+          organizationType,
+          financialsUrl,
+        }),
       });
 
       if (!res.ok) {
@@ -112,6 +124,30 @@ export default function AiClient() {
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
           />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="organization-type">Organization Type</Label>
+            <Select value={organizationType} onValueChange={setOrganizationType}>
+              <SelectTrigger id="organization-type">
+                <SelectValue placeholder="Select organization type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="for-profit">For-Profit</SelectItem>
+                <SelectItem value="non-profit">Non-Profit</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="financials-url">Financial Document URL (10-K, Form 990, etc.)</Label>
+            <Input
+              id="financials-url"
+              type="url"
+              placeholder="Link to the latest financial report (PDF)"
+              value={financialsUrl}
+              onChange={(e) => setFinancialsUrl(e.target.value)}
+            />
+          </div>
         </div>
         <Input
           type="url"

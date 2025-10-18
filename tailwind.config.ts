@@ -7,6 +7,15 @@ export default {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [
+    'bg-cyan-400', 'border-cyan-600', 'drop-shadow-[0_0_4px_#06b6d4]', 'drop-shadow-[0_0_8px_#06b6d4]',
+    'bg-yellow-400', 'border-yellow-600', 'drop-shadow-[0_0_4px_#facc15]', 'drop-shadow-[0_0_8px_#facc15]',
+    'bg-purple-400', 'border-purple-600', 'drop-shadow-[0_0_4px_#a855f7]', 'drop-shadow-[0_0_8px_#a855f7]',
+    'bg-orange-400', 'border-orange-600', 'drop-shadow-[0_0_4px_#f97316]', 'drop-shadow-[0_0_8px_#f97316]',
+    'bg-blue-400', 'border-blue-600', 'drop-shadow-[0_0_4px_#3b82f6]', 'drop-shadow-[0_0_8px_#3b82f6]',
+    'bg-green-400', 'border-green-600', 'drop-shadow-[0_0_4px_#4ade80]', 'drop-shadow-[0_0_8px_#4ade80]',
+    'bg-red-400', 'border-red-600', 'drop-shadow-[0_0_4px_#f87171]', 'drop-shadow-[0_0_8px_#f87171]',
+  ],
   theme: {
     extend: {
       fontFamily: {

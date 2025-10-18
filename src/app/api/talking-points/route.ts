@@ -3,7 +3,7 @@ import { generateOutreachPlan } from '@/lib/ai/generate-outreach-plan';
 
 export async function POST(req: Request) {
   try {
-    const { url, specificUrl, contactFirstName, jobTitle, ghlContactId } = await req.json();
+    const { url, specificUrl, contactFirstName, jobTitle, ghlContactId, organizationType, financialsUrl } = await req.json();
     
     const outreachPlan = await generateOutreachPlan({
       url,
@@ -11,6 +11,8 @@ export async function POST(req: Request) {
       contactFirstName,
       jobTitle,
       ghlContactId,
+      organizationType,
+      financialsUrl,
     });
 
     return NextResponse.json(outreachPlan);

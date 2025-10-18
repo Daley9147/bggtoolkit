@@ -1,7 +1,13 @@
+import 'server-only';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as cheerio from 'cheerio';
 import { caseStudies } from '@/lib/case-studies';
 import { createClient } from '@/lib/supabase/server';
+import { fetchNonProfitData } from '@/lib/propublica/api';
+import { forProfitPrompt } from './prompts/for-profit.prompt';
+import { nonProfitPrompt } from './prompts/non-profit.prompt';
+import { vcBackedPrompt } from './prompts/vc-backed.prompt';
+import { partnershipPrompt } from './prompts/partnership.prompt';
 
 async function fetchWebsiteContent(url: string): Promise<string> {
   try {
@@ -30,7 +36,15 @@ interface GenerateOutreachPlanArgs {
   specificUrl?: string;
   contactFirstName: string;
   jobTitle: string;
-  ghlContactId: string;
+  ghlContactId?: string;
+  organizationType: 'for-profit' | 'non-profit' | 'vc-backed' | 'partnership';
+  nonProfitIdentifier?: string;
+  userInsight?: string;
+  fundingAnnouncementUrl?: string;
+  leadVc?: string;
+  firmWebsiteUrl?: string;
+  partnerLinkedInUrl?: string;
+  recentInvestmentArticleUrl?: string;
 }
 
 export async function generateOutreachPlan({
@@ -39,107 +53,110 @@ export async function generateOutreachPlan({
   contactFirstName,
   jobTitle,
   ghlContactId,
+  organizationType,
+  nonProfitIdentifier,
+  userInsight,
+  fundingAnnouncementUrl,
+  leadVc,
+  firmWebsiteUrl,
+  partnerLinkedInUrl,
+  recentInvestmentArticleUrl,
 }: GenerateOutreachPlanArgs) {
-  if (!url) {
-    throw new Error('URL is required');
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+  const modelName = organizationType === 'partnership' 
+    ? 'gemini-2.5-pro' // NOTE: Using a placeholder for the pro model
+    : 'gemini-2.5-flash';
+  const model = genAI.getGenerativeModel({ model: modelName });
+
+  // Validation
+  if (organizationType === 'vc-backed' && !fundingAnnouncementUrl) {
+    throw new Error('Funding Announcement URL is required for VC-Backed Startups');
+  }
+  if (organizationType === 'partnership' && !firmWebsiteUrl) {
+    throw new Error('Firm Website URL is required for Partnerships');
   }
 
-  const websiteText = await fetchWebsiteContent(url);
+  let websiteText = '';
+  if (organizationType === 'partnership' && firmWebsiteUrl) {
+    websiteText = await fetchWebsiteContent(firmWebsiteUrl);
+  } else if (url) {
+    websiteText = await fetchWebsiteContent(url);
+  }
+
   let specificText = '';
-  if (specificUrl) {
+  if (organizationType === 'partnership' && partnerLinkedInUrl) {
+    specificText = await fetchWebsiteContent(partnerLinkedInUrl);
+  } else if (organizationType === 'vc-backed' && fundingAnnouncementUrl) {
+    specificText = await fetchWebsiteContent(fundingAnnouncementUrl);
+  } else if (specificUrl) {
     specificText = await fetchWebsiteContent(specificUrl);
   }
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  let recentInvestmentText = '';
+  if (organizationType === 'partnership' && recentInvestmentArticleUrl) {
+    recentInvestmentText = await fetchWebsiteContent(recentInvestmentArticleUrl);
+  }
 
-  const prompt = `Your task is to analyze the provided website text from two sources: a primary company website and a specific initiative page (e.g., product, news). Provide structured insights and a personalized email draft. Base your analysis *only* on the text provided.
+  let financialsText = '';
+  let organizationNameText = '';
 
-You are an AI research and sales assistant for Business Growth Global. Through their signature framework, AEROPS (Analyse, Expand, Revenue, Operations, People, Success), they deliver bespoke solutions to transform businesses. Specialising in helping clients increase profitability, build high-performance teams, and develop actionable plans for long-term growth.
+  if (organizationType === 'non-profit' && nonProfitIdentifier) {
+    organizationNameText = `**Organization Name:** ${nonProfitIdentifier}`;
+    const financials = await fetchNonProfitData(nonProfitIdentifier);
+    if (financials && financials.revenue > 0) {
+      const programExpenseRatio = financials.expenses > 0 
+        ? (financials.program_expenses / financials.expenses) * 100 
+        : 0;
 
-First, provide the following sections based on the **Primary Website Text**:
+      financialsText = `
+- **Total Revenue:** ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financials.revenue)}
+- **Total Expenses:** ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financials.expenses)}
+- **Net Income:** ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financials.net_income)}
+- **Program Expense Ratio:** ${programExpenseRatio.toFixed(1)}%
+      `;
+    } else {
+      financialsText = '\n- Financial data not available from ProPublica.';
+    }
+  }
 
-**Industry:** [Primary industry]
+  let prompt;
+  switch (organizationType) {
+    case 'non-profit':
+      prompt = nonProfitPrompt;
+      break;
+    case 'vc-backed':
+      prompt = vcBackedPrompt;
+      break;
+    case 'partnership':
+      prompt = partnershipPrompt;
+      break;
+    default:
+      prompt = forProfitPrompt;
+      break;
+  }
 
-**Full Company Name:** [Official name]
+  const fullPrompt = `${prompt}
 
-**Summary:** [1–2 sentences summarizing the company’s business, target customers, and differentiators]
-
-**Recent Developments:** [From the text, identify any press releases, news, or case studies. Prioritize funding rounds, leadership changes, partnerships, product launches, or expansions. Summarize 1–2 key points.]
-
-**How Business Growth Global Could Help:** [Write a sales-oriented point connecting the company’s current stage and challenges to how the AEROPS Framework can help them scale efficiently.]
-
-**Outreach Hook Example:** [Craft a one-sentence cold outreach hook. **Prioritize the Specific Initiative Text** for this, otherwise use the Primary Website Text.]
-
-**Case Study to Reference:** [Analyze the company's industry and challenges and recommend the most relevant case study from the list provided below. Explain in 2-3 sentences how the challenges and solutions in the case study apply to the company being researched.]
-
-**Contact Information (if available):** [Extract any Phone, email, website, HQ, and LinkedIn from the text.]
-
-**Referenced URLs:** [List the full URLs of any pages referenced for case studies, blogs, or news.]
-
+${userInsight ? `
+User's Key Insight (This is the most important information, build your analysis around this):
 ---
-EMAIL SUBJECT LINES
+${userInsight}
 ---
+` : ''}
 
-["Subject Line 1", "Subject Line 2", "Subject Line 3"]
-
----
-EMAIL BODY
----
-
-Second, draft a personalized cold outreach email. 
-- **Do not include a greeting (like "Hi," or "Hi David,").** The email should start with the first sentence.
-- If a **Job Title** is provided, subtly reference their role or potential responsibilities in the email body to make it more relevant.
-- Use the **Specific Initiative Text** to personalize the first paragraph.
-
-I’ve been following [COMPANY]’s work with [specific initiative/product/news from the **Specific Initiative Text**], and it looks like revenue growth is a key focus right now. 
-
-You likely have a growth plan and processes in place. Even the best growth plans can have hidden bottlenecks that stall progress. We help identify and fix those. This approach recently helped one client increase revenue by 52% and gave their leadership team more time to focus on what's next
-
-Do you have time over the next week or two to learn more? Let me know what works for you and I’ll send over a calendar invite
-
----
-LINKEDIN OUTREACH
----
-
-Third, complete and refine the following two LinkedIn messages. Use the **First Name** and **Job Title** provided. Your task is to replace the remaining bracketed placeholders like **[Their Company]** and **[INDUSTRY]** based on your analysis.
-
-**Linkedin Step 1 – Connection Note (light, no pitch yet)**
-
-Hi ${contactFirstName || '[First Name]'}, I’m curious to learn more about your journey at [Their Company]. I also work with Founders and ${jobTitle || '[Job Title]'}s on scaling growth and freeing up leadership from daily firefighting, would love to connect.
-
-**Linkedin Step 2 – Follow-Up DM (once they accept)**
-
-Thanks for connecting, ${contactFirstName || '[First Name]'}. I help ${jobTitle || '[Job Title]'}s in the [INDUSTRY] space scale revenue without getting stuck in daily firefighting. Would you be open to a quick, no-cost 1:1 to share practical approaches? Even if it’s not a fit, you’ll walk away with insights you can apply immediately.
-
----
-COLD CALL SCRIPT
----
-
-Fourth, complete and refine the following cold call script. Use the **First Name** and the **Specific Initiative Text** to fill in the placeholders.
-
-“Hi [First Name],
-
-This is YOUR NAME from Business Growth Global. Have I caught you at a bad time?
-
-I'll be brief. I saw you [specific initiative/product/news].
-
-The reason I'm calling is that after a big push like that, many leaders find the operational cracks start to show. Processes that initially worked break when you scale. We help prevent that breakage.
-
-Would it make sense to grab 20 minutes this week so I can share how we’ve helped firms like yours navigate this exact stage?”
-
----
-
-Rules:
-- Base your analysis *strictly* on the texts provided. Do not use any external knowledge.
-- If the Specific Initiative Text is available, use it as the primary source for the email's opening line.
-- For the bulleted list in the email, use Markdown formatting (e.g., "- List item").
-- If any text is unclear or insufficient, state that you cannot provide a complete analysis.
-
+${organizationType !== 'partnership' ? `
 Case Studies:
 ---
 ${JSON.stringify(caseStudies, null, 2)}
 ---
+` : ''}
+
+${organizationNameText ? `
+User Input:
+---
+${organizationNameText}
+---
+` : ''}
 
 Primary Website Text to Analyze:
 ---
@@ -147,40 +164,92 @@ ${websiteText.substring(0, 10000)}
 ---
 
 ${specificText ? `
-Specific Initiative Text to Analyze:
+${organizationType === 'vc-backed' ? 'Funding Announcement Text to Analyze:' : ''}
+${organizationType === 'partnership' ? "Partner's LinkedIn Profile Text to Analyze:" : ''}
+${organizationType === 'for-profit' || organizationType === 'non-profit' ? 'Specific Initiative Text to Analyze:' : ''}
 ---
 ${specificText.substring(0, 10000)}
 ---
 ` : ''}
+
+${recentInvestmentText ? `
+Recent Investment Article Text to Analyze:
+---
+${recentInvestmentText.substring(0, 10000)}
+---
+` : ''}
+
+${financialsText ? `
+Financial Data to Analyze:
+---
+${financialsText}
+---
+` : ''}
 `;
 
-  const result = await model.generateContent(prompt);
+  const result = await model.generateContent(fullPrompt);
   const response = await result.response;
   const text = await response.text();
-
-  const subjectLinesParts = text.split(/\s*---\s*EMAIL SUBJECT LINES\s*---\s*/);
-  const insights = subjectLinesParts[0].trim();
-  const subjectLinesAndRest = subjectLinesParts.length > 1 ? subjectLinesParts[1] : '';
-
-  const emailBodyParts = subjectLinesAndRest.split(/\s*---\s*EMAIL BODY\s*---\s*/);
-  const subjectLinesRaw = emailBodyParts[0].trim();
-  const emailAndRest = emailBodyParts.length > 1 ? emailBodyParts[1] : '';
   
-  let subjectLines: string[] = [];
-  try {
-    subjectLines = JSON.parse(subjectLinesRaw);
-  } catch (e) {
-    console.error("Failed to parse subject lines:", subjectLinesRaw);
+  // Definitive, index-based parsing logic
+  const sections: { [key: string]: string } = {};
+  const headers = [
+    "EMAIL SUBJECT LINES",
+    "EMAIL BODY",
+    "LINKEDIN OUTREACH",
+    "COLD CALL SCRIPT",
+    "FOLLOW-UP EMAIL SUBJECT LINES",
+    "FOLLOW-UP EMAIL BODY"
+  ];
+
+  // Find all header positions
+  const headerPositions = headers.map(header => {
+    const regex = new RegExp(`\\s*(---\\s*)?${header}(\\s*---)?\\s*`);
+    const match = text.match(regex);
+    return match ? { header, index: match.index!, length: match[0].length } : null;
+  }).filter(Boolean) as { header: string, index: number, length: number }[];
+
+  // Extract insights (content before the first header)
+  const firstHeaderIndex = headerPositions.length > 0 ? headerPositions[0].index : text.length;
+  sections["insights"] = text.substring(0, firstHeaderIndex).trim();
+
+  // Extract content between headers
+  for (let i = 0; i < headerPositions.length; i++) {
+    const current = headerPositions[i];
+    const next = headerPositions[i + 1];
+    const start = current.index + current.length;
+    const end = next ? next.index : text.length;
+    sections[current.header] = text.substring(start, end).trim();
+  }
+
+  const parseJsonSafe = (jsonString: string): any[] => {
+    if (!jsonString) return [];
+    const cleanedString = jsonString.replace(/```json\n?|```/g, '').trim();
+    try {
+      return JSON.parse(cleanedString);
+    } catch (e) {
+      console.error("Failed to parse JSON:", cleanedString);
+      return [];
+    }
+  };
+
+  const insights = sections["insights"] || '';
+  const subjectLinesRaw = sections["EMAIL SUBJECT LINES"] || '[]';
+  let email = sections["EMAIL BODY"] || '';
+  const linkedinText = sections["LINKEDIN OUTREACH"] || '';
+  const coldCallScript = sections["COLD CALL SCRIPT"] || '';
+  const followUpSubjectLinesRaw = sections["FOLLOW-UP EMAIL SUBJECT LINES"] || '[]';
+  const followUpEmailBody = sections["FOLLOW-UP EMAIL BODY"] || '';
+
+  let subjectLines: string[] = parseJsonSafe(subjectLinesRaw);
+  if (subjectLines.length === 0) {
     subjectLines = ["", "", ""]; // Provide empty fallbacks
   }
 
-  const linkedinParts = emailAndRest.split(/\s*---\s*LINKEDIN OUTREACH\s*---\s*/);
-  let email = linkedinParts[0].trim();
-  const linkedinAndRest = linkedinParts.length > 1 ? linkedinParts[1] : '';
-
-  const coldCallParts = linkedinAndRest.split(/\s*---\s*COLD CALL SCRIPT\s*---\s*/);
-  const linkedinText = coldCallParts[0].trim();
-  const coldCallScript = coldCallParts.length > 1 ? coldCallParts[1].trim() : '';
+  let followUpEmailSubjectLines: string[] = parseJsonSafe(followUpSubjectLinesRaw);
+  if (followUpEmailSubjectLines.length === 0) {
+    followUpEmailSubjectLines = ["", ""]; // Provide empty fallbacks
+  }
 
   const greeting = contactFirstName ? `Hi ${contactFirstName},` : 'Hi,';
   email = `${greeting}\n\n${email}`;
@@ -188,12 +257,12 @@ ${specificText.substring(0, 10000)}
   let linkedinConnectionNote = '';
   let linkedinFollowUpDm = '';
 
-  const connectionNoteMatch = linkedinText.match(/\*\*Linkedin Step 1 – Connection Note \(light, no pitch yet\)\*\*\s*([\s\S]*?)\s*\*\*Linkedin Step 2/);
+  const connectionNoteMatch = linkedinText.match(/\*\*Linkedin Step 1 – Connection Note(?:\s*\(light, no pitch yet\))?\*\*\s*([\s\S]*?)\s*\*\*Linkedin Step 2/);
   if (connectionNoteMatch) {
     linkedinConnectionNote = connectionNoteMatch[1].trim();
   }
 
-  const linkedinFollowUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM \(once they accept\)\*\*\s*([\s\S]*)/);
+  const linkedinFollowUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM(?:\s*\(once they accept\))?\*\*\s*([\s\S]*)/);
   if (linkedinFollowUpDmMatch) {
     linkedinFollowUpDm = linkedinFollowUpDmMatch[1].trim();
   }
@@ -220,7 +289,7 @@ ${specificText.substring(0, 10000)}
       console.error('Error inserting company data:', companyError);
     }
 
-    if (companyData) {
+    if (companyData && ghlContactId) {
           const { error: templateError } = await supabase
             .from('outreach_templates')
             .upsert(
@@ -236,6 +305,8 @@ ${specificText.substring(0, 10000)}
                 cold_call_script: coldCallScript,
                 user_id: user.id,
                 ghl_contact_id: ghlContactId,
+                follow_up_email_subject_lines: followUpEmailSubjectLines,
+                follow_up_email_body: followUpEmailBody,
               },
               { onConflict: 'ghl_contact_id, user_id' }
             );
@@ -245,5 +316,5 @@ ${specificText.substring(0, 10000)}
           }
         }  }
 
-  return { insights, email, subjectLines, linkedinConnectionNote, linkedinFollowUpDm, coldCallScript };
+  return { insights, email, subjectLines, linkedinConnectionNote, linkedinFollowUpDm, coldCallScript, followUpEmailSubjectLines, followUpEmailBody };
 }

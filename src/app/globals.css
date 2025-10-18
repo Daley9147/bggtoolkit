@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+.scoreboard-text {
+  text-shadow: 0 0 2px #f87171, 0 0 5px #f87171;
+}
+
+.neon-green-text {
+  text-shadow: 0 0 2px #4ade80, 0 0 5px #4ade80;
+}
+
+@layer utilities {
+  @keyframes pulse {
+    50% {
+      opacity: 0.7;
+      transform: scale(1.1);
+    }
+  }
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+  .animate-shake {
+    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  }
+}
+
 @layer base {
   :root {
     --background: 210 17% 98%; /* Soft Gray */
