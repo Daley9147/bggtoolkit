@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import MobileNav from './mobile-nav';
+import AppLogo from '@/components/common/app-logo';
 
 export default async function Header() {
   const supabase = createClient();
+
 
   const {
     data: { user },
@@ -23,8 +25,16 @@ export default async function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <MobileNav />
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="flex-1 flex items-center justify-start">
+          <MobileNav />
+        </div>
+        <div className="flex items-center justify-center">
+          <Link href="/">
+            <AppLogo />
+            <span className="sr-only">Home</span>
+          </Link>
+        </div>
+        <div className="flex-1 flex items-center justify-end space-x-2">
           <nav className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" asChild>
               <Link href="/">
