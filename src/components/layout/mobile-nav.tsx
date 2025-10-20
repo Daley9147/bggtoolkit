@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, Gamepad2, ListTodo } from 'lucide-react';
+import { Menu, Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, Gamepad2, ListTodo, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -65,6 +65,16 @@ export default function MobileNav() {
           >
             <Sparkles className="h-5 w-5" />
             AI Insights
+          </Link>
+          <Link
+            href="/email-outreach"
+            className={cn(
+              'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-primary-hover',
+              { 'bg-primary-hover': pathname === '/email-outreach' }
+            )}
+          >
+            <Mail className="h-5 w-5" />
+            Email Outreach
           </Link>
           <Link
             href="/tasks"

@@ -24,6 +24,13 @@ interface OutreachPlan {
   followUpEmailBody: string;
 }
 
+interface EmailTemplate {
+  id: string;
+  template_name: string;
+  subject_line: string;
+  body: string;
+}
+
 interface OutreachPlanTabProps {
   outreachPlan: OutreachPlan | null;
   contactId: string;
@@ -134,6 +141,8 @@ export default function OutreachPlanTab({
   const [parsedInsights, setParsedInsights] = useState<{ [key: string]: string }>({});
   const [contactDetails, setContactDetails] = useState<GhlContact | null>(null);
   const [customFieldDefs, setCustomFieldDefs] = useState<CustomField[]>([]);
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [isPopulating, setIsPopulating] = useState(false);
 
   const JoditEditor = useMemo(() => dynamic(() => import('jodit-react'), { ssr: false }), []);
 
@@ -164,9 +173,10 @@ export default function OutreachPlanTab({
     const fetchContactData = async () => {
       if (contactId) {
         try {
-          const [contactResponse, fieldsResponse] = await Promise.all([
+          const [contactResponse, fieldsResponse, templatesResponse] = await Promise.all([
             fetch(`/api/ghl/contact/${contactId}`),
             fetch('/api/ghl/custom-fields'),
+            fetch('/api/email-templates'),
           ]);
 
           if (contactResponse.ok) {
@@ -175,6 +185,9 @@ export default function OutreachPlanTab({
           if (fieldsResponse.ok) {
             setCustomFieldDefs(await fieldsResponse.json());
           }
+          if (templatesResponse.ok) {
+            setEmailTemplates(await templatesResponse.json());
+          }
         } catch (error) {
           console.error("Failed to fetch contact data:", error);
         }
@@ -182,6 +195,36 @@ export default function OutreachPlanTab({
     };
     fetchContactData();
   }, [contactId]);
+
+  const handlePopulateTemplate = async (templateId: string) => {
+    const template = emailTemplates.find(t => t.id === templateId);
+    if (!template || !outreachPlan?.insights) return;
+
+    setIsPopulating(true);
+    try {
+      const response = await fetch('/api/ai/populate-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateBody: template.body,
+          insights: outreachPlan.insights,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to populate template');
+      }
+
+      const { populatedBody } = await response.json();
+      setSelectedSubject(template.subject_line);
+      setAndCombineEmail(populatedBody, emailSignature);
+
+    } catch (error) {
+      console.error('Error populating template:', error);
+    } finally {
+      setIsPopulating(false);
+    }
+  };
 
   const handleRunResearch = async () => {
     if (!contactId) {
@@ -497,20 +540,37 @@ export default function OutreachPlanTab({
         <TabsContent value="email" className="mt-4">
           <Card>
             <CardContent className="p-6">
-              <div className="space-y-2 mb-4">
-                <Label htmlFor="subject-select">Subject Line</Label>
-                <Select id="subject-select" value={selectedSubject} onValueChange={setSelectedSubject}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a subject line..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {outreachPlan.subjectLines && Array.isArray(outreachPlan.subjectLines) && outreachPlan.subjectLines.filter(Boolean).map((subject, index) => (
-                      <SelectItem key={index} value={subject}>
-                        {subject}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="space-y-2">
+                  <Label htmlFor="subject-select">Subject Line</Label>
+                  <Select id="subject-select" value={selectedSubject} onValueChange={setSelectedSubject}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a subject line..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {outreachPlan.subjectLines && Array.isArray(outreachPlan.subjectLines) && outreachPlan.subjectLines.filter(Boolean).map((subject, index) => (
+                        <SelectItem key={index} value={subject}>
+                          {subject}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="template-select">Use a Template</Label>
+                  <Select onValueChange={handlePopulateTemplate} disabled={isPopulating}>
+                    <SelectTrigger id="template-select">
+                      <SelectValue placeholder={isPopulating ? "Populating..." : "Select a template"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {emailTemplates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.template_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <JoditEditor
                 value={editableEmailBody}
