@@ -18,9 +18,12 @@ export default function AiClient() {
   const [contactFirstName, setContactFirstName] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [organizationType, setOrganizationType] = useState('for-profit');
-  const [financialsUrl, setFinancialsUrl] = useState('');
+  const [nonProfitIdentifier, setNonProfitIdentifier] = useState('');
   const [insights, setInsights] = useState('');
   const [email, setEmail] = useState('');
+  const [emailSubjects, setEmailSubjects] = useState<string[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState('');
+  const [customSubject, setCustomSubject] = useState('');
   const [linkedinConnectionNote, setLinkedinConnectionNote] = useState('');
   const [linkedinFollowUpDm, setLinkedinFollowUpDm] = useState('');
   const [coldCallScript, setColdCallScript] = useState('');
@@ -34,6 +37,9 @@ export default function AiClient() {
     setIsLoading(true);
     setInsights('');
     setEmail('');
+    setEmailSubjects([]);
+    setSelectedSubject('');
+    setCustomSubject('');
     setLinkedinConnectionNote('');
     setLinkedinFollowUpDm('');
     setColdCallScript('');
@@ -52,7 +58,7 @@ export default function AiClient() {
           contactFirstName,
           jobTitle,
           organizationType,
-          financialsUrl,
+          nonProfitIdentifier,
         }),
       });
 
@@ -62,7 +68,7 @@ export default function AiClient() {
       }
       
       const data = await res.json();
-      const { insights: insightsOutput, email: emailOutput, linkedinConnectionNote: connOutput, linkedinFollowUpDm: dmOutput, coldCallScript: scriptOutput } = data;
+      const { insights: insightsOutput, email: emailOutput, subjectLines: subjectsOutput, linkedinConnectionNote: connOutput, linkedinFollowUpDm: dmOutput, coldCallScript: scriptOutput } = data;
 
       // Extract the case study reference from the insights
       const caseStudyRegex = /\*\*Case Study to Reference:\*\* \[?(Case Study #(\d+))\]?([\s\S]*)/;
@@ -85,6 +91,8 @@ export default function AiClient() {
       // Normalize newlines to ensure consistent paragraph spacing
       const cleanedEmail = emailOutput.replace(/\n\s*\n/g, '\n\n');
       setEmail(cleanedEmail);
+      setEmailSubjects(subjectsOutput || []);
+      setSelectedSubject(subjectsOutput?.[0] || '');
       setLinkedinConnectionNote(connOutput);
       setLinkedinFollowUpDm(dmOutput);
       setColdCallScript(scriptOutput);
@@ -92,11 +100,18 @@ export default function AiClient() {
     } catch (error: any) {
       console.error('Error generating talking points:', error);
       setInsights('An error occurred while generating insights.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleCopyToClipboard = (textToCopy: string, type: string) => {
-    navigator.clipboard.writeText(textToCopy);
+    let contentToCopy = textToCopy;
+    if (type === 'email content') {
+      const subject = selectedSubject === 'custom' ? customSubject : selectedSubject;
+      contentToCopy = `Subject: ${subject}\n\n${textToCopy}`;
+    }
+    navigator.clipboard.writeText(contentToCopy);
     toast({
       title: 'Copied to clipboard!',
       description: `The ${type} has been copied to your clipboard.`,
@@ -135,19 +150,23 @@ export default function AiClient() {
               <SelectContent>
                 <SelectItem value="for-profit">For-Profit</SelectItem>
                 <SelectItem value="non-profit">Non-Profit</SelectItem>
+                <SelectItem value="vc-backed">VC-Backed Startup</SelectItem>
+                <SelectItem value="partnership">Partnership/VC</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="financials-url">Financial Document URL (10-K, Form 990, etc.)</Label>
-            <Input
-              id="financials-url"
-              type="url"
-              placeholder="Link to the latest financial report (PDF)"
-              value={financialsUrl}
-              onChange={(e) => setFinancialsUrl(e.target.value)}
-            />
-          </div>
+          {organizationType === 'non-profit' && (
+            <div className="space-y-2">
+              <Label htmlFor="non-profit-identifier">Organization Name or EIN</Label>
+              <Input
+                id="non-profit-identifier"
+                type="text"
+                placeholder="Enter EIN for best results"
+                value={nonProfitIdentifier}
+                onChange={(e) => setNonProfitIdentifier(e.target.value)}
+              />
+            </div>
+          )}
         </div>
         <Input
           type="url"
@@ -196,7 +215,37 @@ export default function AiClient() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="subject-line">Subject Line</Label>
+                    <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                      <SelectTrigger id="subject-line">
+                        <SelectValue placeholder="Select a subject line" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {emailSubjects.map((subject, index) => (
+                          <SelectItem key={index} value={subject}>
+                            {subject}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom">Custom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {selectedSubject === 'custom' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="custom-subject">Custom Subject</Label>
+                      <Input
+                        id="custom-subject"
+                        type="text"
+                        placeholder="Enter your custom subject line"
+                        value={customSubject}
+                        onChange={(e) => setCustomSubject(e.target.value)}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap mt-4">
                   <ReactMarkdown>{email}</ReactMarkdown>
                 </div>
               </CardContent>

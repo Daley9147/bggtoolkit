@@ -13,7 +13,6 @@ interface NonProfitFinancials {
   revenue: number;
   expenses: number;
   net_income: number;
-  program_expenses: number;
 }
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -67,7 +66,6 @@ export async function fetchNonProfitData(identifier: string): Promise<NonProfitF
         revenue: latestFiling.totrevenue ?? 0,
         expenses: latestFiling.totfuncexpns ?? 0,
         net_income: (latestFiling.totrevenue ?? 0) - (latestFiling.totfuncexpns ?? 0),
-        program_expenses: latestFiling.totprgmexpns ?? 0,
       };
     }
 
@@ -75,5 +73,30 @@ export async function fetchNonProfitData(identifier: string): Promise<NonProfitF
   } catch (error) {
     console.error('An error occurred while fetching non-profit data:', error);
     return null;
+  }
+}
+
+export async function inspectLatestFiling(ein: string) {
+  try {
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    };
+    const orgUrl = `${PROPUBLICA_API_BASE_URL}/organizations/${ein}.json`;
+    const orgResponse = await fetch(orgUrl, { headers });
+    if (!orgResponse.ok) {
+      console.error(`ProPublica API org request failed for EIN ${ein}:`, orgResponse.statusText);
+      return;
+    }
+    const orgData = await orgResponse.json();
+    if (orgData.filings_with_data && orgData.filings_with_data.length > 0) {
+      const latestFiling = orgData.filings_with_data[0];
+      console.log('--- Latest Filing Data ---');
+      console.log(latestFiling);
+      console.log('--------------------------');
+    } else {
+      console.log('No filings with data found.');
+    }
+  } catch (error) {
+    console.error('An error occurred during inspection:', error);
   }
 }

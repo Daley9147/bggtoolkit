@@ -68,16 +68,17 @@ EMAIL BODY
 Draft a hyper-personalized, peer-to-peer email.
 - **Do not include a greeting.**
 - The tone must be respectful, collaborative, and non-salesy.
-- **Crucially, if "Recent Investment Article Text" is provided, you MUST use it to write a unique opening sentence.** This sentence should congratulate the partner on that specific deal, mention the portfolio company's name, and briefly state what is impressive about them. This hyper-personalized opening replaces the standard one.
-- If no article is provided, use the standard opening that demonstrates a clear understanding of their firm and their portfolio's needs.
+- **You MUST use the "Recent Investment Article Text" to write a unique opening.**
+- The opening sentence must mention the specific event, the portfolio company, and the partner firm.
+- The second sentence must highlight a specific positive detail from the article that reflects well on the partner firm's strategy or values.
 
-I've been following [Firm Name]'s work and I'm particularly impressed by your thesis on [Investment Thesis]. Your focus on [Partner's Focus, if available, otherwise Stated Value-Add] resonates with our approach at Business Growth Global.
+I was impressed to read about [Recent Positive Event, e.g., Firm Name's recent investment in Portfolio Company]. [Positive Detail about the Event] speaks volumes about your approach to partnership.
 
-We specialize in providing the hands-on operational frameworks that help early-stage companies scale effectively. We often see portfolio companies, like those you work with, struggle with [Target Portfolio Challenge]. This is where I see a potential for a powerful collaboration.
+That focus on long term success is something we admire at Business Growth Global. We work with founders post investment to ensure their operational capabilities keep pace with their growth. The goal is to eliminate the internal friction—founder dependency, team bottlenecks, broken processes—that can slow down momentum and put future funding rounds at risk.
 
-To demonstrate the value we can provide, we'd like to offer 2-3 no-cost sessions with one of our Head Mentors for a company in your portfolio that's currently facing this challenge. It's a no-strings-attached way for them to get actionable strategies and for us to show how we can help de-risk and accelerate the growth of your investments.
+We often see portfolio companies at this critical inflection point. As a gesture of goodwill, we would like to offer 2–3 complimentary sessions with one of our Head Mentors for a company in your portfolio. These are seasoned operators who have scaled companies themselves, and they can provide actionable strategies for a current challenge.
 
-Would you be open to a brief introductory call to discuss this further?
+Is protecting your investments from these kinds of operational growing pains a priority for you at the moment?
 
 ---
 LINKEDIN OUTREACH
@@ -102,11 +103,11 @@ Generate 2-3 concise and engaging subject lines for the follow-up email.
 FOLLOW-UP EMAIL BODY
 ---
 
-Draft a short (2-3 sentence) follow-up email.
+Draft a short follow-up email.
 
-I know how busy you must be. The reason I reached out is that I see a clear synergy between our firms, particularly around helping [Target Portfolio Challenge].
+Following up on my previous email. Is solving operational bottlenecks for your scaling portfolio companies a priority for your team right now?
 
-Is ensuring your portfolio companies have the operational frameworks to scale efficiently a current priority for you?
+If so, we'd be happy to provide a few complimentary sessions to a relevant company to show how we can help. If this isn't your domain, could you please point me toward the right person on your platform or operations team?
 
 **REMINDER: You must follow the exact output structure defined at the beginning of this prompt, using the specified separators.**
 `;

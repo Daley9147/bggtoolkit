@@ -103,20 +103,18 @@ export async function generateOutreachPlan({
   if (organizationType === 'non-profit' && nonProfitIdentifier) {
     organizationNameText = `**Organization Name:** ${nonProfitIdentifier}`;
     const financials = await fetchNonProfitData(nonProfitIdentifier);
-    if (financials && financials.revenue > 0) {
-      const programExpenseRatio = financials.expenses > 0 
-        ? (financials.program_expenses / financials.expenses) * 100 
-        : 0;
+    console.log('--- ProPublica API Result ---', financials);
 
+    if (financials) {
       financialsText = `
 - **Total Revenue:** ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financials.revenue)}
 - **Total Expenses:** ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financials.expenses)}
 - **Net Income:** ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(financials.net_income)}
-- **Program Expense Ratio:** ${programExpenseRatio.toFixed(1)}%
       `;
     } else {
       financialsText = '\n- Financial data not available from ProPublica.';
     }
+    console.log('--- Formatted Financials Text ---', financialsText);
   }
 
   let prompt;
@@ -233,13 +231,29 @@ ${financialsText}
     }
   };
 
-  const insights = sections["insights"] || '';
+  let insights = sections["insights"] || '';
+  // Final cleanup for AI-specific markers
+  insights = insights.replace('[INSIGHTS]', '').trim();
+
   const subjectLinesRaw = sections["EMAIL SUBJECT LINES"] || '[]';
   let email = sections["EMAIL BODY"] || '';
-  const linkedinText = sections["LINKEDIN OUTREACH"] || '';
+  const linkedinText = sections["LINKED-IN OUTREACH"] || '';
   const coldCallScript = sections["COLD CALL SCRIPT"] || '';
   const followUpSubjectLinesRaw = sections["FOLLOW-UP EMAIL SUBJECT LINES"] || '[]';
   const followUpEmailBody = sections["FOLLOW-UP EMAIL BODY"] || '';
+
+  // Clean up potential AI errors
+  // Remove duplicated outreach hook example if it exists at the start of the insights
+  const hookRegex = /^\s*\**Outreach Hook Example\**\s*:?[\s\S]*?\n\n/i;
+  if (insights.trim().match(hookRegex)) {
+    insights = insights.trim().replace(hookRegex, '');
+  }
+
+  let finalInsights = insights;
+  if (organizationType === 'non-profit' && financialsText.includes('Total Revenue')) {
+    const financialBlock = `**Key Financials (Annual):**\n${financialsText.trim()}`;
+    finalInsights = `${financialBlock}\n\n---\n\n${insights}`;
+  }
 
   let subjectLines: string[] = parseJsonSafe(subjectLinesRaw);
   if (subjectLines.length === 0) {
@@ -257,12 +271,12 @@ ${financialsText}
   let linkedinConnectionNote = '';
   let linkedinFollowUpDm = '';
 
-  const connectionNoteMatch = linkedinText.match(/\*\*Linkedin Step 1 – Connection Note(?:\s*\(light, no pitch yet\))?\*\*\s*([\s\S]*?)\s*\*\*Linkedin Step 2/);
+  const connectionNoteMatch = linkedinText.match(/\*\*Linkedin Step 1 – Connection Note\*\*\s*([\s\S]*?)\s*\*\*Linkedin Step 2/);
   if (connectionNoteMatch) {
     linkedinConnectionNote = connectionNoteMatch[1].trim();
   }
 
-  const linkedinFollowUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM(?:\s*\(once they accept\))?\*\*\s*([\s\S]*)/);
+  const linkedinFollowUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM\*\*\s*([\s\S]*)/);
   if (linkedinFollowUpDmMatch) {
     linkedinFollowUpDm = linkedinFollowUpDmMatch[1].trim();
   }
@@ -297,7 +311,7 @@ ${financialsText}
                 company_id: companyData[0].id,
                 contact_first_name: contactFirstName,
                 job_title: jobTitle,
-                insights,
+                insights: finalInsights,
                 email,
                 email_subject_lines: subjectLines,
                 linkedin_connection_note: linkedinConnectionNote,
@@ -316,5 +330,5 @@ ${financialsText}
           }
         }  }
 
-  return { insights, email, subjectLines, linkedinConnectionNote, linkedinFollowUpDm, coldCallScript, followUpEmailSubjectLines, followUpEmailBody };
+  return { insights: finalInsights, email, subjectLines, linkedinConnectionNote, linkedinFollowUpDm, coldCallScript, followUpEmailSubjectLines, followUpEmailBody };
 }

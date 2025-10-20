@@ -49,6 +49,7 @@ const renderers = {
   },
 };
 
+
 const parseInsights = (insightsText: string) => {
   const sections: { [key: string]: string } = {};
   const headers = [
@@ -131,7 +132,7 @@ export default function OutreachPlanTab({
   };
 
   useEffect(() => {
-    if (outreachPlan?.insights) {
+    if (outreachPlan?.insights && organizationType !== 'non-profit') {
       setParsedInsights(parseInsights(outreachPlan.insights));
     }
     if (outreachPlan?.email) {
@@ -146,7 +147,7 @@ export default function OutreachPlanTab({
     if (outreachPlan?.followUpEmailSubjectLines && outreachPlan.followUpEmailSubjectLines.length > 0) {
       setSelectedFollowUpSubject(outreachPlan.followUpEmailSubjectLines[0]);
     }
-  }, [outreachPlan, emailSignature]);
+  }, [outreachPlan, emailSignature, organizationType]);
 
   const handleRunResearch = async () => {
     if (!contactId) {
@@ -427,21 +428,26 @@ export default function OutreachPlanTab({
         <TabsContent value="insights" className="mt-4">
           <Card>
             <CardContent className="p-6 space-y-4">
-              {Object.entries(parsedInsights).map(([key, value]) => {
-                // Create a readable title from the camelCase key
-                const title = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
-                return (
-                  value && (
-                    <div key={key}>
-                      <h4 className="font-semibold text-lg mb-2">{title}</h4>
-                      <div className="prose max-w-none text-muted-foreground">
-                        <ReactMarkdown components={renderers}>{value}</ReactMarkdown>
+              {organizationType === 'non-profit' ? (
+                <div className="prose max-w-none text-muted-foreground">
+                  <ReactMarkdown components={renderers}>{outreachPlan.insights}</ReactMarkdown>
+                </div>
+              ) : (
+                Object.entries(parsedInsights).map(([key, value]) => {
+                  const title = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+                  return (
+                    value && (
+                      <div key={key}>
+                        <h4 className="font-semibold text-lg mb-2">{title}</h4>
+                        <div className="prose max-w-none text-muted-foreground">
+                          <ReactMarkdown components={renderers}>{value}</ReactMarkdown>
+                        </div>
+                        <Separator className="mt-4" />
                       </div>
-                      <Separator className="mt-4" />
-                    </div>
-                  )
-                );
-              })}
+                    )
+                  );
+                })
+              )}
             </CardContent>
           </Card>
           <div className="mt-6 flex gap-4">
