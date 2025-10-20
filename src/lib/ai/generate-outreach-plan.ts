@@ -250,10 +250,6 @@ ${financialsText}
   }
 
   let finalInsights = insights;
-  if (organizationType === 'non-profit' && financialsText.includes('Total Revenue')) {
-    const financialBlock = `**Key Financials (Annual):**\n${financialsText.trim()}`;
-    finalInsights = `${financialBlock}\n\n---\n\n${insights}`;
-  }
 
   let subjectLines: string[] = parseJsonSafe(subjectLinesRaw);
   if (subjectLines.length === 0) {
@@ -286,32 +282,31 @@ ${financialsText}
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (user && ghlContactId) {
-    const { error: rpcError } = await supabase.rpc('create_company_and_outreach_plan', {
-      p_user_id: user.id,
-      p_ghl_contact_id: ghlContactId,
-      p_company_name: insights.match(/Full Company Name:\s*(.*)/)?.[1],
-      p_industry: insights.match(/Industry:\s*(.*)/)?.[1],
-      p_website: url,
-      p_summary: insights.match(/Summary:\s*(.*)/)?.[1],
-      p_developments: insights.match(/Recent Developments:\s*(.*)/)?.[1],
-      p_contact_first_name: contactFirstName,
-      p_job_title: jobTitle,
-      p_insights: finalInsights,
-      p_email: email,
-      p_email_subject_lines: subjectLines,
-      p_linkedin_connection_note: linkedinConnectionNote,
-      p_linkedin_follow_up_dm: linkedinFollowUpDm,
-      p_cold_call_script: coldCallScript,
-      p_follow_up_email_subject_lines: followUpEmailSubjectLines,
-      p_follow_up_email_body: followUpEmailBody,
-    });
-
-    if (rpcError) {
-      console.error('Error calling create_company_and_outreach_plan RPC:', rpcError);
+      if (user && ghlContactId) {
+      const { error: rpcError } = await supabase.rpc('create_company_and_outreach_plan', {
+        p_user_id: user.id,
+        p_ghl_contact_id: ghlContactId ?? null,
+        p_company_name: insights.match(/\*\*Full Company Name:\*\*\s*(.*)/)?.[1]?.trim() || null,
+        p_industry: insights.match(/\*\*Industry:\*\*\s*(.*)/)?.[1]?.trim() || null,
+        p_website: url,
+        p_summary: insights.match(/\*\*Summary:\*\*\s*(.*)/)?.[1]?.trim() || null,
+        p_developments: insights.match(/\*\*Recent Developments:\*\*\s*(.*)/)?.[1]?.trim() || null,
+        p_contact_first_name: contactFirstName,
+        p_job_title: jobTitle,
+        p_insights: finalInsights,
+        p_email: email,
+        p_email_subject_lines: JSON.stringify(subjectLines ?? []),
+        p_linkedin_connection_note: linkedinConnectionNote,
+        p_linkedin_follow_up_dm: linkedinFollowUpDm,
+        p_cold_call_script: coldCallScript,
+        p_follow_up_email_subject_lines: JSON.stringify(followUpEmailSubjectLines ?? []),
+        p_follow_up_email_body: followUpEmailBody,
+      });
+  
+      if (rpcError) {
+        console.error('Error calling create_company_and_outreach_plan RPC:', rpcError);
+      }
     }
-  }
-
 
   const stripMarkdown = (text: string) => {
     return text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');

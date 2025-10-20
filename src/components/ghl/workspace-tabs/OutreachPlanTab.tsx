@@ -35,7 +35,7 @@ interface OutreachPlanTabProps {
   outreachPlan: OutreachPlan | null;
   contactId: string;
   emailSignature: string;
-  onPlanGenerated: (plan: any) => void;
+  onPlanGenerated: () => void;
   initialHomepageUrl: string;
 }
 
@@ -72,7 +72,7 @@ const parseInsights = (insightsText: string) => {
     "Industry", "Full Company Name", "Summary", "Recent Developments", 
     "Strategic Goals & Challenges", "How Business Growth Global Could Help", 
     "Outreach Hook Example", "Case Study to Reference", "Contact Information", 
-    "Referenced URLs", "Key Financials", "Stated Mission Objectives", 
+    "Referenced URLs", "Key Financials (Annual)", "Stated Mission Objectives", 
     "Operational Challenges", "Funding Stage & Amount", "Lead Investors", 
     "Stated Purpose of Funds", "Implied Pressures & Challenges", "Firm Name",
     "Firm's Investment Thesis", "Stated Value-Add", "Partner's Focus",
@@ -144,6 +144,8 @@ export default function OutreachPlanTab({
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [isPopulating, setIsPopulating] = useState(false);
 
+  const [localOutreachPlan, setLocalOutreachPlan] = useState(outreachPlan);
+
   const JoditEditor = useMemo(() => dynamic(() => import('jodit-react'), { ssr: false }), []);
 
   const setAndCombineEmail = (aiEmail: string, signature: string) => {
@@ -157,22 +159,22 @@ export default function OutreachPlanTab({
   };
 
   useEffect(() => {
-    if (outreachPlan?.insights && organizationType !== 'non-profit') {
-      setParsedInsights(parseInsights(outreachPlan.insights));
+    if (localOutreachPlan?.insights && organizationType !== 'non-profit') {
+      setParsedInsights(parseInsights(localOutreachPlan.insights));
     }
-    if (outreachPlan?.email) {
-      setAndCombineEmail(outreachPlan.email, emailSignature);
+    if (localOutreachPlan?.email) {
+      setAndCombineEmail(localOutreachPlan.email, emailSignature);
     }
-    if (outreachPlan?.subjectLines && outreachPlan.subjectLines.length > 0) {
-      setSelectedSubject(outreachPlan.subjectLines[0]);
+    if (localOutreachPlan?.subjectLines && localOutreachPlan.subjectLines.length > 0) {
+      setSelectedSubject(localOutreachPlan.subjectLines[0]);
     }
-    if (outreachPlan?.followUpEmailBody) {
-      setAndCombineFollowUpEmail(outreachPlan.followUpEmailBody, emailSignature);
+    if (localOutreachPlan?.followUpEmailBody) {
+      setAndCombineFollowUpEmail(localOutreachPlan.followUpEmailBody, emailSignature);
     }
-    if (outreachPlan?.followUpEmailSubjectLines && outreachPlan.followUpEmailSubjectLines.length > 0) {
-      setSelectedFollowUpSubject(outreachPlan.followUpEmailSubjectLines[0]);
+    if (localOutreachPlan?.followUpEmailSubjectLines && localOutreachPlan.followUpEmailSubjectLines.length > 0) {
+      setSelectedFollowUpSubject(localOutreachPlan.followUpEmailSubjectLines[0]);
     }
-  }, [outreachPlan, emailSignature, organizationType]);
+  }, [localOutreachPlan, emailSignature, organizationType]);
 
   useEffect(() => {
     const fetchContactData = async () => {
@@ -203,7 +205,7 @@ export default function OutreachPlanTab({
 
   const handlePopulateTemplate = async (templateId: string) => {
     const template = emailTemplates.find(t => t.id === templateId);
-    if (!template || !outreachPlan?.insights) return;
+    if (!template || !localOutreachPlan?.insights) return;
 
     setIsPopulating(true);
     try {
@@ -212,7 +214,7 @@ export default function OutreachPlanTab({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           templateBody: template.body,
-          insights: outreachPlan.insights,
+          insights: localOutreachPlan.insights,
         }),
       });
 
@@ -264,17 +266,8 @@ export default function OutreachPlanTab({
       }
 
       const plan = await response.json();
-      onPlanGenerated(plan);
-      setAndCombineEmail(plan.email, emailSignature);
-      if (plan.subjectLines && plan.subjectLines.length > 0) {
-        setSelectedSubject(plan.subjectLines[0]);
-      }
-      if (plan.followUpEmailBody) {
-        setAndCombineFollowUpEmail(plan.followUpEmailBody, emailSignature);
-      }
-      if (plan.followUpEmailSubjectLines && plan.followUpEmailSubjectLines.length > 0) {
-        setSelectedFollowUpSubject(plan.followUpEmailSubjectLines[0]);
-      }
+      setLocalOutreachPlan(plan); // Update the local state
+      onPlanGenerated();
       setIsRerunningResearch(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -285,7 +278,7 @@ export default function OutreachPlanTab({
   };
 
   const handleSyncNotes = async () => {
-    if (!contactId || !outreachPlan?.insights) return;
+    if (!contactId || !localOutreachPlan?.insights) return;
     setIsSyncing(true);
     setSyncSuccess(false);
 
@@ -295,7 +288,7 @@ export default function OutreachPlanTab({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contactId: contactId,
-          note: outreachPlan.insights,
+          note: localOutreachPlan.insights,
         }),
       });
 
@@ -384,7 +377,7 @@ export default function OutreachPlanTab({
     return <div className="text-center text-red-500 p-4 border border-red-200 bg-red-50 rounded-lg mt-4">{error}</div>;
   }
 
-  if (!outreachPlan || isRerunningResearch) {
+  if (!localOutreachPlan || isRerunningResearch) {
     return (
       <div className="text-center space-y-4 mt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -516,7 +509,7 @@ export default function OutreachPlanTab({
             <CardContent className="p-6 space-y-4">
               {organizationType === 'non-profit' ? (
                 <div className="prose max-w-none text-muted-foreground">
-                  <ReactMarkdown components={renderers}>{outreachPlan.insights}</ReactMarkdown>
+                  <ReactMarkdown components={renderers}>{localOutreachPlan.insights}</ReactMarkdown>
                 </div>
               ) : (
                 Object.entries(parsedInsights).map(([key, value]) => {
@@ -553,7 +546,7 @@ export default function OutreachPlanTab({
                       <SelectValue placeholder="Choose a subject line..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {outreachPlan.subjectLines && Array.isArray(outreachPlan.subjectLines) && outreachPlan.subjectLines.filter(Boolean).map((subject, index) => (
+                      {localOutreachPlan.subjectLines && Array.isArray(localOutreachPlan.subjectLines) && localOutreachPlan.subjectLines.filter(Boolean).map((subject, index) => (
                         <SelectItem key={index} value={subject}>
                           {subject}
                         </SelectItem>
@@ -601,7 +594,7 @@ export default function OutreachPlanTab({
                     <SelectValue placeholder="Choose a subject line..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {outreachPlan.followUpEmailSubjectLines && Array.isArray(outreachPlan.followUpEmailSubjectLines) && outreachPlan.followUpEmailSubjectLines.filter(Boolean).map((subject, index) => (
+                    {localOutreachPlan.followUpEmailSubjectLines && Array.isArray(localOutreachPlan.followUpEmailSubjectLines) && localOutreachPlan.followUpEmailSubjectLines.filter(Boolean).map((subject, index) => (
                       <SelectItem key={index} value={subject}>
                         {subject}
                       </SelectItem>
@@ -657,17 +650,17 @@ export default function OutreachPlanTab({
                 })}
               </div>
               <h4 className="font-semibold mb-2 not-prose">Request DM</h4>
-              <ReactMarkdown>{outreachPlan.linkedinConnectionNote}</ReactMarkdown>
+              <ReactMarkdown>{localOutreachPlan.linkedinConnectionNote}</ReactMarkdown>
               <hr className="my-4" />
               <h4 className="font-semibold mb-2 not-prose">Connection DM</h4>
-              <ReactMarkdown>{outreachPlan.linkedinFollowUpDm}</ReactMarkdown>
+              <ReactMarkdown>{localOutreachPlan.linkedinFollowUpDm}</ReactMarkdown>
             </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="call" className="mt-4">
           <Card>
             <CardContent className="prose max-w-none p-6">
-              <ReactMarkdown>{outreachPlan.coldCallScript}</ReactMarkdown>
+              <ReactMarkdown>{localOutreachPlan.coldCallScript}</ReactMarkdown>
             </CardContent>
           </Card>
         </TabsContent>

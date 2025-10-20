@@ -93,6 +93,52 @@ export default function OpportunityWorkspace({
   const [internalOutreachPlan, setInternalOutreachPlan] = useState<any>(null);
   const { toast } = useToast();
 
+  const fetchAllData = async () => {
+    if (!opportunity) return;
+    setIsInitialLoading(true);
+    setStageUpdateError(null);
+
+    try {
+      const [
+        sigResponse,
+        planResponse,
+        fieldsResponse,
+        contactResponse,
+        notesResponse,
+      ] = await Promise.all([
+        fetch('/api/user/signature'),
+        fetch(`/api/outreach-plan/${opportunity.contact.id}`),
+        fetch('/api/ghl/custom-fields'),
+        fetch(`/api/ghl/contact/${opportunity.contact.id}`),
+        fetch(`/api/ghl/notes/${opportunity.contact.id}`),
+      ]);
+
+      if (sigResponse.ok) {
+        const sigData = await sigResponse.json();
+        setEmailSignature(sigData.email_signature || '');
+      }
+      if (planResponse.ok) {
+        const planData = await planResponse.json();
+        if (planData && planData.email) {
+          setInternalOutreachPlan(planData);
+        }
+      }
+      if (fieldsResponse.ok) {
+        setCustomFieldDefs(await fieldsResponse.json());
+      }
+      if (contactResponse.ok) {
+        setContactDetails(await contactResponse.json());
+      }
+      if (notesResponse.ok) {
+        setNotes(await notesResponse.json());
+      }
+    } catch (error) {
+      console.error("Failed to fetch workspace data:", error);
+    } finally {
+      setIsInitialLoading(false);
+    }
+  };
+
   // This effect syncs the local stage state when the parent passes a new opportunity prop
   useEffect(() => {
     if (opportunity) {
@@ -103,51 +149,6 @@ export default function OpportunityWorkspace({
 
   useEffect(() => {
     if (isOpen && opportunity) {
-      setIsInitialLoading(true);
-      setStageUpdateError(null); // Reset on open
-
-      const fetchAllData = async () => {
-        try {
-          const [
-            sigResponse,
-            planResponse,
-            fieldsResponse,
-            contactResponse,
-            notesResponse,
-          ] = await Promise.all([
-            fetch('/api/user/signature'),
-            fetch(`/api/outreach-plan/${opportunity.contact.id}`),
-            fetch('/api/ghl/custom-fields'),
-            fetch(`/api/ghl/contact/${opportunity.contact.id}`),
-            fetch(`/api/ghl/notes/${opportunity.contact.id}`),
-          ]);
-
-          if (sigResponse.ok) {
-            const sigData = await sigResponse.json();
-            setEmailSignature(sigData.email_signature || '');
-          }
-          if (planResponse.ok) {
-            const planData = await planResponse.json();
-            if (planData && planData.email) {
-              setInternalOutreachPlan(planData);
-            }
-          }
-          if (fieldsResponse.ok) {
-            setCustomFieldDefs(await fieldsResponse.json());
-          }
-          if (contactResponse.ok) {
-            setContactDetails(await contactResponse.json());
-          }
-          if (notesResponse.ok) {
-            setNotes(await notesResponse.json());
-          }
-        } catch (error) {
-          console.error("Failed to fetch workspace data:", error);
-        } finally {
-          setIsInitialLoading(false);
-        }
-      };
-
       fetchAllData();
     }
   }, [isOpen, opportunity]);
@@ -241,7 +242,7 @@ export default function OpportunityWorkspace({
                   outreachPlan={internalOutreachPlan}
                   contactId={opportunity.contact.id}
                   emailSignature={emailSignature}
-                  onPlanGenerated={setInternalOutreachPlan}
+                  onPlanGenerated={fetchAllData}
                   initialHomepageUrl={contactDetails?.website || ''}
                 />
               </TabsContent>

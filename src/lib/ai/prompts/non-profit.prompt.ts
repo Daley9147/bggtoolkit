@@ -52,6 +52,8 @@ Carefully review the financial data and website text to provide the following an
 
 **Stated Mission Objectives:** [Summarize 1-2 key program goals or initiatives mentioned on their website.]
 
+**Key Financials (Annual):** [Copy the provided financial data verbatim here.]
+
 **Operational Challenges:** [Identify potential inefficiencies or risks. Look for significant deficits (expenses > revenue) or other fundraising challenges mentioned on their website.]
 
 **How Business Growth Global Could Help (AEROPS Framework):** [Select the single most relevant pillar from the AEROPS Framework that addresses the challenges you identified. **You must then write a 1-2 sentence explanation** detailing *why* this pillar is the right fit based on the financial data and website text.]
