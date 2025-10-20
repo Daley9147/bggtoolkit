@@ -20,7 +20,7 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('outreach_templates')
-      .select('insights, email, email_subject_lines, linkedin_connection_note, linkedin_follow_up_dm, cold_call_script')
+      .select('insights, email, email_subject_lines, linkedin_connection_note, linkedin_follow_up_dm, cold_call_script, follow_up_email_subject_lines, follow_up_email_body')
       .eq('ghl_contact_id', contactId)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
@@ -39,6 +39,8 @@ export async function GET(
       linkedinConnectionNote: data.linkedin_connection_note,
       linkedinFollowUpDm: data.linkedin_follow_up_dm,
       coldCallScript: data.cold_call_script,
+      followUpEmailSubjectLines: data.follow_up_email_subject_lines,
+      followUpEmailBody: data.follow_up_email_body,
     };
 
     return NextResponse.json(formattedData);
