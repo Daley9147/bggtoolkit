@@ -22,6 +22,7 @@ export async function GET(
       .from('outreach_templates')
       .select('insights, email, email_subject_lines, linkedin_connection_note, linkedin_follow_up_dm, cold_call_script')
       .eq('ghl_contact_id', contactId)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1)
       .single();

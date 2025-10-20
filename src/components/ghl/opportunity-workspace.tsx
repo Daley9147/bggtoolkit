@@ -41,8 +41,6 @@ interface OpportunityWorkspaceProps {
   onOpenChange: (isOpen: boolean) => void;
   onOpportunityUpdate: () => void;
   pipelines: Pipeline[];
-  outreachPlan: any;
-  onPlanGenerated: (opportunityId: string, plan: any) => void;
 }
 
 interface GhlContact {
@@ -83,8 +81,6 @@ export default function OpportunityWorkspace({
   onOpenChange,
   onOpportunityUpdate,
   pipelines,
-  outreachPlan,
-  onPlanGenerated,
 }: OpportunityWorkspaceProps) {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStage, setSelectedStage] = useState<string | undefined>(undefined);
@@ -94,12 +90,14 @@ export default function OpportunityWorkspace({
   const [customFieldDefs, setCustomFieldDefs] = useState<CustomField[]>([]);
   const [notes, setNotes] = useState<{ id: string; body: string; dateAdded: string }[]>([]);
   const [emailSignature, setEmailSignature] = useState('');
+  const [internalOutreachPlan, setInternalOutreachPlan] = useState<any>(null);
   const { toast } = useToast();
 
   // This effect syncs the local stage state when the parent passes a new opportunity prop
   useEffect(() => {
     if (opportunity) {
       setSelectedStage(opportunity.pipelineStageId);
+      setInternalOutreachPlan(null); // Reset the plan when the opportunity changes
     }
   }, [opportunity]);
 
@@ -131,7 +129,7 @@ export default function OpportunityWorkspace({
           if (planResponse.ok) {
             const planData = await planResponse.json();
             if (planData && planData.email) {
-              onPlanGenerated(opportunity.id, planData);
+              setInternalOutreachPlan(planData);
             }
           }
           if (fieldsResponse.ok) {
@@ -152,7 +150,7 @@ export default function OpportunityWorkspace({
 
       fetchAllData();
     }
-  }, [isOpen, opportunity, onPlanGenerated]);
+  }, [isOpen, opportunity]);
 
   const handleStageChange = async (stageId: string) => {
     if (!opportunity) return;
@@ -240,10 +238,10 @@ export default function OpportunityWorkspace({
               </TabsList>
               <TabsContent value="outreach">
                 <OutreachPlanTab
-                  outreachPlan={outreachPlan}
+                  outreachPlan={internalOutreachPlan}
                   contactId={opportunity.contact.id}
                   emailSignature={emailSignature}
-                  onPlanGenerated={(plan) => onPlanGenerated(opportunity.id, plan)}
+                  onPlanGenerated={setInternalOutreachPlan}
                   initialHomepageUrl={contactDetails?.website || ''}
                 />
               </TabsContent>

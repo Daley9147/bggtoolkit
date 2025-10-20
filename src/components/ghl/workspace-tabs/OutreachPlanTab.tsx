@@ -151,6 +151,11 @@ export default function OutreachPlanTab({
     setEditableEmailBody(`${formattedAiEmail}<br><br>${signature}`);
   };
 
+  const setAndCombineFollowUpEmail = (aiFollowUpEmail: string, signature: string) => {
+    const formattedAiFollowUpEmail = aiFollowUpEmail.replace(/\\n/g, '<br>');
+    setEditableFollowUpBody(`${formattedAiFollowUpEmail}<br><br>${signature}`);
+  };
+
   useEffect(() => {
     if (outreachPlan?.insights && organizationType !== 'non-profit') {
       setParsedInsights(parseInsights(outreachPlan.insights));
@@ -162,7 +167,7 @@ export default function OutreachPlanTab({
       setSelectedSubject(outreachPlan.subjectLines[0]);
     }
     if (outreachPlan?.followUpEmailBody) {
-      setEditableFollowUpBody(outreachPlan.followUpEmailBody);
+      setAndCombineFollowUpEmail(outreachPlan.followUpEmailBody, emailSignature);
     }
     if (outreachPlan?.followUpEmailSubjectLines && outreachPlan.followUpEmailSubjectLines.length > 0) {
       setSelectedFollowUpSubject(outreachPlan.followUpEmailSubjectLines[0]);
@@ -265,7 +270,7 @@ export default function OutreachPlanTab({
         setSelectedSubject(plan.subjectLines[0]);
       }
       if (plan.followUpEmailBody) {
-        setEditableFollowUpBody(plan.followUpEmailBody);
+        setAndCombineFollowUpEmail(plan.followUpEmailBody, emailSignature);
       }
       if (plan.followUpEmailSubjectLines && plan.followUpEmailSubjectLines.length > 0) {
         setSelectedFollowUpSubject(plan.followUpEmailSubjectLines[0]);

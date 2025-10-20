@@ -100,6 +100,8 @@ Third, complete and refine the following two LinkedIn messages. Use the **First 
 
 Hi [First Name], I’m curious to learn more about your journey at [Their Company]. I also work with Founders and [Job Title]s on scaling growth and freeing up leadership from daily firefighting, would love to connect.
 
+---
+
 **Linkedin Step 2 – Follow-Up DM (once they accept)**
 
 Thanks for connecting, [First Name]. I help [Job Title]s in the [INDUSTRY] space scale revenue without getting stuck in daily firefighting. Would you be open to a quick, no-cost 1:1 to share practical approaches? Even if it’s not a fit, you’ll walk away with insights you can apply immediately.

@@ -228,8 +228,6 @@ export default function OpportunitiesClient() {
         onOpenChange={handleWorkspaceClose}
         onOpportunityUpdate={() => fetchOpportunities(selectedPipelineId, selectedStage, searchTerm)}
         pipelines={pipelines}
-        outreachPlan={selectedOpp ? outreachPlans[selectedOpp.id] : null}
-        onPlanGenerated={handlePlanGenerated}
       />
     </>
   );

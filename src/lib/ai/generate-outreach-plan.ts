@@ -237,16 +237,16 @@ ${financialsText}
 
   const subjectLinesRaw = sections["EMAIL SUBJECT LINES"] || '[]';
   let email = sections["EMAIL BODY"] || '';
-  const linkedinText = sections["LINKED-IN OUTREACH"] || '';
+  const linkedinText = sections["LINKEDIN OUTREACH"] || '';
   const coldCallScript = sections["COLD CALL SCRIPT"] || '';
   const followUpSubjectLinesRaw = sections["FOLLOW-UP EMAIL SUBJECT LINES"] || '[]';
   const followUpEmailBody = sections["FOLLOW-UP EMAIL BODY"] || '';
 
   // Clean up potential AI errors
-  // Remove duplicated outreach hook example if it exists at the start of the insights
-  const hookRegex = /^\s*\**Outreach Hook Example\**\s*:?[\s\S]*?\n\n/i;
-  if (insights.trim().match(hookRegex)) {
-    insights = insights.trim().replace(hookRegex, '');
+  // Remove duplicated outreach hook example if it exists anywhere in the insights
+  const hookRegex = /\s*\**Outreach Hook Example\**\s*:?[\s\S]*?$/gmi;
+  if (insights.match(hookRegex)) {
+    insights = insights.replace(hookRegex, '');
   }
 
   let finalInsights = insights;
@@ -271,64 +271,63 @@ ${financialsText}
   let linkedinConnectionNote = '';
   let linkedinFollowUpDm = '';
 
-  const connectionNoteMatch = linkedinText.match(/\*\*Linkedin Step 1 – Connection Note\*\*\s*([\s\S]*?)\s*\*\*Linkedin Step 2/);
-  if (connectionNoteMatch) {
-    linkedinConnectionNote = connectionNoteMatch[1].trim();
-  }
+  if (linkedinText) {
+    const connectionNoteMatch = linkedinText.match(/\*\*Linkedin Step 1 – Connection Note.*?\*\*\s*([\s\S]*?)(?=\*\*Linkedin Step 2 – Follow-Up DM|$)/);
+    const followUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM.*?\*\*\s*([\s\S]*)/);
 
-  const linkedinFollowUpDmMatch = linkedinText.match(/\*\*Linkedin Step 2 – Follow-Up DM\*\*\s*([\s\S]*)/);
-  if (linkedinFollowUpDmMatch) {
-    linkedinFollowUpDm = linkedinFollowUpDmMatch[1].trim();
+    if (connectionNoteMatch) {
+      linkedinConnectionNote = connectionNoteMatch[1].trim();
+    }
+    if (followUpDmMatch) {
+      linkedinFollowUpDm = followUpDmMatch[1].trim();
+    }
   }
 
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (user) {
-    const { data: companyData, error: companyError } = await supabase
-      .from('companies')
-      .insert([
-        {
-          name: insights.match(/Full Company Name:\s*(.*)/)?.[1],
-          industry: insights.match(/Industry:\s*(.*)/)?.[1],
-          website: url,
-          summary: insights.match(/Summary:\s*(.*)/)?.[1],
-          developments: insights.match(/Recent Developments:\s*(.*)/)?.[1],
-          user_id: user.id,
-        },
-      ])
-      .select();
+  if (user && ghlContactId) {
+    const { error: rpcError } = await supabase.rpc('create_company_and_outreach_plan', {
+      p_user_id: user.id,
+      p_ghl_contact_id: ghlContactId,
+      p_company_name: insights.match(/Full Company Name:\s*(.*)/)?.[1],
+      p_industry: insights.match(/Industry:\s*(.*)/)?.[1],
+      p_website: url,
+      p_summary: insights.match(/Summary:\s*(.*)/)?.[1],
+      p_developments: insights.match(/Recent Developments:\s*(.*)/)?.[1],
+      p_contact_first_name: contactFirstName,
+      p_job_title: jobTitle,
+      p_insights: finalInsights,
+      p_email: email,
+      p_email_subject_lines: subjectLines,
+      p_linkedin_connection_note: linkedinConnectionNote,
+      p_linkedin_follow_up_dm: linkedinFollowUpDm,
+      p_cold_call_script: coldCallScript,
+      p_follow_up_email_subject_lines: followUpEmailSubjectLines,
+      p_follow_up_email_body: followUpEmailBody,
+    });
 
-    if (companyError) {
-      console.error('Error inserting company data:', companyError);
+    if (rpcError) {
+      console.error('Error calling create_company_and_outreach_plan RPC:', rpcError);
     }
+  }
 
-    if (companyData && ghlContactId) {
-          const { error: templateError } = await supabase
-            .from('outreach_templates')
-            .upsert(
-              {
-                company_id: companyData[0].id,
-                contact_first_name: contactFirstName,
-                job_title: jobTitle,
-                insights: finalInsights,
-                email,
-                email_subject_lines: subjectLines,
-                linkedin_connection_note: linkedinConnectionNote,
-                linkedin_follow_up_dm: linkedinFollowUpDm,
-                cold_call_script: coldCallScript,
-                user_id: user.id,
-                ghl_contact_id: ghlContactId,
-                follow_up_email_subject_lines: followUpEmailSubjectLines,
-                follow_up_email_body: followUpEmailBody,
-              },
-              { onConflict: 'ghl_contact_id, user_id' }
-            );
-    
-          if (templateError) {
-            console.error('Error upserting template data:', templateError);
-          }
-        }  }
 
-  return { insights: finalInsights, email, subjectLines, linkedinConnectionNote, linkedinFollowUpDm, coldCallScript, followUpEmailSubjectLines, followUpEmailBody };
+  const stripMarkdown = (text: string) => {
+    return text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
+  };
+
+  const finalEmail = stripMarkdown(email);
+  const finalFollowUpEmail = stripMarkdown(followUpEmailBody);
+
+  return { 
+    insights: finalInsights, 
+    email: finalEmail, 
+    subjectLines, 
+    linkedinConnectionNote, 
+    linkedinFollowUpDm, 
+    coldCallScript, 
+    followUpEmailSubjectLines, 
+    followUpEmailBody: finalFollowUpEmail 
+  };
 }
