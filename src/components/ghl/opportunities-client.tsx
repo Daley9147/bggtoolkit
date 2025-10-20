@@ -166,17 +166,17 @@ export default function OpportunitiesClient() {
     <>
       <div className="border rounded-lg overflow-hidden">
         <div className="bg-primary text-primary-foreground p-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <h2 className="font-headline text-xl font-semibold text-primary-foreground">GHL Opportunities</h2>
-            <div className="flex gap-4">
+            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
               <Input
                 placeholder="Search opportunities..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-[280px] bg-white text-gray-900"
+                className="bg-white text-gray-900 w-full"
               />
               <Select onValueChange={handlePipelineChange} value={selectedPipelineId}>
-                <SelectTrigger className="w-[280px] bg-white text-gray-900">
+                <SelectTrigger className="bg-white text-gray-900 w-full">
                   <SelectValue placeholder="Select a pipeline" />
                 </SelectTrigger>
                 <SelectContent>
@@ -189,7 +189,7 @@ export default function OpportunitiesClient() {
                 </SelectContent>
               </Select>
               <Select onValueChange={setSelectedStage} value={selectedStage} disabled={selectedPipelineId === 'all'}>
-                <SelectTrigger className="w-[280px] bg-white text-gray-900">
+                <SelectTrigger className="bg-white text-gray-900 w-full">
                   <SelectValue placeholder="Select a stage" />
                 </SelectTrigger>
                 <SelectContent>

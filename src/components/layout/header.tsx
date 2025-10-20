@@ -4,6 +4,7 @@ import { Book, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import MobileNav from './mobile-nav';
 
 export default async function Header() {
   const supabase = createClient();
@@ -21,21 +22,9 @@ export default async function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-24 items-center">
-        <div className="flex items-center">
-          {/* This space is intentionally left to balance the flexbox layout */}
-        </div>
-        <div className="flex flex-1 items-center justify-center">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-                src="https://umwvwdiphmjchbwagtlc.supabase.co/storage/v1/object/public/site-logos/Business-Global-Growth-logo.png"
-                alt="BGG Logo"
-                width={250}
-                height={75}
-            />
-          </Link>
-        </div>
-        <div className="flex items-center justify-end space-x-2">
+      <div className="container flex h-16 items-center">
+        <MobileNav />
+        <div className="flex flex-1 items-center justify-end space-x-2">
           <nav className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" asChild>
               <Link href="/">

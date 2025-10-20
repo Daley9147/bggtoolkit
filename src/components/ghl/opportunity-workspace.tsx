@@ -232,7 +232,7 @@ export default function OpportunityWorkspace({
             </div>
           ) : (
             <Tabs defaultValue="outreach" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                 <TabsTrigger value="outreach">Outreach Plan</TabsTrigger>
                 <TabsTrigger value="tasks">Tasks</TabsTrigger>
                 <TabsTrigger value="contact">Contact Details</TabsTrigger>
