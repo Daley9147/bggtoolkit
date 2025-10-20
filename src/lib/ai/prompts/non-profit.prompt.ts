@@ -32,6 +32,7 @@ You are an expert non-profit strategy consultant for Business Growth Global. You
 1.  If a "User's Key Insight" is provided, it is the most critical piece of information. You MUST build your entire analysis and outreach strategy around this insight.
 2.  When analyzing the website, you MUST ignore any placeholder metrics (e.g., "0 Alumnae," "0 Careers Started," "0 Enrolled"). Do not include these in your analysis. Base your findings only on concrete information.
 3.  The "Outreach Hook Example" section must appear only ONCE in your final output. Do not repeat it.
+4.  You MUST generate a follow-up email. This is a required part of the output.
 
 ---
 **AEROPS Framework - Detailed Breakdown:**
@@ -64,6 +65,7 @@ Carefully review the financial data and website text to provide the following an
 EMAIL SUBJECT LINES
 ---
 
+**CRITICAL: You MUST format the subject lines as a single, valid JSON array of strings. Do not use a markdown list or any other format. Failure to do so will break the application.**
 Generate three email subject lines with the following strategic angles, formatted as a JSON array of strings:
 1.  A direct question about the primary **Operational Challenge** you identified.
 2.  A reference to one of the **Stated Mission Objectives** you found.
@@ -122,6 +124,7 @@ Would it make sense to grab 20 minutes this week to explore how we might be able
 FOLLOW-UP EMAIL SUBJECT LINES
 ---
 
+**CRITICAL: You MUST format the subject lines as a single, valid JSON array of strings. Do not use a markdown list or any other format. Failure to do so will break the application.**
 Generate 2-3 concise and engaging subject lines for the follow-up email, formatted as a JSON array of strings. Examples: "Re: [Original Subject]", "A final thought on [Challenge]", "Is this a priority?".
 ["Follow-up Subject 1", "Follow-up Subject 2"]
 
@@ -129,7 +132,7 @@ Generate 2-3 concise and engaging subject lines for the follow-up email, formatt
 FOLLOW-UP EMAIL BODY
 ---
 
-Finally, draft a short (2-3 sentence) follow-up email to be sent if there is no reply to the first one. This email must:
+Finally, complete and refine the following follow-up email template. This email must:
 1.  Briefly reference the primary **Operational Challenge** from your initial analysis.
 2.  Offer a **new, compelling statistic or a short, relevant insight** that adds value for a non-profit leader.
 3.  End with a simple, low-friction question to gauge interest.
@@ -139,4 +142,6 @@ I know your time is valuable, so I'll be brief. When we help non-profits tackle 
 Is improving this area a priority for your team right now?
 
 **REMINDER: You must follow the exact output structure defined at the beginning of this prompt, using the specified separators.**
+
+**FINAL REMINDER: Your output must be a single block of text with the following sections in this exact order: [INSIGHTS], EMAIL SUBJECT LINES, EMAIL BODY, LINKEDIN OUTREACH, COLD CALL SCRIPT, FOLLOW-UP EMAIL SUBJECT LINES, FOLLOW-UP EMAIL BODY.**
 `;

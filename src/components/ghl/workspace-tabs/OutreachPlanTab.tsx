@@ -16,11 +16,11 @@ import { Separator } from '@/components/ui/separator';
 interface OutreachPlan {
   insights: string;
   email: string;
-  subjectLines: string[];
+  subjectLines: string; // Changed from string[]
   linkedinConnectionNote: string;
   linkedinFollowUpDm: string;
   coldCallScript: string;
-  followUpEmailSubjectLines: string[];
+  followUpEmailSubjectLines: string; // Changed from string[]
   followUpEmailBody: string;
 }
 
@@ -165,14 +165,28 @@ export default function OutreachPlanTab({
     if (localOutreachPlan?.email) {
       setAndCombineEmail(localOutreachPlan.email, emailSignature);
     }
-    if (localOutreachPlan?.subjectLines && localOutreachPlan.subjectLines.length > 0) {
-      setSelectedSubject(localOutreachPlan.subjectLines[0]);
+    if (localOutreachPlan?.subjectLines) {
+      try {
+        const parsedSubjects = JSON.parse(localOutreachPlan.subjectLines);
+        if (Array.isArray(parsedSubjects) && parsedSubjects.length > 0) {
+          setSelectedSubject(parsedSubjects[0]);
+        }
+      } catch (e) {
+        console.error("Failed to parse subject lines:", e);
+      }
     }
     if (localOutreachPlan?.followUpEmailBody) {
       setAndCombineFollowUpEmail(localOutreachPlan.followUpEmailBody, emailSignature);
     }
-    if (localOutreachPlan?.followUpEmailSubjectLines && localOutreachPlan.followUpEmailSubjectLines.length > 0) {
-      setSelectedFollowUpSubject(localOutreachPlan.followUpEmailSubjectLines[0]);
+    if (localOutreachPlan?.followUpEmailSubjectLines) {
+      try {
+        const parsedFollowUpSubjects = JSON.parse(localOutreachPlan.followUpEmailSubjectLines);
+        if (Array.isArray(parsedFollowUpSubjects) && parsedFollowUpSubjects.length > 0) {
+          setSelectedFollowUpSubject(parsedFollowUpSubjects[0]);
+        }
+      } catch (e) {
+        console.error("Failed to parse follow-up subject lines:", e);
+      }
     }
   }, [localOutreachPlan, emailSignature, organizationType]);
 
@@ -546,12 +560,24 @@ export default function OutreachPlanTab({
                       <SelectValue placeholder="Choose a subject line..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {localOutreachPlan.subjectLines && Array.isArray(localOutreachPlan.subjectLines) && localOutreachPlan.subjectLines.filter(Boolean).map((subject, index) => (
-                        <SelectItem key={index} value={subject}>
-                          {subject}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                    {(() => {
+                      try {
+                        if (localOutreachPlan.subjectLines && typeof localOutreachPlan.subjectLines === 'string') {
+                          const subjects = JSON.parse(localOutreachPlan.subjectLines);
+                          if (Array.isArray(subjects)) {
+                            return subjects.filter(Boolean).map((subject, index) => (
+                              <SelectItem key={index} value={subject}>
+                                {subject}
+                              </SelectItem>
+                            ));
+                          }
+                        }
+                      } catch (e) {
+                        console.error("Failed to parse subject lines for rendering:", e);
+                      }
+                      return null;
+                    })()}
+                  </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
@@ -594,11 +620,23 @@ export default function OutreachPlanTab({
                     <SelectValue placeholder="Choose a subject line..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {localOutreachPlan.followUpEmailSubjectLines && Array.isArray(localOutreachPlan.followUpEmailSubjectLines) && localOutreachPlan.followUpEmailSubjectLines.filter(Boolean).map((subject, index) => (
-                      <SelectItem key={index} value={subject}>
-                        {subject}
-                      </SelectItem>
-                    ))}
+                    {(() => {
+                      try {
+                        if (localOutreachPlan.followUpEmailSubjectLines && typeof localOutreachPlan.followUpEmailSubjectLines === 'string') {
+                          const subjects = JSON.parse(localOutreachPlan.followUpEmailSubjectLines);
+                          if (Array.isArray(subjects)) {
+                            return subjects.filter(Boolean).map((subject, index) => (
+                              <SelectItem key={index} value={subject}>
+                                {subject}
+                              </SelectItem>
+                            ));
+                          }
+                        }
+                      } catch (e) {
+                        console.error("Failed to parse follow-up subject lines for rendering:", e);
+                      }
+                      return null;
+                    })()}
                   </SelectContent>
                 </Select>
               </div>

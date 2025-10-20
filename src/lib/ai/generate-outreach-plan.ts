@@ -253,12 +253,12 @@ ${financialsText}
 
   let subjectLines: string[] = parseJsonSafe(subjectLinesRaw);
   if (subjectLines.length === 0) {
-    subjectLines = ["", "", ""]; // Provide empty fallbacks
+    subjectLines = ["Error: Could not generate subject lines"]; // Provide a helpful fallback
   }
 
   let followUpEmailSubjectLines: string[] = parseJsonSafe(followUpSubjectLinesRaw);
   if (followUpEmailSubjectLines.length === 0) {
-    followUpEmailSubjectLines = ["", ""]; // Provide empty fallbacks
+    followUpEmailSubjectLines = ["Error: Could not generate subject lines"]; // Provide a helpful fallback
   }
 
   const greeting = contactFirstName ? `Hi ${contactFirstName},` : 'Hi,';
@@ -318,11 +318,11 @@ ${financialsText}
   return { 
     insights: finalInsights, 
     email: finalEmail, 
-    subjectLines, 
+    subjectLines: JSON.stringify(subjectLines), 
     linkedinConnectionNote, 
     linkedinFollowUpDm, 
     coldCallScript, 
-    followUpEmailSubjectLines, 
+    followUpEmailSubjectLines: JSON.stringify(followUpEmailSubjectLines), 
     followUpEmailBody: finalFollowUpEmail 
   };
 }
