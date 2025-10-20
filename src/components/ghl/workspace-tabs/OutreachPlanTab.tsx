@@ -32,6 +32,15 @@ interface OutreachPlanTabProps {
   initialHomepageUrl: string;
 }
 
+interface GhlContact {
+  customFields?: { id: string; value: string | number }[];
+}
+
+interface CustomField {
+  id: string;
+  name: string;
+}
+
 const renderers = {
   p: ({ node, ...props }: any) => {
     const textContent = node.children.map((child: any) => child.value || '').join('');
@@ -123,6 +132,8 @@ export default function OutreachPlanTab({
   const [sendFollowUpSuccess, setSendFollowUpSuccess] = useState(false);
   const [sendFollowUpError, setSendFollowUpError] = useState<string | null>(null);
   const [parsedInsights, setParsedInsights] = useState<{ [key: string]: string }>({});
+  const [contactDetails, setContactDetails] = useState<GhlContact | null>(null);
+  const [customFieldDefs, setCustomFieldDefs] = useState<CustomField[]>([]);
 
   const JoditEditor = useMemo(() => dynamic(() => import('jodit-react'), { ssr: false }), []);
 
@@ -148,6 +159,29 @@ export default function OutreachPlanTab({
       setSelectedFollowUpSubject(outreachPlan.followUpEmailSubjectLines[0]);
     }
   }, [outreachPlan, emailSignature, organizationType]);
+
+  useEffect(() => {
+    const fetchContactData = async () => {
+      if (contactId) {
+        try {
+          const [contactResponse, fieldsResponse] = await Promise.all([
+            fetch(`/api/ghl/contact/${contactId}`),
+            fetch('/api/ghl/custom-fields'),
+          ]);
+
+          if (contactResponse.ok) {
+            setContactDetails(await contactResponse.json());
+          }
+          if (fieldsResponse.ok) {
+            setCustomFieldDefs(await fieldsResponse.json());
+          }
+        } catch (error) {
+          console.error("Failed to fetch contact data:", error);
+        }
+      }
+    };
+    fetchContactData();
+  }, [contactId]);
 
   const handleRunResearch = async () => {
     if (!contactId) {
@@ -289,6 +323,10 @@ export default function OutreachPlanTab({
       setIsSendingFollowUp(false);
     }
   };
+
+  const customFieldMap = new Map(
+    customFieldDefs.map((field) => [field.id, field.name])
+  );
 
   if (isLoading) {
     return <div className="text-center mt-4">Generating outreach plan... (This can take up to 30 seconds)</div>;
@@ -523,6 +561,36 @@ export default function OutreachPlanTab({
         <TabsContent value="linkedin" className="mt-4">
           <Card>
             <CardContent className="prose max-w-none p-6">
+              <div className="flex space-x-2 mb-4">
+                {contactDetails?.customFields?.map((field) => {
+                  const fieldName = customFieldMap.get(field.id)?.toLowerCase();
+                  if (fieldName === 'person linkedin' && field.value) {
+                    return (
+                      <a
+                        key={field.id}
+                        href={String(field.value)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="outline">Personal LinkedIn</Button>
+                      </a>
+                    );
+                  }
+                  if (fieldName === 'company linkedin' && field.value) {
+                    return (
+                      <a
+                        key={field.id}
+                        href={String(field.value)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="outline">Company LinkedIn</Button>
+                      </a>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
               <h4 className="font-semibold mb-2 not-prose">Request DM</h4>
               <ReactMarkdown>{outreachPlan.linkedinConnectionNote}</ReactMarkdown>
               <hr className="my-4" />
