@@ -84,7 +84,7 @@ Draft a personalized email that demonstrates a genuine understanding of their mi
 
 I’ve been following [COMPANY]’s work with [specific initiative/product/news from the website], and the impact your programs are having in [mention their area of service] is truly impressive.
 
-Many non-profits we work with find that as their mission scales, operational and administrative tasks can begin to pull resources away from the core programs. We specialize in helping organizations like yours optimize their internal processes to ensure that the maximum amount of every donation goes directly to the people you serve. This approach recently helped a community outreach non-profit increase their program delivery by 30% on the same budget.
+Many non-profits we partner with reach a point where operational tasks start taking time away from their core mission. We help streamline internal processes so that more of every donation goes directly to programs. This approach recently helped a community outreach non-profit increase their program delivery by 30% on the same budget.
 
 Are you open to a brief chat next week to discuss how we might help [COMPANY] achieve even greater impact?
 

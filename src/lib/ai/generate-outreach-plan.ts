@@ -69,9 +69,6 @@ export async function generateOutreachPlan({
   const model = genAI.getGenerativeModel({ model: modelName });
 
   // Validation
-  if (organizationType === 'vc-backed' && !fundingAnnouncementUrl) {
-    throw new Error('Funding Announcement URL is required for VC-Backed Startups');
-  }
   if (organizationType === 'partnership' && !firmWebsiteUrl) {
     throw new Error('Firm Website URL is required for Partnerships');
   }
@@ -277,6 +274,12 @@ ${financialsText}
     if (followUpDmMatch) {
       linkedinFollowUpDm = followUpDmMatch[1].trim();
     }
+  }
+
+  // Replace placeholders with actual data
+  if (contactFirstName) {
+    linkedinConnectionNote = linkedinConnectionNote.replace(/\[First Name\]/g, contactFirstName);
+    linkedinFollowUpDm = linkedinFollowUpDm.replace(/\[First Name\]/g, contactFirstName);
   }
 
   const supabase = createClient();
