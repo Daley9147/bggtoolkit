@@ -76,29 +76,24 @@ const parseInsights = (insightsText: string) => {
     "Operational Challenges", "Funding Stage & Amount", "Lead Investors", 
     "Stated Purpose of Funds", "Implied Pressures & Challenges", "Firm Name",
     "Firm's Investment Thesis", "Stated Value-Add", "Partner's Focus",
-    "Synergy Angle", "Target Portfolio Challenge", "The Offer"
+    "Synergy Angle", "Target Portfolio Challenge", "The Offer",
+    "Financial History (Last 5 Years)", "Financial Trend Analysis"
   ];
 
-  let remainingText = insightsText;
+  const headerRegex = new RegExp(`(?:\\*\\*)?(${headers.join('|')}):(?:\\*\\*)?`, 'gi');
+  const matches = Array.from(insightsText.matchAll(headerRegex));
 
-  headers.forEach((header, index) => {
-    const regex = new RegExp(`\\*\\*${header}:\\*\\*\\s*`);
-    const nextHeader = headers[index + 1] ? new RegExp(`\\*\\*${headers[index + 1]}:\\*\\*`) : null;
+  matches.forEach((match, index) => {
+    const header = match[1];
+    const key = header.toLowerCase().replace(/[^a-zA-Z0-9]+(.)?/g, (m, chr) => chr ? chr.toUpperCase() : '');
     
-    const match = remainingText.match(regex);
-    if (match) {
-      const startIndex = match.index! + match[0].length;
-      let endIndex = remainingText.length;
-      
-      if (nextHeader) {
-        const nextMatch = remainingText.match(nextHeader);
-        if (nextMatch) {
-          endIndex = nextMatch.index!;
-        }
-      }
-      
-      const key = header.toLowerCase().replace(/[^a-zA-Z0-9]+(.)?/g, (m, chr) => chr ? chr.toUpperCase() : '');
-      sections[key] = remainingText.substring(startIndex, endIndex).trim();
+    const contentStart = match.index! + match[0].length;
+    const nextMatch = matches[index + 1];
+    const contentEnd = nextMatch ? nextMatch.index! : insightsText.length;
+    
+    const content = insightsText.substring(contentStart, contentEnd).trim();
+    if (content) {
+      sections[key] = content;
     }
   });
 
@@ -160,7 +155,10 @@ export default function OutreachPlanTab({
 
   useEffect(() => {
     if (localOutreachPlan?.insights && organizationType !== 'non-profit') {
-      setParsedInsights(parseInsights(localOutreachPlan.insights));
+      console.log('--- Raw Insights ---', localOutreachPlan.insights);
+      const parsed = parseInsights(localOutreachPlan.insights);
+      console.log('--- Parsed Insights ---', JSON.stringify(parsed, null, 2));
+      setParsedInsights(parsed);
     }
     if (localOutreachPlan?.email) {
       setAndCombineEmail(localOutreachPlan.email, emailSignature);
@@ -403,7 +401,8 @@ export default function OutreachPlanTab({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="for-profit">For-Profit</SelectItem>
-                <SelectItem value="non-profit">Non-Profit</SelectItem>
+                <SelectItem value="non-profit">Non-Profit (US)</SelectItem>
+                <SelectItem value="non-profit-uk">Non-Profit (UK)</SelectItem>
                 <SelectItem value="vc-backed">VC-Backed Startup</SelectItem>
                 <SelectItem value="partnership">Partnership</SelectItem>
               </SelectContent>
@@ -411,11 +410,23 @@ export default function OutreachPlanTab({
           </div>
           {organizationType === 'non-profit' && (
             <div className="space-y-2 text-left">
-              <Label htmlFor="non-profit-identifier">Organization Name or EIN</Label>
+              <Label htmlFor="non-profit-identifier">Organization Name or EIN (US)</Label>
               <Input
                 id="non-profit-identifier"
                 type="text"
                 placeholder="Enter organization name or EIN"
+                value={nonProfitIdentifier}
+                onChange={(e) => setNonProfitIdentifier(e.target.value)}
+              />
+            </div>
+          )}
+          {organizationType === 'non-profit-uk' && (
+            <div className="space-y-2 text-left">
+              <Label htmlFor="non-profit-identifier">Charity Number (UK)</Label>
+              <Input
+                id="non-profit-identifier"
+                type="text"
+                placeholder="Enter charity registration number"
                 value={nonProfitIdentifier}
                 onChange={(e) => setNonProfitIdentifier(e.target.value)}
               />

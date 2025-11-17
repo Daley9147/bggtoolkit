@@ -59,12 +59,6 @@ First, provide the following sections based on the **Primary Website Text**:
 
 **Outreach Hook Example:** [Craft a one-sentence cold outreach hook. **Prioritize the Specific Initiative Text** for this, otherwise use the Primary Website Text.]
 
-**Case Study to Reference:** [Analyze the company's industry and challenges and recommend the most relevant case study from the list provided below. Explain in 2-3 sentences how the challenges and solutions in the case study apply to the company being researched.]
-
-**Contact Information (if available):** [Extract any Phone, email, website, HQ, and LinkedIn from the text.]
-
-**Referenced URLs:** [List the full URLs of any pages referenced for case studies, blogs, or news.]
-
 ---
 EMAIL SUBJECT LINES
 ---

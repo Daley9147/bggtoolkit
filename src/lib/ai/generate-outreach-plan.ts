@@ -4,8 +4,10 @@ import * as cheerio from 'cheerio';
 import { caseStudies } from '@/lib/case-studies';
 import { createClient } from '@/lib/supabase/server';
 import { fetchNonProfitData } from '@/lib/propublica/api';
+import { fetchUKNonProfitData } from '@/lib/charity-commission/api';
 import { forProfitPrompt } from './prompts/for-profit.prompt';
 import { nonProfitPrompt } from './prompts/non-profit.prompt';
+import { nonProfitUkPrompt } from './prompts/non-profit-uk.prompt';
 import { vcBackedPrompt } from './prompts/vc-backed.prompt';
 import { partnershipPrompt } from './prompts/partnership.prompt';
 
@@ -13,7 +15,11 @@ async function fetchWebsiteContent(url: string): Promise<string> {
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Upgrade-Insecure-Requests': '1',
       },
     });
     if (!response.ok) {
@@ -37,7 +43,7 @@ interface GenerateOutreachPlanArgs {
   contactFirstName: string;
   jobTitle: string;
   ghlContactId?: string;
-  organizationType: 'for-profit' | 'non-profit' | 'vc-backed' | 'partnership';
+  organizationType: 'for-profit' | 'non-profit' | 'non-profit-uk' | 'vc-backed' | 'partnership';
   nonProfitIdentifier?: string;
   userInsight?: string;
   fundingAnnouncementUrl?: string;
@@ -64,7 +70,7 @@ export async function generateOutreachPlan({
 }: GenerateOutreachPlanArgs) {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
   const modelName = organizationType === 'partnership' 
-    ? 'gemini-2.5-pro' // NOTE: Using a placeholder for the pro model
+    ? 'gemini-2.5-flash' // Adhering to project guidelines to use gemini-2.5-flash
     : 'gemini-2.5-flash';
   const model = genAI.getGenerativeModel({ model: modelName });
 
@@ -114,10 +120,31 @@ export async function generateOutreachPlan({
     console.log('--- Formatted Financials Text ---', financialsText);
   }
 
+  if (organizationType === 'non-profit-uk' && nonProfitIdentifier) {
+    organizationNameText = `**Organization Name:** ${nonProfitIdentifier}`;
+    const financials = await fetchUKNonProfitData(nonProfitIdentifier);
+    console.log('--- Charity Commission API Result ---', financials);
+
+    if (financials && financials.length > 0) {
+      financialsText = financials.map(f => `
+- **Financial Year End:** ${new Date(f.financialYearEnd).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}
+- **Total Revenue:** ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(f.revenue)}
+- **Total Spending:** ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(f.spending)}
+- **Net Income:** ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(f.income)}
+      `).join('\n');
+    } else {
+      financialsText = '\n- Financial data not available from Charity Commission.';
+    }
+    console.log('--- Formatted Financials Text ---', financialsText);
+  }
+
   let prompt;
   switch (organizationType) {
     case 'non-profit':
       prompt = nonProfitPrompt;
+      break;
+    case 'non-profit-uk':
+      prompt = nonProfitUkPrompt;
       break;
     case 'vc-backed':
       prompt = vcBackedPrompt;
