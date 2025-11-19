@@ -70,8 +70,8 @@ export async function generateOutreachPlan({
 }: GenerateOutreachPlanArgs) {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
   const modelName = organizationType === 'partnership' 
-    ? 'gemini-2.5-flash' // Adhering to project guidelines to use gemini-2.5-flash
-    : 'gemini-2.5-flash';
+    ? 'gemini-3-pro-preview' // Adhering to project guidelines to use gemini-3-pro-preview
+    : 'gemini-3-pro-preview';
   const model = genAI.getGenerativeModel({ model: modelName });
 
   // Validation

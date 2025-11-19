@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 async function generateSuggestions(opportunityName: string, contactName: string) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-3-pro-preview' })
 
   const prompt = `
     Based on the following sales opportunity, suggest 3-5 brief, actionable tasks for a sales representative.

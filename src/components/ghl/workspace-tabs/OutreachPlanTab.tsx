@@ -532,7 +532,7 @@ export default function OutreachPlanTab({
         <TabsContent value="insights" className="mt-4">
           <Card>
             <CardContent className="p-6 space-y-4">
-              {organizationType === 'non-profit' ? (
+              {organizationType === 'non-profit' || Object.keys(parsedInsights).length === 0 ? (
                 <div className="prose max-w-none text-muted-foreground">
                   <ReactMarkdown components={renderers}>{localOutreachPlan.insights}</ReactMarkdown>
                 </div>
