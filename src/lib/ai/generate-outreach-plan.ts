@@ -339,7 +339,32 @@ ${financialsText}
     }
 
   const stripMarkdown = (text: string) => {
-    return text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
+    if (!text) return '';
+    return text
+      // Remove headers (e.g. ## Header)
+      .replace(/^#{1,6}\s+/gm, '')
+      // Remove bold/italic (**text**, *text*, __text__, _text_)
+      .replace(/(\*\*|__)(.*?)\1/g, '$2')
+      .replace(/(\*|_)(.*?)\1/g, '$2')
+      // Remove links ([text](url)) -> text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove images (![alt](url)) -> ''
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
+      // Remove blockquotes (> text)
+      .replace(/^>\s+/gm, '')
+      // Remove code blocks (```)
+      .replace(/```[\s\S]*?```/g, '')
+      // Remove inline code (`)
+      .replace(/`([^`]+)`/g, '$1')
+      // Remove horizontal rules (---, ***, ___)
+      .replace(/^[-*_]{3,}\s*$/gm, '')
+      // Remove unordered list markers (-, *, +) but keep the structure
+      // We might want to keep the list structure but remove the bullet character if strict plain text
+      // For emails, keeping a simple hyphen is usually okay, but let's standardize
+      // .replace(/^[\s\t]*[-*+]\s+/gm, '') 
+      
+      // Clean up extra whitespace
+      .trim();
   };
 
   const finalEmail = stripMarkdown(email);
