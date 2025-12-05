@@ -83,7 +83,7 @@ ${input.userInsight || "None provided."}
 
   // 5. Parse the Output
   const extractBlock = (marker: string) => {
-    const regex = new RegExp(`${marker.replace(/[.*+?^${}()|\[\]/g, '\\$&')}\s*\n([\s\S]*?)(?=\n---|$)`, 'i');
+    const regex = new RegExp(`${marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\n([\\s\\S]*?)(?=\\n---|$)`, 'i');
     const match = text.match(regex);
     return match ? match[1].trim() : "";
   };
