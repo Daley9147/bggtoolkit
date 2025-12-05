@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { MissionMetricsOutput } from '@/lib/ai/mission-metrics.types';
 import { useToast } from '@/hooks/use-toast';
+import ReactMarkdown from 'react-markdown';
 
 interface Opportunity {
   id: string;
@@ -113,10 +114,12 @@ export default function MissionMetricsWorkspace({
         fieldsResponse,
         contactResponse,
         notesResponse,
+        reportResponse,
       ] = await Promise.all([
         fetch('/api/mission-metrics/custom-fields'),
         fetch(`/api/mission-metrics/contact/${opportunity.contact.id}`),
         fetch(`/api/mission-metrics/notes/${opportunity.contact.id}`),
+        fetch(`/api/mission-metrics/report/${opportunity.contact.id}`),
       ]);
 
       if (fieldsResponse.ok) {
@@ -125,13 +128,28 @@ export default function MissionMetricsWorkspace({
       if (contactResponse.ok) {
         const contactData = await contactResponse.json();
         setContactDetails(contactData);
-        // Set initial website URL if available from contact details
-        if (contactData?.website) {
-          setWebsiteUrl(contactData.website);
-        }
+        // Only set website if not already set by report fetch (which happens concurrently, but we can check order or just prioritize report)
+        // Actually, report fetch provides specific URL used for generation, which is better to keep if it exists.
+        // We will handle report data below.
       }
       if (notesResponse.ok) {
         setNotes(await notesResponse.json());
+      }
+      if (reportResponse.ok) {
+        const reportData = await reportResponse.json();
+        if (reportData) {
+          setMissionMetricsReport(reportData.report);
+          setCharityNumber(reportData.metadata.charityNumber || '');
+          setWebsiteUrl(reportData.metadata.websiteUrl || '');
+          setSpecificUrl(reportData.metadata.specificUrl || '');
+          setOrgType(reportData.metadata.charityNumber ? 'charity' : 'non-charity');
+        } else {
+            // If no report, fallback to contact website if available
+             if (contactResponse.ok) {
+                const contactData = await contactResponse.json(); // Re-read potentially if needed, or rely on setContactDetails logic
+                if (contactData?.website) setWebsiteUrl(contactData.website);
+             }
+        }
       }
     } catch (error) {
       console.error("Failed to fetch Mission Metrics workspace data:", error);
@@ -307,7 +325,7 @@ export default function MissionMetricsWorkspace({
               </TabsList>
               <TabsContent value="insights">
                 <div className="mt-4 p-4 border rounded-lg">
-                  <form onSubmit={handleGenerateReport} className="space-y-4">
+                  <form onSubmit={handleGenerateReport} className="space-y-4 mb-6">
                     
                     <div className="space-y-2">
                         <Label>Organization Type</Label>
@@ -363,46 +381,65 @@ export default function MissionMetricsWorkspace({
                   </form>
 
                   {missionMetricsReport ? (
-                    <div className="mt-6 space-y-4 text-sm">
-                      <h3 className="text-lg font-semibold">Generated Report:</h3>
-                      <div className="prose dark:prose-invert max-w-none">
-                        <p><strong>Mission Brief:</strong></p>
-                        <p>{missionMetricsReport.insights.split('Strategic Analysis')[0]?.replace('**Mission Brief**\n', '').trim()}</p>
-                        <p><strong>Strategic Analysis:</strong></p>
-                        <p>{missionMetricsReport.insights.split('Strategic Analysis')[1]?.split('The Solution')[0]?.replace('**Strategic Analysis**\n', '').trim()}</p>
-                        <p><strong>The Solution:</strong></p>
-                        <p>{missionMetricsReport.insights.split('The Solution')[1]?.replace('**The Solution**\n', '').trim()}</p>
-                      </div>
+                    <div className="mt-6 border-t pt-6">
+                      <h3 className="text-lg font-semibold mb-4">Generated Strategy & Outreach</h3>
+                      
+                      <Tabs defaultValue="strategy" className="w-full">
+                        <TabsList className="grid w-full grid-cols-5 mb-4 overflow-x-auto">
+                          <TabsTrigger value="strategy">Strategy</TabsTrigger>
+                          <TabsTrigger value="email">Email</TabsTrigger>
+                          <TabsTrigger value="followup">Follow Up</TabsTrigger>
+                          <TabsTrigger value="linkedin">LinkedIn</TabsTrigger>
+                          <TabsTrigger value="call">Call</TabsTrigger>
+                        </TabsList>
 
-                      <h4 className="font-semibold mt-4">Email Subject Lines:</h4>
-                      <ul className="list-disc pl-5">
-                        {missionMetricsReport.emailSubjectLines.map((subject, index) => (
-                          <li key={index}>{subject}</li>
-                        ))}
-                      </ul>
+                        <TabsContent value="strategy" className="bg-muted/30 p-4 rounded-md">
+                          <div className="prose dark:prose-invert max-w-none text-sm">
+                            <ReactMarkdown>{missionMetricsReport.insights}</ReactMarkdown>
+                          </div>
+                        </TabsContent>
 
-                      <h4 className="font-semibold mt-4">Email Body:</h4>
-                      <p className="whitespace-pre-wrap">{missionMetricsReport.emailBody}</p>
+                        <TabsContent value="email" className="space-y-4">
+                          <div className="bg-muted p-3 rounded-md">
+                            <h4 className="text-sm font-semibold mb-2">Subject Lines:</h4>
+                            <ul className="list-disc pl-5 text-sm space-y-1">
+                              {missionMetricsReport.emailSubjectLines.map((subject, index) => (
+                                <li key={index}>{subject}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="bg-background border p-4 rounded-md text-sm whitespace-pre-wrap">
+                            <ReactMarkdown>{missionMetricsReport.emailBody}</ReactMarkdown>
+                          </div>
+                        </TabsContent>
 
-                      <h4 className="font-semibold mt-4">LinkedIn Outreach:</h4>
-                      <p className="whitespace-pre-wrap">{missionMetricsReport.linkedinMessages}</p>
+                        <TabsContent value="followup" className="space-y-4">
+                          <div className="bg-muted p-3 rounded-md">
+                            <h4 className="text-sm font-semibold mb-2">Subject Lines:</h4>
+                            <ul className="list-disc pl-5 text-sm space-y-1">
+                              {missionMetricsReport.followUpSubjectLines.map((subject, index) => (
+                                <li key={index}>{subject}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="bg-background border p-4 rounded-md text-sm whitespace-pre-wrap">
+                            <ReactMarkdown>{missionMetricsReport.followUpBody}</ReactMarkdown>
+                          </div>
+                        </TabsContent>
 
-                      <h4 className="font-semibold mt-4">Cold Call Script:</h4>
-                      <p className="whitespace-pre-wrap">{missionMetricsReport.callScript}</p>
+                        <TabsContent value="linkedin" className="bg-background border p-4 rounded-md text-sm whitespace-pre-wrap">
+                          <ReactMarkdown>{missionMetricsReport.linkedinMessages}</ReactMarkdown>
+                        </TabsContent>
 
-                      <h4 className="font-semibold mt-4">Follow-Up Email Subject Lines:</h4>
-                      <ul className="list-disc pl-5">
-                        {missionMetricsReport.followUpSubjectLines.map((subject, index) => (
-                          <li key={index}>{subject}</li>
-                        ))}
-                      </ul>
-
-                      <h4 className="font-semibold mt-4">Follow-Up Email Body:</h4>
-                      <p className="whitespace-pre-wrap">{missionMetricsReport.followUpBody}</p>
-
+                        <TabsContent value="call" className="bg-background border p-4 rounded-md text-sm whitespace-pre-wrap">
+                          <ReactMarkdown>{missionMetricsReport.callScript}</ReactMarkdown>
+                        </TabsContent>
+                      </Tabs>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500 mt-4">Enter details and click 'Generate' to get Mission Insights.</p>
+                    <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                      <p>Enter organization details and click 'Generate' to create a custom Mission Metrics strategy.</p>
+                    </div>
                   )}
                 </div>
               </TabsContent>
