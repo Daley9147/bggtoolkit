@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, Gamepad2, ListTodo, Mail } from 'lucide-react';
+import { Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, Gamepad2, ListTodo, Mail, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GhlSettingsDialog from '@/components/ghl/ghl-settings-dialog';
 import UserProfile from '@/components/layout/user-profile';
@@ -43,6 +43,18 @@ export default function Sidebar() {
             >
               <Briefcase className="h-4 w-4" />
               Opportunities
+            </Link>
+            <Link
+              href="/mission-metrics"
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
+                {
+                  'bg-primary-hover': pathname === '/mission-metrics',
+                }
+              )}
+            >
+              <Target className="h-4 w-4" />
+              Mission Metrics
             </Link>
             <Link
               href="/calendars"

@@ -63,30 +63,52 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
     }
 
+    const state = searchParams.get('state');
+
     // Calculate expires_at timestamp
     const expires_in = data.expires_in; // in seconds
     const expires_at = new Date(Date.now() + expires_in * 1000);
 
-    const { error: upsertError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: user.id,
-        ghl_access_token: data.access_token,
-        ghl_refresh_token: data.refresh_token,
-        ghl_token_expires_at: expires_at.toISOString(),
-        ghl_location_id: data.locationId,
-        ghl_user_id: data.userId,
-        full_name: `${ghlUser.firstName} ${ghlUser.lastName}`,
-        ghl_email: ghlUser.email,
-      });
+    if (state === 'mission_metrics') {
+      const { error: upsertError } = await supabase
+        .from('ghl_integrations')
+        .upsert({
+          user_id: user.id,
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          location_id: data.locationId,
+          label: 'mission_metrics',
+        });
 
-    if (upsertError) {
-      console.error('Error upserting profile with GHL tokens:', upsertError);
-      return NextResponse.json({ error: 'Failed to save GHL tokens to profile.' }, { status: 500 });
+      if (upsertError) {
+        console.error('Error upserting mission_metrics GHL integration:', upsertError);
+        return NextResponse.json({ error: 'Failed to save Mission Metrics GHL tokens.' }, { status: 500 });
+      }
+
+      return NextResponse.redirect(`${origin}/mission-metrics`);
+
+    } else {
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          ghl_access_token: data.access_token,
+          ghl_refresh_token: data.refresh_token,
+          ghl_token_expires_at: expires_at.toISOString(),
+          ghl_location_id: data.locationId,
+          ghl_user_id: data.userId,
+          full_name: `${ghlUser.firstName} ${ghlUser.lastName}`,
+          ghl_email: ghlUser.email,
+        });
+
+      if (upsertError) {
+        console.error('Error upserting profile with GHL tokens:', upsertError);
+        return NextResponse.json({ error: 'Failed to save GHL tokens to profile.' }, { status: 500 });
+      }
+
+      return NextResponse.redirect(origin);
     }
 
-    // Redirect user to the main page after successful authentication
-    return NextResponse.redirect(origin);
 
   } catch (error) {
     console.error('Error during token exchange:', error);

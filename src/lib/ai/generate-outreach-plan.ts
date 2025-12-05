@@ -11,7 +11,7 @@ import { nonProfitUkPrompt } from './prompts/non-profit-uk.prompt';
 import { vcBackedPrompt } from './prompts/vc-backed.prompt';
 import { partnershipPrompt } from './prompts/partnership.prompt';
 
-async function fetchWebsiteContent(url: string): Promise<string> {
+export async function fetchWebsiteContent(url: string): Promise<string> {
   try {
     const response = await fetch(url, {
       headers: {
