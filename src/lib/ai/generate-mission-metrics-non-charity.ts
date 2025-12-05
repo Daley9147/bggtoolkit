@@ -1,22 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generativeai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { missionMetricsNonCharityPrompt } from './prompts/mission-metrics-non-charity.prompt';
 import { fetchWebsiteContent } from './generate-outreach-plan';
+import { MissionMetricsNonCharityInput, MissionMetricsOutput } from './mission-metrics.types';
 
-interface MissionMetricsNonCharityInput {
-  websiteUrl: string;
-  specificUrl?: string; // URL for specific article/case study
-  userInsight?: string;
-}
 
-export interface MissionMetricsOutput {
-  insights: string;
-  emailSubjectLines: string[];
-  emailBody: string;
-  linkedinMessages: string;
-  callScript: string;
-  followUpSubjectLines: string[];
-  followUpBody: string;
-}
+
 
 function parseJsonSafe(jsonString: string): any {
   try {

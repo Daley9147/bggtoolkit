@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { MissionMetricsOutput } from '@/lib/ai/generate-mission-metrics';
+import { MissionMetricsOutput } from '@/lib/ai/mission-metrics.types';
 import { useToast } from '@/hooks/use-toast';
 
 interface Opportunity {

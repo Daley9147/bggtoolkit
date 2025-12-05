@@ -2,24 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { fetchUKNonProfitData } from '@/lib/charity-commission/api';
 import { missionMetricsUkPrompt } from './prompts/mission-metrics-uk.prompt';
 import { fetchWebsiteContent } from './generate-outreach-plan';
-
-interface MissionMetricsInput {
-  charityNumber: string;
-  websiteUrl: string;
-  specificUrl?: string; // URL for specific article/case study
-  userInsight?: string;
-}
-
-export interface MissionMetricsOutput {
-  insights: string;
-  emailSubjectLines: string[];
-  emailBody: string;
-  linkedinMessages: string;
-  callScript: string;
-  followUpSubjectLines: string[];
-  followUpBody: string;
-  financialData: any; // Raw data from Charity Commission
-}
+import { MissionMetricsInput, MissionMetricsOutput } from './mission-metrics.types';
 
 function parseJsonSafe(jsonString: string): any {
   try {
