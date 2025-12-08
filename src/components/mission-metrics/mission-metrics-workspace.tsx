@@ -125,8 +125,9 @@ export default function MissionMetricsWorkspace({
       if (fieldsResponse.ok) {
         setCustomFieldDefs(await fieldsResponse.json());
       }
+      let contactData: GhlContact | null = null;
       if (contactResponse.ok) {
-        const contactData = await contactResponse.json();
+        contactData = await contactResponse.json();
         setContactDetails(contactData);
         // Only set website if not already set by report fetch (which happens concurrently, but we can check order or just prioritize report)
         // Actually, report fetch provides specific URL used for generation, which is better to keep if it exists.
@@ -145,10 +146,7 @@ export default function MissionMetricsWorkspace({
           setOrgType(reportData.metadata.charityNumber ? 'charity' : 'non-charity');
         } else {
             // If no report, fallback to contact website if available
-             if (contactResponse.ok) {
-                const contactData = await contactResponse.json(); // Re-read potentially if needed, or rely on setContactDetails logic
-                if (contactData?.website) setWebsiteUrl(contactData.website);
-             }
+             if (contactData?.website) setWebsiteUrl(contactData.website);
         }
       }
     } catch (error) {

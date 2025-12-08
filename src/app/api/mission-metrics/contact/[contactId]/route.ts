@@ -4,8 +4,9 @@ import { getGhlAccessToken } from '@/lib/ghl/token-helper';
 
 export async function GET(
   request: Request,
-  { params }: { params: { contactId: string } }
+  props: { params: Promise<{ contactId: string }> }
 ) {
+  const params = await props.params;
   const { contactId } = params;
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();

@@ -165,12 +165,28 @@ export default function OutreachPlanTab({
     }
     if (localOutreachPlan?.subjectLines) {
       try {
-        const parsedSubjects = JSON.parse(localOutreachPlan.subjectLines);
+        let parsedSubjects;
+        // Check if it's already an object/array (though type says string) or a JSON string
+        if (typeof localOutreachPlan.subjectLines === 'object') {
+             parsedSubjects = localOutreachPlan.subjectLines;
+        } else {
+             // Basic cleanup before parse to handle potential "doubly escaped" strings or minor formatting issues
+             const cleanJson = localOutreachPlan.subjectLines.trim();
+             parsedSubjects = JSON.parse(cleanJson);
+        }
+
         if (Array.isArray(parsedSubjects) && parsedSubjects.length > 0) {
           setSelectedSubject(parsedSubjects[0]);
+        } else if (typeof parsedSubjects === 'string') {
+           // Handle case where it might be a single plain string
+           setSelectedSubject(parsedSubjects);
         }
       } catch (e) {
         console.error("Failed to parse subject lines:", e);
+        // Fallback: treat the whole string as one subject if it fails to parse as JSON
+        if (localOutreachPlan.subjectLines.length < 100 && !localOutreachPlan.subjectLines.includes('{')) {
+             setSelectedSubject(localOutreachPlan.subjectLines);
+        }
       }
     }
     if (localOutreachPlan?.followUpEmailBody) {
@@ -178,12 +194,24 @@ export default function OutreachPlanTab({
     }
     if (localOutreachPlan?.followUpEmailSubjectLines) {
       try {
-        const parsedFollowUpSubjects = JSON.parse(localOutreachPlan.followUpEmailSubjectLines);
+        let parsedFollowUpSubjects;
+        if (typeof localOutreachPlan.followUpEmailSubjectLines === 'object') {
+            parsedFollowUpSubjects = localOutreachPlan.followUpEmailSubjectLines;
+        } else {
+             const cleanJson = localOutreachPlan.followUpEmailSubjectLines.trim();
+             parsedFollowUpSubjects = JSON.parse(cleanJson);
+        }
+
         if (Array.isArray(parsedFollowUpSubjects) && parsedFollowUpSubjects.length > 0) {
           setSelectedFollowUpSubject(parsedFollowUpSubjects[0]);
+        } else if (typeof parsedFollowUpSubjects === 'string') {
+            setSelectedFollowUpSubject(parsedFollowUpSubjects);
         }
       } catch (e) {
         console.error("Failed to parse follow-up subject lines:", e);
+         if (localOutreachPlan.followUpEmailSubjectLines.length < 100 && !localOutreachPlan.followUpEmailSubjectLines.includes('{')) {
+             setSelectedFollowUpSubject(localOutreachPlan.followUpEmailSubjectLines);
+        }
       }
     }
   }, [localOutreachPlan, emailSignature, organizationType]);
@@ -573,16 +601,27 @@ export default function OutreachPlanTab({
                     <SelectContent>
                     {(() => {
                       try {
-                        if (localOutreachPlan.subjectLines && typeof localOutreachPlan.subjectLines === 'string') {
-                          const subjects = JSON.parse(localOutreachPlan.subjectLines);
-                          if (Array.isArray(subjects)) {
-                            return subjects.filter(Boolean).map((subject, index) => (
+                        let subjects = [];
+                        if (localOutreachPlan.subjectLines) {
+                             if (typeof localOutreachPlan.subjectLines === 'string') {
+                                try {
+                                    subjects = JSON.parse(localOutreachPlan.subjectLines);
+                                } catch {
+                                    // Fallback for non-JSON strings
+                                    subjects = [localOutreachPlan.subjectLines];
+                                }
+                             } else if (Array.isArray(localOutreachPlan.subjectLines)) {
+                                 subjects = localOutreachPlan.subjectLines;
+                             }
+                        }
+                        
+                        if (Array.isArray(subjects)) {
+                            return subjects.filter(Boolean).map((subject: string, index: number) => (
                               <SelectItem key={index} value={subject}>
                                 {subject}
                               </SelectItem>
                             ));
-                          }
-                        }
+                         }
                       } catch (e) {
                         console.error("Failed to parse subject lines for rendering:", e);
                       }
@@ -633,16 +672,27 @@ export default function OutreachPlanTab({
                   <SelectContent>
                     {(() => {
                       try {
-                        if (localOutreachPlan.followUpEmailSubjectLines && typeof localOutreachPlan.followUpEmailSubjectLines === 'string') {
-                          const subjects = JSON.parse(localOutreachPlan.followUpEmailSubjectLines);
-                          if (Array.isArray(subjects)) {
-                            return subjects.filter(Boolean).map((subject, index) => (
+                        let subjects = [];
+                        if (localOutreachPlan.followUpEmailSubjectLines) {
+                             if (typeof localOutreachPlan.followUpEmailSubjectLines === 'string') {
+                                try {
+                                    subjects = JSON.parse(localOutreachPlan.followUpEmailSubjectLines);
+                                } catch {
+                                    // Fallback for non-JSON strings
+                                    subjects = [localOutreachPlan.followUpEmailSubjectLines];
+                                }
+                             } else if (Array.isArray(localOutreachPlan.followUpEmailSubjectLines)) {
+                                 subjects = localOutreachPlan.followUpEmailSubjectLines;
+                             }
+                        }
+
+                        if (Array.isArray(subjects)) {
+                            return subjects.filter(Boolean).map((subject: string, index: number) => (
                               <SelectItem key={index} value={subject}>
                                 {subject}
                               </SelectItem>
                             ));
                           }
-                        }
                       } catch (e) {
                         console.error("Failed to parse follow-up subject lines for rendering:", e);
                       }

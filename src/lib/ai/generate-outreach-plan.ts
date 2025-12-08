@@ -244,14 +244,33 @@ ${financialsText}
     sections[current.header] = text.substring(start, end).trim();
   }
 
-  const parseJsonSafe = (jsonString: string): any[] => {
-    if (!jsonString) return [];
-    const cleanedString = jsonString.replace(/```json\n?|```/g, '').trim();
+  const parseJsonSafe = (jsonString: string): string[] => {
+    if (!jsonString) return ["Default Subject Line"];
+    
+    // Remove markdown code blocks if present
+    let cleanedString = jsonString.replace(/```json\n?|```/g, '').trim();
+    
+    // Attempt to fix common JSON errors (like trailing commas) before parsing
+    // This regex looks for a comma followed by closing bracket/brace and removes the comma
+    cleanedString = cleanedString.replace(/,(\s*[}\]])/g, '$1');
+
     try {
-      return JSON.parse(cleanedString);
+      const parsed = JSON.parse(cleanedString);
+      if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'string') {
+        return parsed;
+      } else {
+         console.warn("Parsed JSON is not a string array:", parsed);
+         return ["Default Subject Line"];
+      }
     } catch (e) {
-      console.error("Failed to parse JSON:", cleanedString);
-      return [];
+      console.error("Failed to parse JSON:", cleanedString, e);
+      // Fallback: try to extract strings if it looks like a list but failed strict parsing
+      // e.g., ["Subject 1", "Subject 2",]
+      const matches = cleanedString.match(/"([^"]+)"/g);
+      if (matches && matches.length > 0) {
+          return matches.map(m => m.replace(/^"|"$/g, ''));
+      }
+      return ["Default Subject Line"];
     }
   };
 

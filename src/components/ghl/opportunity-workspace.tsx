@@ -153,6 +153,21 @@ export default function OpportunityWorkspace({
     }
   }, [isOpen, opportunity]);
 
+  const fetchOutreachPlanOnly = async () => {
+    if (!opportunity) return;
+    try {
+      const planResponse = await fetch(`/api/outreach-plan/${opportunity.contact.id}`);
+      if (planResponse.ok) {
+        const planData = await planResponse.json();
+        if (planData && planData.email) {
+          setInternalOutreachPlan(planData);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to refresh outreach plan:", error);
+    }
+  };
+
   const handleStageChange = async (stageId: string) => {
     if (!opportunity) return;
     setIsUpdatingStage(true);
@@ -242,7 +257,7 @@ export default function OpportunityWorkspace({
                   outreachPlan={internalOutreachPlan}
                   contactId={opportunity.contact.id}
                   emailSignature={emailSignature}
-                  onPlanGenerated={fetchAllData}
+                  onPlanGenerated={fetchOutreachPlanOnly}
                   initialHomepageUrl={contactDetails?.website || ''}
                 />
               </TabsContent>

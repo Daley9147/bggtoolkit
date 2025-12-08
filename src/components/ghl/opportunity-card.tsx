@@ -4,25 +4,20 @@ import { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { Link as LinkIcon } from 'lucide-react';
 
-export default function OpportunityCard({ opp, pipelines, handleOppClick }) {
-  const [contact, setContact] = useState(null);
+interface OpportunityCardProps {
+  opp: any;
+  pipelines: any[];
+  handleOppClick: (opp: any) => void;
+}
+
+export default function OpportunityCard({ 
+  opp, 
+  pipelines, 
+  handleOppClick,
+}: OpportunityCardProps) {
   const [stageName, setStageName] = useState('No Stage');
 
   useEffect(() => {
-    const fetchContact = async () => {
-      if (opp.contactId) {
-        try {
-          const response = await fetch(`/api/ghl/contact/${opp.contactId}`);
-          if (response.ok) {
-            const data = await response.json();
-            setContact(data);
-          }
-        } catch (error) {
-          console.error('Failed to fetch contact details for card:', error);
-        }
-      }
-    };
-
     const findStageName = () => {
       const pipeline = pipelines.find(p => p.id === opp.pipelineId);
       if (pipeline) {
@@ -33,7 +28,6 @@ export default function OpportunityCard({ opp, pipelines, handleOppClick }) {
       }
     };
 
-    fetchContact();
     findStageName();
   }, [opp, pipelines]);
 
@@ -47,10 +41,10 @@ export default function OpportunityCard({ opp, pipelines, handleOppClick }) {
         onClick={() => handleOppClick(opp)}
       >
         <div className="flex justify-between items-center">
-          <h3 className="font-semibold">{contact?.companyName || opp.name}</h3>
+          <h3 className="font-semibold">{opp.contact?.companyName || opp.name}</h3>
         </div>
         <div className="flex justify-between items-center text-sm text-muted-foreground mt-1">
-          <span>{contact?.name || opp.name || 'No Contact'}</span>
+          <span>{opp.contact?.name || opp.name || 'No Contact'}</span>
           <span>{stageName}</span>
         </div>
       </div>
@@ -60,6 +54,13 @@ export default function OpportunityCard({ opp, pipelines, handleOppClick }) {
         ) : (
           <span />
         )}
+        {/* We can't access website from just opp.contact usually, unless we expand or fetch. 
+            For now, let's remove the website link to save the fetch, or rely on it if it exists. 
+            The opp.contact object from search usually has name, company, email, phone, tags. 
+            Website is often on the full contact object. 
+            Given the goal is to stop the N+1 fetch, we will remove this conditional link unless the data is present.
+        */}
+        {/* 
         {contact?.website && (
           <a 
             href={contact.website} 
@@ -72,6 +73,7 @@ export default function OpportunityCard({ opp, pipelines, handleOppClick }) {
             Website
           </a>
         )}
+        */}
       </div>
     </div>
   );

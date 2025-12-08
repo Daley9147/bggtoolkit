@@ -5,21 +5,24 @@ import { fetchWebsiteContent } from './generate-outreach-plan';
 import { MissionMetricsInput, MissionMetricsOutput } from './mission-metrics.types';
 
 function parseJsonSafe(jsonString: string): any {
+  if (!jsonString) return [];
   try {
     return JSON.parse(jsonString);
   } catch (e) {
-    console.warn("Failed to parse JSON, returning raw string or empty array:", e);
+    console.warn("Failed to parse JSON. Raw string:", jsonString);
+    console.warn("Parse Error:", e);
     return [];
   }
 }
 
 function stripMarkdown(text: string): string {
-  return text.replace(/```json/g, '').replace(/```/g, '').trim();
+  // Remove code blocks like ```json ... ``` or just ``` ... ```
+  return text.replace(/```(?:json)?/g, '').replace(/```/g, '').trim();
 }
 
 export async function generateMissionMetricsReport(input: MissionMetricsInput): Promise<MissionMetricsOutput> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // Using the new model
+  const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
 
   // 1. Fetch Financial Data
   console.log(`Fetching financial data for charity number: ${input.charityNumber}`);
@@ -76,84 +79,46 @@ ${input.userInsight || "None provided."}
   const response = result.response;
   const text = response.text();
   console.log("Gemini response received.");
-
-  // 6. Parse the Output
-  // The prompt enforces specific markers. We split by them.
-  const sections = text.split(/---/);
   
-  // Helper to find content by section header (approximate match)
-  const findSection = (header: string) => {
-    const index = sections.findIndex(s => s.toUpperCase().includes(header));
-    if (index !== -1 && index + 1 < sections.length) {
-      return sections[index + 1].trim();
+  // 6. Robust Parsing Logic (Double Bracket Strategy)
+  // We look for [[HEADER]]
+  
+  const extractSection = (header: string, nextHeader: string | null) => {
+    const startMarker = `[[${header}]]`;
+    const startIndex = text.indexOf(startMarker);
+    
+    if (startIndex === -1) return "";
+    
+    // Start after the marker
+    const contentStart = startIndex + startMarker.length;
+    
+    let contentEnd = text.length;
+    
+    if (nextHeader) {
+      const nextMarker = `[[${nextHeader}]]`;
+      const nextIndex = text.indexOf(nextMarker);
+      if (nextIndex !== -1) {
+        contentEnd = nextIndex;
+      }
     }
-    return "";
+    
+    let content = text.substring(contentStart, contentEnd);
+    
+    // Clean up
+    return content.replace(/---/g, '').trim();
   };
 
-  // We need to match the markers defined in the prompt:
-  // [INSIGHTS], EMAIL SUBJECT LINES, [EMAIL SUBJECTS], EMAIL BODY, [EMAIL BODY], etc.
-  
-  // A more robust way given the prompt structure:
-  // The output structure is:
-  // [INSIGHTS] block
-  // ---
-  // EMAIL SUBJECT LINES header
-  // ---
-  // [EMAIL SUBJECTS] block
-  // ... and so on.
-  
-  // Let's create a map based on known markers in the prompt.
-  const markers = [
-    "[INSIGHTS]",
-    "EMAIL SUBJECT LINES", // Header, next block is content
-    "[EMAIL SUBJECTS]",
-    "EMAIL BODY",
-    "[EMAIL BODY]",
-    "LINKEDIN OUTREACH",
-    "[LINKEDIN MESSAGES]",
-    "COLD CALL SCRIPT",
-    "[CALL SCRIPT]",
-    "FOLLOW-UP EMAIL SUBJECT LINES",
-    "[FOLLOW-UP SUBJECTS]",
-    "FOLLOW-UP EMAIL BODY",
-    "[FOLLOW-UP BODY]"
-  ];
-
-  // Simple parser based on order or regex might be brittle if AI hallucinates markers.
-  // Let's try to extract by splitting the full text by the markers directly.
-  
-  let insights = "";
-  let emailSubjectLines: string[] = [];
-  let emailBody = "";
-  let linkedinMessages = "";
-  let callScript = "";
-  let followUpSubjectLines: string[] = [];
-  let followUpBody = "";
-
-  // Regex extraction is safer than simple split if markers are unique
-  const extractBlock = (marker: string) => {
-    const regex = new RegExp(`${marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\n([\\s\\S]*?)(?=\\n---|$)`, 'i');
-    const match = text.match(regex);
-    return match ? match[1].trim() : "";
-  };
-  
-  // Note: The prompt uses specific markers for the content blocks.
-  // [INSIGHTS] -> Content
-  // EMAIL SUBJECT LINES -> Header
-  // ---
-  // [EMAIL SUBJECTS] -> Content
-  
-  insights = extractBlock("[INSIGHTS]");
-  const emailSubjectsRaw = extractBlock("[EMAIL SUBJECTS]");
-  emailBody = extractBlock("[EMAIL BODY]");
-  linkedinMessages = extractBlock("[LINKEDIN MESSAGES]");
-  callScript = extractBlock("[CALL SCRIPT]");
-  const followUpSubjectsRaw = extractBlock("[FOLLOW-UP SUBJECTS]");
-  followUpBody = extractBlock("[FOLLOW-UP BODY]");
+  const insights = extractSection("INSIGHTS", "EMAIL_SUBJECTS");
+  const emailSubjectsRaw = extractSection("EMAIL_SUBJECTS", "EMAIL_BODY");
+  const emailBody = extractSection("EMAIL_BODY", "LINKEDIN_MESSAGES");
+  const linkedinMessages = extractSection("LINKEDIN_MESSAGES", "CALL_SCRIPT");
+  const callScript = extractSection("CALL_SCRIPT", "FOLLOW_UP_SUBJECTS");
+  const followUpSubjectsRaw = extractSection("FOLLOW_UP_SUBJECTS", "FOLLOW_UP_BODY");
+  const followUpBody = extractSection("FOLLOW_UP_BODY", null);
 
   // Parse JSON arrays
-  emailSubjectLines = parseJsonSafe(stripMarkdown(emailSubjectsRaw));
-  followUpSubjectLines = parseJsonSafe(stripMarkdown(followUpSubjectsRaw));
+  const emailSubjectLines = parseJsonSafe(stripMarkdown(emailSubjectsRaw));
+  const followUpSubjectLines = parseJsonSafe(stripMarkdown(followUpSubjectsRaw));
 
   return {
     insights,
@@ -163,6 +128,6 @@ ${input.userInsight || "None provided."}
     callScript,
     followUpSubjectLines,
     followUpBody,
-    financialData: financialData // Return raw data for frontend display if needed
+    financialData: financialData
   };
 }

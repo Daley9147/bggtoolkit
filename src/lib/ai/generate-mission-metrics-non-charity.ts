@@ -3,25 +3,25 @@ import { missionMetricsNonCharityPrompt } from './prompts/mission-metrics-non-ch
 import { fetchWebsiteContent } from './generate-outreach-plan';
 import { MissionMetricsNonCharityInput, MissionMetricsOutput } from './mission-metrics.types';
 
-
-
-
 function parseJsonSafe(jsonString: string): any {
+  if (!jsonString) return [];
   try {
     return JSON.parse(jsonString);
   } catch (e) {
-    console.warn("Failed to parse JSON, returning raw string or empty array:", e);
+    console.warn("Failed to parse JSON. Raw string:", jsonString);
+    console.warn("Parse Error:", e);
     return [];
   }
 }
 
 function stripMarkdown(text: string): string {
-  return text.replace(/```json/g, '').replace(/```/g, '').trim();
+  // Remove code blocks like ```json ... ``` or just ``` ... ```
+  return text.replace(/```(?:json)?/g, '').replace(/```/g, '').trim();
 }
 
 export async function generateMissionMetricsNonCharityReport(input: MissionMetricsNonCharityInput): Promise<MissionMetricsOutput> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
 
   // 1. Fetch Website Content (Home Page)
   let websiteContent = "Website content not available.";
@@ -69,20 +69,39 @@ ${input.userInsight || "None provided."}
   const text = response.text();
   console.log("Gemini response received.");
 
-  // 5. Parse the Output
-  const extractBlock = (marker: string) => {
-    const regex = new RegExp(`${marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\n([\\s\\S]*?)(?=\\n---|$)`, 'i');
-    const match = text.match(regex);
-    return match ? match[1].trim() : "";
+  // 5. Robust Parsing Logic (Double Bracket Strategy)
+  const extractSection = (header: string, nextHeader: string | null) => {
+    const startMarker = `[[${header}]]`;
+    const startIndex = text.indexOf(startMarker);
+    
+    if (startIndex === -1) return "";
+    
+    // Start after the marker
+    const contentStart = startIndex + startMarker.length;
+    
+    let contentEnd = text.length;
+    
+    if (nextHeader) {
+      const nextMarker = `[[${nextHeader}]]`;
+      const nextIndex = text.indexOf(nextMarker);
+      if (nextIndex !== -1) {
+        contentEnd = nextIndex;
+      }
+    }
+    
+    let content = text.substring(contentStart, contentEnd);
+    
+    // Clean up
+    return content.replace(/---/g, '').trim();
   };
-  
-  const insights = extractBlock("[INSIGHTS]");
-  const emailSubjectsRaw = extractBlock("[EMAIL SUBJECTS]");
-  const emailBody = extractBlock("[EMAIL BODY]");
-  const linkedinMessages = extractBlock("[LINKEDIN MESSAGES]");
-  const callScript = extractBlock("[CALL SCRIPT]");
-  const followUpSubjectsRaw = extractBlock("[FOLLOW-UP SUBJECTS]");
-  const followUpBody = extractBlock("[FOLLOW-UP BODY]");
+
+  const insights = extractSection("INSIGHTS", "EMAIL_SUBJECTS");
+  const emailSubjectsRaw = extractSection("EMAIL_SUBJECTS", "EMAIL_BODY");
+  const emailBody = extractSection("EMAIL_BODY", "LINKEDIN_MESSAGES");
+  const linkedinMessages = extractSection("LINKEDIN_MESSAGES", "CALL_SCRIPT");
+  const callScript = extractSection("CALL_SCRIPT", "FOLLOW_UP_SUBJECTS");
+  const followUpSubjectsRaw = extractSection("FOLLOW_UP_SUBJECTS", "FOLLOW_UP_BODY");
+  const followUpBody = extractSection("FOLLOW_UP_BODY", null);
 
   // Parse JSON arrays
   const emailSubjectLines = parseJsonSafe(stripMarkdown(emailSubjectsRaw));
