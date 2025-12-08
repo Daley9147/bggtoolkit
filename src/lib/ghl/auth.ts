@@ -8,7 +8,12 @@ interface GhlTokenData {
   locationId: string;
 }
 
-export async function refreshGhlToken(refreshToken: string, userId: string, supabase: SupabaseClient) {
+export async function refreshGhlToken(
+  refreshToken: string,
+  userId: string,
+  supabase: SupabaseClient,
+  integrationLabel?: string
+) {
   const GHL_CLIENT_ID = process.env.GHL_CLIENT_ID;
   const GHL_CLIENT_SECRET = process.env.GHL_CLIENT_SECRET;
 
@@ -38,19 +43,37 @@ export async function refreshGhlToken(refreshToken: string, userId: string, supa
 
     const expires_at = new Date(Date.now() + data.expires_in * 1000);
 
-    const { error: upsertError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: userId,
-        ghl_access_token: data.access_token,
-        ghl_refresh_token: data.refresh_token,
-        ghl_token_expires_at: expires_at.toISOString(),
-        ghl_location_id: data.locationId,
-      });
+    if (integrationLabel) {
+      const { error: upsertError } = await supabase
+        .from('ghl_integrations')
+        .upsert({
+          user_id: userId,
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_at: expires_at.toISOString(),
+          location_id: data.locationId,
+          label: integrationLabel,
+        }, { onConflict: 'user_id,label' });
 
-    if (upsertError) {
-      console.error('Error upserting profile with refreshed GHL tokens:', upsertError);
-      throw new Error('Failed to save refreshed GHL tokens to profile.');
+      if (upsertError) {
+        console.error(`Error upserting GHL integration ${integrationLabel} with refreshed tokens:`, upsertError);
+        throw new Error(`Failed to save refreshed GHL tokens for ${integrationLabel}.`);
+      }
+    } else {
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          ghl_access_token: data.access_token,
+          ghl_refresh_token: data.refresh_token,
+          ghl_token_expires_at: expires_at.toISOString(),
+          ghl_location_id: data.locationId,
+        });
+
+      if (upsertError) {
+        console.error('Error upserting profile with refreshed GHL tokens:', upsertError);
+        throw new Error('Failed to save refreshed GHL tokens to profile.');
+      }
     }
 
     return {
