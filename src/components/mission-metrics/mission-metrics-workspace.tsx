@@ -148,6 +148,18 @@ export default function MissionMetricsWorkspace({
 
   const fetchAllData = async () => {
     if (!opportunity) return;
+    
+    // Clear previous state to prevent leakage
+    setMissionMetricsReport(null);
+    setContactDetails(null);
+    setNotes([]);
+    setIdentifier('');
+    setWebsiteUrl('');
+    setSpecificUrl('');
+    setUserInsight('');
+    setEditedEmailBody('');
+    setEditedFollowUpBody('');
+    
     setIsInitialLoading(true);
     setStageUpdateError(null);
 
