@@ -1,6 +1,8 @@
 import Header from '@/components/layout/header';
 import BookmarksClient from '@/components/bookmarks/bookmarks-client';
 
+export const dynamic = 'force-dynamic';
+
 export default function BookmarksPage() {
   return (
     <div className="flex min-h-screen w-full flex-col">
