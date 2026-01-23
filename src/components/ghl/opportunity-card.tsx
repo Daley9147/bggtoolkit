@@ -34,7 +34,7 @@ export default function OpportunityCard({
   return (
     <div 
       key={opp.id} 
-      className="p-4 hover:bg-muted/50"
+      className="p-4 bg-background rounded-md border shadow-sm hover:shadow-md transition-shadow"
     >
       <div 
         className="cursor-pointer"

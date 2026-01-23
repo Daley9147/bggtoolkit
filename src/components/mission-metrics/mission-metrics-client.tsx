@@ -43,6 +43,11 @@ interface OutreachPlan {
   [key: string]: unknown;
 }
 
+const fetchWithTimeout = async (resource: string, options: RequestInit = {}) => {
+  // Use standard fetch without timeout aborts
+  return await fetch(resource, options);
+};
+
 export default function MissionMetricsClient() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
@@ -72,7 +77,7 @@ export default function MissionMetricsClient() {
       
       if (query) url.searchParams.append('query', query);
       
-      const response = await fetch(url.toString());
+      const response = await fetchWithTimeout(url.toString());
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to fetch Mission Metrics opportunities');
@@ -91,7 +96,7 @@ export default function MissionMetricsClient() {
 
   const fetchPipelines = useCallback(async () => {
     try {
-      const response = await fetch('/api/mission-metrics/pipelines');
+      const response = await fetchWithTimeout('/api/mission-metrics/pipelines');
       if (!response.ok) throw new Error('Failed to fetch Mission Metrics pipelines');
       const data = await response.json();
       setPipelines(data);
@@ -101,6 +106,7 @@ export default function MissionMetricsClient() {
     }
   }, []);
 
+
   useEffect(() => {
     const savedPipelineId = localStorage.getItem('selectedMissionMetricsPipelineId');
     if (savedPipelineId) {
@@ -108,6 +114,19 @@ export default function MissionMetricsClient() {
     }
     fetchPipelines();
   }, [fetchPipelines]);
+
+  // Validate selectedPipelineId against fetched pipelines
+  useEffect(() => {
+    if (pipelines.length > 0 && selectedPipelineId !== 'all') {
+      const exists = pipelines.find(p => p.id === selectedPipelineId);
+      if (!exists) {
+        // If the saved ID doesn't exist in the current pipelines (e.g. legacy GHL ID), reset to all
+        console.log('Resetting invalid pipeline ID:', selectedPipelineId);
+        setSelectedPipelineId('all');
+        localStorage.removeItem('selectedMissionMetricsPipelineId');
+      }
+    }
+  }, [pipelines, selectedPipelineId]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -215,10 +234,12 @@ export default function MissionMetricsClient() {
       <div className="border rounded-lg flex flex-col h-full">
         <div className="bg-primary text-primary-foreground p-6 shrink-0">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <h2 className="font-headline text-xl font-semibold text-primary-foreground">
-              Mission Metrics Opportunities
-              {isFetching && <span className="text-sm font-normal ml-2 opacity-75">(Updating...)</span>}
-            </h2>
+            <div className="flex items-center gap-4">
+                <h2 className="font-headline text-xl font-semibold text-primary-foreground">
+                Opportunities
+                {isFetching && <span className="text-sm font-normal ml-2 opacity-75">(Updating...)</span>}
+                </h2>
+            </div>
             <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto items-center">
               <div className="bg-background/10 p-1 rounded-md flex gap-1">
                 <Button
@@ -300,14 +321,12 @@ export default function MissionMetricsClient() {
           <div className="p-6 space-y-4">
             {opportunities.length > 0 && pipelines.length > 0 ? (
               opportunities.map((opp) => (
-                <Card key={opp.id} className="bg-secondary">
-                  <CardContent className="p-4">
-                                      <OpportunityCard 
-                                        opp={opp}
-                                        pipelines={pipelines}
-                                        handleOppClick={handleOppClick}
-                                      />                  </CardContent>
-                </Card>
+                <OpportunityCard 
+                  key={opp.id}
+                  opp={opp}
+                  pipelines={pipelines}
+                  handleOppClick={handleOppClick}
+                />
               ))
             ) : (
               <p className="p-4 text-center text-muted-foreground">No opportunities found.</p>

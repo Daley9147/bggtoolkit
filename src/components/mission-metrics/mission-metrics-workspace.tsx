@@ -24,6 +24,7 @@ interface Opportunity {
   pipelineStage: {
     name: string;
   };
+  contactId: string;
   contact: {
     id: string;
     name: string;
@@ -77,6 +78,11 @@ interface CustomField {
   value: string | number;
 }
 
+const fetchWithTimeout = async (resource: string, options: RequestInit = {}) => {
+  return await fetch(resource, options);
+};
+
+
 export default function MissionMetricsWorkspace({
   opportunity,
   isOpen,
@@ -93,8 +99,8 @@ export default function MissionMetricsWorkspace({
   const [notes, setNotes] = useState<{ id: string; body: string; dateAdded: string }[]>([]);
   
   // AI Generation State
-  const [orgType, setOrgType] = useState<'charity' | 'non-charity'>('charity');
-  const [charityNumber, setCharityNumber] = useState('');
+  const [regionType, setRegionType] = useState<'uk-charity' | 'us-nonprofit'>('uk-charity');
+  const [identifier, setIdentifier] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [specificUrl, setSpecificUrl] = useState('');
   const [userInsight, setUserInsight] = useState('');
@@ -102,83 +108,151 @@ export default function MissionMetricsWorkspace({
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   
+  // Editable State
+  const [editedEmailBody, setEditedEmailBody] = useState('');
+  const [editedFollowUpBody, setEditedFollowUpBody] = useState('');
+  const [emailSignature, setEmailSignature] = useState('');
+  const [isSavingEdits, setIsSavingEdits] = useState(false);
+  
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (isOpen && opportunity) {
+        fetchAllData();
+    }
+  }, [isOpen, opportunity]);
+
+  // Sync edited state when report loads
+  useEffect(() => {
+    if (missionMetricsReport) {
+        // Only append signature if it's not already there (simple check)
+        const signatureHtml = emailSignature ? `\n\n${emailSignature}` : '';
+        
+        // If the body already contains the signature (e.g. from a previous save), don't append it again
+        // Ideally we check if the report body ends with the signature, but formatted HTML might vary.
+        // For now, we just set the initial value. Users can edit it.
+        
+        // Check if report body seems to already include the signature to avoid duplication on re-renders
+        let initialEmailBody = missionMetricsReport.emailBody;
+        if (emailSignature && !initialEmailBody.includes(emailSignature)) {
+             // It's tricky to append HTML signature to markdown/text body directly here if the body is just text.
+             // But assuming the signature is HTML from Jodit, and the email body is text/markdown from AI.
+             // We will just append it.
+             initialEmailBody = `${initialEmailBody}${signatureHtml}`;
+        }
+        
+        setEditedEmailBody(initialEmailBody);
+        setEditedFollowUpBody(missionMetricsReport.followUpBody);
+    }
+  }, [missionMetricsReport, emailSignature]);
 
   const fetchAllData = async () => {
     if (!opportunity) return;
     setIsInitialLoading(true);
     setStageUpdateError(null);
 
-    try {
-      const [
-        fieldsResponse,
-        contactResponse,
-        notesResponse,
-        reportResponse,
-      ] = await Promise.all([
-        fetch('/api/mission-metrics/custom-fields'),
-        fetch(`/api/mission-metrics/contact/${opportunity.contact.id}`),
-        fetch(`/api/mission-metrics/notes/${opportunity.contact.id}`),
-        fetch(`/api/mission-metrics/report/${opportunity.contact.id}`),
-      ]);
+    // Robust ID extraction
+    const contactId = opportunity.contactId || (opportunity.contact && opportunity.contact.id);
+    
+    console.log("Fetching data for Contact ID:", contactId); 
 
-      if (fieldsResponse.ok) {
-        setCustomFieldDefs(await fieldsResponse.json());
-      }
-      let contactData: GhlContact | null = null;
-      if (contactResponse.ok) {
-        contactData = await contactResponse.json();
-        setContactDetails(contactData);
-        // Only set website if not already set by report fetch (which happens concurrently, but we can check order or just prioritize report)
-        // Actually, report fetch provides specific URL used for generation, which is better to keep if it exists.
-        // We will handle report data below.
-      }
-      if (notesResponse.ok) {
-        setNotes(await notesResponse.json());
-      }
-      if (reportResponse.ok) {
-        const reportData = await reportResponse.json();
-        if (reportData) {
-          setMissionMetricsReport(reportData.report);
-          setCharityNumber(reportData.metadata.charityNumber || '');
-          setWebsiteUrl(reportData.metadata.websiteUrl || '');
-          setSpecificUrl(reportData.metadata.specificUrl || '');
-          setOrgType(reportData.metadata.charityNumber ? 'charity' : 'non-charity');
-        } else {
-            // If no report, fallback to contact website if available
-             if (contactData?.website) setWebsiteUrl(contactData.website);
+    if (!contactId) {
+        console.warn("No contact ID found for opportunity:", opportunity);
+        setIsInitialLoading(false);
+        setContactDetails(null); // Ensure we don't show stale data
+        return;
+    }
+
+    // 1. Fetch Contact Details (Critical)
+    const contactPromise = fetchWithTimeout(`/api/mission-metrics/contact/${contactId}`, { cache: 'no-store' })
+        .then(async (res) => {
+            if (res.ok) {
+                const data = await res.json();
+                setContactDetails(data);
+                if (data.website) setWebsiteUrl(data.website);
+                if (data.identifier) setIdentifier(data.identifier);
+                if (data.country === 'US') setRegionType('us-nonprofit');
+                else setRegionType('uk-charity');
+            } else {
+                throw new Error("Failed to load contact");
+            }
+        })
+        .catch((e) => {
+            console.error("Contact fetch error:", e);
+            toast({ title: "Error", description: "Could not load contact details.", variant: "destructive" });
+        })
+        .finally(() => {
+            // Stop loading spinner as soon as contact attempt finishes (success or fail)
+            setIsInitialLoading(false);
+        });
+
+    // 2. Fetch Other Data (Non-critical - Background)
+    Promise.allSettled([
+      fetchWithTimeout('/api/mission-metrics/custom-fields').then(async (res) => { if (res.ok) setCustomFieldDefs(await res.json()); }),
+      fetchWithTimeout(`/api/mission-metrics/notes/${contactId}`).then(async (res) => { if (res.ok) setNotes(await res.json()); }),
+      fetchWithTimeout(`/api/mission-metrics/report/${contactId}`).then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          if (data) {
+            setMissionMetricsReport(data.report);
+            setIdentifier(data.metadata?.charityNumber || '');
+            setWebsiteUrl(data.metadata?.websiteUrl || '');
+            setSpecificUrl(data.metadata?.specificUrl || '');
+          }
         }
-      }
-    } catch (error) {
-      console.error("Failed to fetch Mission Metrics workspace data:", error);
-    } finally {
-      setIsInitialLoading(false);
-    }
+      }),
+      // Fetch Email Signature
+      fetch('/api/user/profile').then(async (res) => {
+          if (res.ok) {
+              const profile = await res.json();
+              if (profile?.email_signature) {
+                  setEmailSignature(profile.email_signature);
+              }
+          }
+      })
+    ]);
   };
+// ...
+  const handleSaveChanges = async () => {
+      if (!opportunity) return;
+      setIsSavingEdits(true);
+      const contactId = opportunity.contactId || (opportunity.contact && opportunity.contact.id);
 
-  useEffect(() => {
-    if (opportunity) {
-      setSelectedStage(opportunity.pipelineStageId);
-      setMissionMetricsReport(null); // Clear report on opportunity change
-      setGenerationError(null);
-      // Attempt to pre-fill websiteUrl from contact if available
-      if (contactDetails?.website) {
-        setWebsiteUrl(contactDetails.website);
+      try {
+          const response = await fetch(`/api/mission-metrics/report/${contactId}/update`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  emailBody: editedEmailBody,
+                  followUpBody: editedFollowUpBody,
+              }),
+          });
+
+          if (!response.ok) throw new Error('Failed to save changes');
+
+          // Update local state
+          if (missionMetricsReport) {
+              setMissionMetricsReport({
+                  ...missionMetricsReport,
+                  emailBody: editedEmailBody,
+                  followUpBody: editedFollowUpBody,
+              });
+          }
+
+          toast({ title: 'Saved', description: 'Your edits have been saved.' });
+      } catch (error) {
+          console.error('Error saving edits:', error);
+          toast({ title: 'Error', description: 'Failed to save changes.', variant: 'destructive' });
+      } finally {
+          setIsSavingEdits(false);
       }
-    }
-  }, [opportunity, contactDetails]);
-
-  useEffect(() => {
-    if (isOpen && opportunity) {
-      fetchAllData();
-    }
-  }, [isOpen, opportunity]);
+  };
 
   const handleGenerateReport = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (orgType === 'charity' && !charityNumber) {
-        setGenerationError('Charity Number is required for Registered Charities.');
+    if (!identifier) {
+        setGenerationError(regionType === 'uk-charity' ? 'Charity Number is required.' : 'EIN is required.');
         return;
     }
     if (!websiteUrl) {
@@ -190,25 +264,21 @@ export default function MissionMetricsWorkspace({
     setGenerationError(null);
     setMissionMetricsReport(null);
 
-    const endpoint = orgType === 'charity' 
-        ? '/api/mission-metrics/generate' 
-        : '/api/mission-metrics/generate-non-charity';
+    const country = regionType === 'uk-charity' ? 'UK' : 'US';
 
-    const body = orgType === 'charity' ? {
-        contactId: opportunity!.contact.id,
-        charityNumber,
-        websiteUrl,
-        specificUrl,
-        userInsight,
-    } : {
-        contactId: opportunity!.contact.id,
+    const contactId = opportunity!.contactId || opportunity!.contact.id;
+
+    const body = {
+        contactId: contactId,
+        identifier,
+        country,
         websiteUrl,
         specificUrl,
         userInsight,
     };
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/mission-metrics/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -272,7 +342,8 @@ export default function MissionMetricsWorkspace({
 
   const handleNoteAdded = async () => {
     if (!opportunity) return;
-    const notesResponse = await fetch(`/api/mission-metrics/notes/${opportunity.contact.id}`);
+    const contactId = opportunity.contactId || opportunity.contact.id;
+    const notesResponse = await fetchWithTimeout(`/api/mission-metrics/notes/${contactId}`);
     if (notesResponse.ok) {
       setNotes(await notesResponse.json());
     }
@@ -323,64 +394,67 @@ export default function MissionMetricsWorkspace({
               </TabsList>
               <TabsContent value="insights">
                 <div className="mt-4 p-4 border rounded-lg">
-                  <form onSubmit={handleGenerateReport} className="space-y-4 mb-6">
-                    
-                    <div className="space-y-2">
-                        <Label>Organization Type</Label>
-                        <RadioGroup 
-                            defaultValue="charity" 
-                            value={orgType} 
-                            onValueChange={(val) => setOrgType(val as 'charity' | 'non-charity')}
-                            className="flex space-x-4"
-                        >
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="charity" id="charity" />
-                                <Label htmlFor="charity">UK Registered Charity</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="non-charity" id="non-charity" />
-                                <Label htmlFor="non-charity">Other (CIC, Association, etc.)</Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
+                  {!missionMetricsReport ? (
+                    <form onSubmit={handleGenerateReport} className="space-y-4 mb-6">
+                      
+                      <div className="space-y-2">
+                          <Label>Region / Type</Label>
+                          <RadioGroup 
+                              defaultValue="uk-charity" 
+                              value={regionType} 
+                              onValueChange={(val) => setRegionType(val as 'uk-charity' | 'us-nonprofit')}
+                              className="flex space-x-4"
+                          >
+                              <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="uk-charity" id="uk-charity" />
+                                  <Label htmlFor="uk-charity">UK Registered Charity</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="us-nonprofit" id="us-nonprofit" />
+                                  <Label htmlFor="us-nonprofit">USA Non-Profit (501c3)</Label>
+                              </div>
+                          </RadioGroup>
+                      </div>
 
-                    {orgType === 'charity' && (
-                        <Input
-                        placeholder="Charity Number (e.g., 123456)"
-                        value={charityNumber}
-                        onChange={(e) => setCharityNumber(e.target.value)}
+                      <Input
+                          placeholder={regionType === 'uk-charity' ? "Charity Number (e.g., 123456)" : "EIN (e.g., 12-3456789)"}
+                          value={identifier}
+                          onChange={(e) => setIdentifier(e.target.value)}
+                          required
+                      />
+                      
+                      <Input
+                        placeholder="Organization Website URL (e.g., https://example.org)"
+                        value={websiteUrl}
+                        onChange={(e) => setWebsiteUrl(e.target.value)}
                         required
-                        />
-                    )}
-                    
-                    <Input
-                      placeholder="Organization Website URL (e.g., https://example.org)"
-                      value={websiteUrl}
-                      onChange={(e) => setWebsiteUrl(e.target.value)}
-                      required
-                    />
-                    <Input
-                      placeholder="Specific Article/Case Study URL (Optional)"
-                      value={specificUrl}
-                      onChange={(e) => setSpecificUrl(e.target.value)}
-                    />
-                    <Textarea
-                      placeholder="Your key insight or notes about this organization (Optional)"
-                      value={userInsight}
-                      onChange={(e) => setUserInsight(e.target.value)}
-                      rows={3}
-                    />
-                    <Button type="submit" disabled={isGeneratingReport}>
-                      {isGeneratingReport ? 'Generating...' : 'Generate Mission Insights'}
-                    </Button>
-                    {generationError && (
-                      <p className="text-red-500 text-sm mt-2">Error: {generationError}</p>
-                    )}
-                  </form>
+                      />
+                      <Input
+                        placeholder="Specific Article/Case Study URL (Optional)"
+                        value={specificUrl}
+                        onChange={(e) => setSpecificUrl(e.target.value)}
+                      />
+                      <Textarea
+                        placeholder="Your key insight or notes about this organization (Optional)"
+                        value={userInsight}
+                        onChange={(e) => setUserInsight(e.target.value)}
+                        rows={3}
+                      />
+                      <Button type="submit" disabled={isGeneratingReport}>
+                        {isGeneratingReport ? 'Generating...' : 'Generate Mission Insights'}
+                      </Button>
+                      {generationError && (
+                        <p className="text-red-500 text-sm mt-2">Error: {generationError}</p>
+                      )}
+                    </form>
+                  ) : null}
 
                   {missionMetricsReport ? (
-                    <div className="mt-6 border-t pt-6">
-                      <h3 className="text-lg font-semibold mb-4">Generated Strategy & Outreach</h3>
+                    <div className="mt-6 pt-6">
+                      <div className="flex justify-between items-center mb-4">
+                         <h3 className="text-lg font-semibold">Generated Strategy & Outreach</h3>
+                         {/* Button to show inputs again (Regenerate) */}
+                      </div>
                       
                       <Tabs defaultValue="strategy" className="w-full">
                         <TabsList className="grid w-full grid-cols-5 mb-4 overflow-x-auto">
@@ -406,8 +480,17 @@ export default function MissionMetricsWorkspace({
                               ))}
                             </ul>
                           </div>
-                          <div className="bg-background border p-4 rounded-md text-sm whitespace-pre-wrap">
-                            <ReactMarkdown>{missionMetricsReport.emailBody}</ReactMarkdown>
+                          <div className="bg-background border p-4 rounded-md">
+                            <Textarea 
+                                value={editedEmailBody}
+                                onChange={(e) => setEditedEmailBody(e.target.value)}
+                                className="min-h-[300px] font-mono text-sm border-none focus-visible:ring-0 p-0 resize-none"
+                            />
+                            <div className="flex justify-end mt-2">
+                                <Button size="sm" onClick={handleSaveChanges} disabled={isSavingEdits}>
+                                    {isSavingEdits ? 'Saving...' : 'Save Changes'}
+                                </Button>
+                            </div>
                           </div>
                         </TabsContent>
 
@@ -420,8 +503,17 @@ export default function MissionMetricsWorkspace({
                               ))}
                             </ul>
                           </div>
-                          <div className="bg-background border p-4 rounded-md text-sm whitespace-pre-wrap">
-                            <ReactMarkdown>{missionMetricsReport.followUpBody}</ReactMarkdown>
+                          <div className="bg-background border p-4 rounded-md">
+                             <Textarea 
+                                value={editedFollowUpBody}
+                                onChange={(e) => setEditedFollowUpBody(e.target.value)}
+                                className="min-h-[300px] font-mono text-sm border-none focus-visible:ring-0 p-0 resize-none"
+                            />
+                            <div className="flex justify-end mt-2">
+                                <Button size="sm" onClick={handleSaveChanges} disabled={isSavingEdits}>
+                                    {isSavingEdits ? 'Saving...' : 'Save Changes'}
+                                </Button>
+                            </div>
                           </div>
                         </TabsContent>
 
@@ -433,11 +525,29 @@ export default function MissionMetricsWorkspace({
                           <ReactMarkdown>{missionMetricsReport.callScript}</ReactMarkdown>
                         </TabsContent>
                       </Tabs>
+                      
+                      <div className="mt-8 border-t pt-4">
+                        <Button 
+                            variant="destructive" 
+                            onClick={() => {
+                                if (confirm('Are you sure? This will delete the current report and allow you to generate a new one.')) {
+                                    setMissionMetricsReport(null);
+                                }
+                            }}
+                        >
+                            Regenerate Report
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">
+                            Regenerating will discard the current insights and let you update the input details.
+                        </p>
+                      </div>
                     </div>
                   ) : (
-                    <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
-                      <p>Enter organization details and click 'Generate' to create a custom Mission Metrics strategy.</p>
-                    </div>
+                    !isGeneratingReport && (
+                        <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
+                        <p>Enter organization details and click 'Generate' to create a custom Mission Metrics strategy.</p>
+                        </div>
+                    )
                   )}
                 </div>
               </TabsContent>
@@ -446,13 +556,14 @@ export default function MissionMetricsWorkspace({
                   contactDetails={contactDetails}
                   isLoading={isInitialLoading}
                   customFieldDefs={customFieldDefs}
+                  onRetry={fetchAllData}
                 />
               </TabsContent>
               <TabsContent value="notes">
                 <MissionMetricsNotesTab
                   notes={notes}
                   isLoading={isInitialLoading}
-                  contactId={opportunity.contact.id}
+                  contactId={opportunity.contactId || opportunity.contact.id}
                   onNoteAdded={handleNoteAdded}
                 />
               </TabsContent>

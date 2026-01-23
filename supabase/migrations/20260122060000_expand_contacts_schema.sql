@@ -1,0 +1,13 @@
+-- Add missing CSV columns to contacts table
+ALTER TABLE public.contacts 
+ADD COLUMN IF NOT EXISTS num_employees TEXT,
+ADD COLUMN IF NOT EXISTS industry TEXT,
+ADD COLUMN IF NOT EXISTS keywords TEXT,
+ADD COLUMN IF NOT EXISTS person_linkedin_url TEXT,
+ADD COLUMN IF NOT EXISTS company_linkedin_url TEXT,
+ADD COLUMN IF NOT EXISTS facebook_url TEXT,
+ADD COLUMN IF NOT EXISTS twitter_url TEXT,
+ADD COLUMN IF NOT EXISTS address TEXT,
+ADD COLUMN IF NOT EXISTS city TEXT,
+ADD COLUMN IF NOT EXISTS state TEXT,
+ADD COLUMN IF NOT EXISTS annual_revenue TEXT;

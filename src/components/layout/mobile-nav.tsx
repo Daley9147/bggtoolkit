@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, Gamepad2, ListTodo, Mail } from 'lucide-react';
+import { Menu, Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, ListTodo, Mail, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ export default function MobileNav() {
         </SheetHeader>
         <nav className="grid gap-2 text-lg font-medium">
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold mb-4">
-            <span>Sales Toolkit</span>
+            <span>Mission Metrics</span>
           </Link>
           <Link
             href="/toolkit"
@@ -45,6 +45,16 @@ export default function MobileNav() {
           >
             <Briefcase className="h-5 w-5" />
             Opportunities
+          </Link>
+          <Link
+            href="/contacts"
+            className={cn(
+              'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-primary-hover',
+              { 'bg-primary-hover': pathname === '/contacts' }
+            )}
+          >
+            <Users className="h-5 w-5" />
+            Contacts
           </Link>
           <Link
             href="/calendars"
@@ -87,16 +97,6 @@ export default function MobileNav() {
             Tasks
           </Link>
           <Link
-            href="/saved"
-            className={cn(
-              'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-primary-hover',
-              { 'bg-primary-hover': pathname === '/saved' }
-            )}
-          >
-            <Bookmark className="h-5 w-5" />
-            Company Research
-          </Link>
-          <Link
             href="/workspace"
             className={cn(
               'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-primary-hover',
@@ -105,16 +105,6 @@ export default function MobileNav() {
           >
             <PenSquare className="h-5 w-5" />
             Workspace
-          </Link>
-          <Link
-            href="/escape"
-            className={cn(
-              'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-primary-hover',
-              { 'bg-primary-hover': pathname === '/escape' }
-            )}
-          >
-            <Gamepad2 className="h-5 w-5" />
-            Escape
           </Link>
         </nav>
       </SheetContent>

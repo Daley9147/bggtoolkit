@@ -61,7 +61,7 @@ export default async function MissionMetricsPage() {
         <Card className="w-full max-w-md mx-auto">
           <CardHeader>
             <CardTitle>Connect to Mission Metrics GoHighLevel</CardTitle>
-            <CardDescription>Authorize the BGG Sales Toolkit to access your Mission Metrics GHL account.</CardDescription>
+            <CardDescription>Authorize the Sales Toolkit to access your Mission Metrics GHL account.</CardDescription>
           </CardHeader>
           <CardContent>
             <form action={connectGhl}>

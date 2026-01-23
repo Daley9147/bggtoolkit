@@ -1,24 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getGhlAccessToken } from '@/lib/ghl/token-helper';
-
-async function ghlRequest(url: string, accessToken: string, options: RequestInit = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...options.headers,
-      'Authorization': `Bearer ${accessToken}`,
-      'Version': '2021-07-28',
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`GHL API Error (${response.status}): ${errorData.message || 'Failed to fetch data'}`);
-  }
-  return response.json();
-}
 
 export async function PUT(request: Request) {
   const supabase = createClient();
@@ -28,36 +9,33 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
   }
 
-  // Use the new token helper to get Mission Metrics GHL tokens
-  const ghlIntegration = await getGhlAccessToken(user.id, 'mission_metrics');
-
-  if (!ghlIntegration) {
-    return NextResponse.json({ error: 'Mission Metrics GHL integration not found or tokens missing.' }, { status: 404 });
-  }
-
   const { opportunityId, pipelineId, pipelineStageId } = await request.json();
   if (!opportunityId || !pipelineId || !pipelineStageId) {
     return NextResponse.json({ error: 'Opportunity ID, Pipeline ID, and Stage ID are required.' }, { status: 400 });
   }
 
   try {
-    const result = await ghlRequest(
-      `https://services.leadconnectorhq.com/opportunities/${opportunityId}`,
-      ghlIntegration.access_token,
-      {
-        method: 'PUT',
-        body: JSON.stringify({ 
-          pipelineId: pipelineId,
-          pipelineStageId: pipelineStageId,
-        }),
-      }
-    );
+    const { data, error } = await supabase
+      .from('opportunities')
+      .update({ 
+        pipeline_id: pipelineId,
+        stage_id: pipelineStageId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', opportunityId)
+      .eq('user_id', user.id)
+      .select()
+      .single();
 
-    return NextResponse.json({ success: true, data: result });
+    if (error) {
+      console.error('Error updating opportunity stage:', error);
+      return NextResponse.json({ error: 'Failed to update opportunity stage' }, { status: 500 });
+    }
 
-  } catch (error: unknown) {
-    console.error('Error updating GHL Mission Metrics opportunity stage:', error);
-    const message = error instanceof Error ? error.message : 'An unknown error occurred';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ success: true, data: data });
+
+  } catch (error) {
+    console.error('Unexpected error updating opportunity stage:', error);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
 }

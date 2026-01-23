@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getGhlAccessToken } from '@/lib/ghl/token-helper';
 
 export async function GET(
   request: Request,
@@ -19,34 +18,52 @@ export async function GET(
     return NextResponse.json({ error: 'Contact ID is required.' }, { status: 400 });
   }
 
-  // Use the new token helper to get Mission Metrics GHL tokens
-  const ghlIntegration = await getGhlAccessToken(user.id, 'mission_metrics');
-
-  if (!ghlIntegration) {
-    return NextResponse.json({ error: 'Mission Metrics GHL integration not found or tokens missing.' }, { status: 404 });
-  }
-
   try {
-    const url = `https://services.leadconnectorhq.com/contacts/${contactId}`;
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${ghlIntegration.access_token}`,
-        'Version': '2021-07-28',
-        'Accept': 'application/json',
-      },
-    });
+    const { data: contact, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .eq('id', contactId)
+      .eq('user_id', user.id)
+      .single();
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('GHL Mission Metrics Contact API Error:', errorData);
-      return NextResponse.json({ error: 'Failed to fetch contact from Mission Metrics GHL.', details: errorData }, { status: response.status });
+    if (error) {
+      console.error('Error fetching contact:', error);
+      return NextResponse.json({ error: 'Contact not found or access denied.' }, { status: 404 });
     }
 
-    const data = await response.json();
-    return NextResponse.json(data.contact);
+    const formattedContact = {
+      id: contact.id,
+      firstName: contact.first_name,
+      lastName: contact.last_name,
+      jobTitle: contact.job_title,
+      email: contact.email,
+      phone: contact.phone,
+      mobilePhone: contact.mobile_phone,
+      corporatePhone: contact.corporate_phone,
+      otherPhone: contact.other_phone,
+      listName: contact.list_name,
+      website: contact.website,
+      identifier: contact.identifier,
+      country: contact.country,
+      num_employees: contact.num_employees,
+      industry: contact.industry,
+      keywords: contact.keywords,
+      person_linkedin_url: contact.person_linkedin_url,
+      company_linkedin_url: contact.company_linkedin_url,
+      facebook_url: contact.facebook_url,
+      twitter_url: contact.twitter_url,
+      address: contact.address,
+      city: contact.city,
+      state: contact.state,
+      annual_revenue: contact.annual_revenue,
+      tags: contact.tags || [],
+      companyName: contact.organization_name,
+    };
+
+    return NextResponse.json(formattedContact);
 
   } catch (error) {
-    console.error('Error fetching GHL Mission Metrics contact:', error);
-    return NextResponse.json({ error: 'An unexpected error occurred while fetching the Mission Metrics contact.' }, { status: 500 });
+    console.error('Unexpected error fetching contact:', error);
+    return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
   }
 }

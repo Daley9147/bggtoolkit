@@ -30,36 +30,46 @@
 
 @layer base {
   :root {
-    --background: 210 17% 98%; /* Soft Gray */
-    --foreground: 224 71% 4%; /* Darker text for contrast */
+    --background: 185 27% 92%; /* #E6F0F1 - Soft Mint */
+    --foreground: 224 71% 4%; /* Dark text */
 
-    --card: 0 0% 100%;
+    --card: 0 0% 100%; /* #FFFFFF */
     --card-foreground: 224 71% 4%;
  
     --popover: 0 0% 100%;
     --popover-foreground: 224 71% 4%;
  
-    --primary: 207 68% 20%; /* New Dark Blue */
-    --primary-hover: 207 68% 25%; /* Lighter Dark Blue for hover */
+    --primary: 180 61% 44%; /* #2CB5B5 - Bright Teal */
+    --primary-hover: 180 61% 39%; /* Darker for hover */
     --primary-foreground: 0 0% 100%;
  
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 189 37% 38%; /* #3D7A84 - Dark Teal (Sidebar) */
+    --secondary-foreground: 0 0% 100%;
  
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 185 27% 85%; /* Slightly darker than background */
+    --muted-foreground: 189 26% 46%; /* #588C95 - Accent/Border color for text */
  
-    --accent: 210 40% 96.1%;
+    --accent: 185 27% 85%;
     --accent-foreground: 222.2 47.4% 11.2%;
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 212 71% 59%; /* Ring color to match brand blue */
+    --border: 189 26% 46%; /* #588C95 - Accent/Border */
+    --input: 189 26% 46%;
+    --ring: 180 61% 44%; /* Match Primary */
  
     --radius: 0.5rem;
+
+    /* Sidebar Variables */
+    --sidebar-background: 189 37% 38%; /* #3D7A84 */
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 180 61% 44%; /* #2CB5B5 */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 189 37% 33%; /* Slightly darker sidebar for hover */
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 189 26% 46%;
+    --sidebar-ring: 180 61% 44%;
   }
 
   .dark {

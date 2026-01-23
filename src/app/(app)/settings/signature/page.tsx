@@ -57,7 +57,25 @@ export default function SignatureEditorPage() {
     uploader: {
       url: '/api/user/signature/upload',
       format: 'json',
-      filesVariableName: 'files[]',
+      filesVariableName: () => 'files[]',
+      isSuccess: (resp: any) => resp.success,
+      process: (resp: any) => {
+        return {
+          files: resp.files.map((f: any) => f.url), // Jodit expects simple array of strings or specific object
+          path: '',
+          baseurl: '',
+          error: resp.error,
+          msg: resp.error
+        };
+      },
+      defaultHandlerSuccess: function (data: any, resp: any) {
+        // @ts-ignore
+        const files = data.files || [];
+        if (files.length) {
+          // @ts-ignore
+          this.selection.insertImage(files[0]);
+        }
+      },
     },
     filebrowser: {
       ajax: {

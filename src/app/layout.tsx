@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'BGG Sales Toolkit',
-  description: 'A sales toolkit for the BGG team.',
+  title: 'MM Sales Toolkit',
+  description: 'A sales toolkit for the Mission Metrics team.',
 };
 
 export default function RootLayout({

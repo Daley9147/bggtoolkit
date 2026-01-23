@@ -1,31 +1,75 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, Gamepad2, ListTodo, Mail, Target } from 'lucide-react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Briefcase, LayoutDashboard, Calendar, PenSquare, Sparkles, ListTodo, Mail, Target, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GhlSettingsDialog from '@/components/ghl/ghl-settings-dialog';
 import UserProfile from '@/components/layout/user-profile';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Sidebar user check:', user?.id, user?.email);
+      
+      // Fallback: Check email directly
+      if (user?.email === 'darrel@missionmetrics.io') {
+          setIsAdmin(true);
+      }
+
+      if (user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        console.log('Sidebar profile check:', data, error);
+        if (data?.role === 'admin') setIsAdmin(true);
+      }
+    };
+    checkRole();
+  }, []);
 
   return (
-    <div className="hidden border-r bg-primary text-primary-foreground md:block">
+    <div className="hidden border-r bg-sidebar text-sidebar-foreground md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b border-white/20 px-4 lg:h-[60px] lg:px-6">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="">Sales Toolkit</span>
+            <span className="">Mission Metrics</span>
           </Link>
         </div>
         <div className="flex-1">
-          <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+          <nav className="grid items-start px-2 text-sm font-semibold lg:px-4">
+            {isAdmin && (
+              <>
+                <Link
+                  href="/staff"
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
+                    {
+                      'bg-white text-primary shadow-sm': pathname === '/staff',
+                    }
+                  )}
+                >
+                  <Users className="h-4 w-4" />
+                  My Staff
+                </Link>
+              </>
+            )}
             <Link
               href="/toolkit"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname === '/toolkit',
+                  'bg-white text-primary shadow-sm': pathname === '/toolkit',
                 }
               )}
             >
@@ -37,7 +81,7 @@ export default function Sidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname === '/opportunities',
+                  'bg-white text-primary shadow-sm': pathname === '/opportunities',
                 }
               )}
             >
@@ -45,23 +89,35 @@ export default function Sidebar() {
               Opportunities
             </Link>
             <Link
-              href="/mission-metrics"
+              href="/contacts"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname === '/mission-metrics',
+                  'bg-white text-primary shadow-sm': pathname === '/contacts',
                 }
               )}
             >
-              <Target className="h-4 w-4" />
-              Mission Metrics
+              <Users className="h-4 w-4" />
+              Contacts
+            </Link>
+            <Link
+              href="/email"
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
+                {
+                  'bg-white text-primary shadow-sm': pathname === '/email',
+                }
+              )}
+            >
+              <Mail className="h-4 w-4" />
+              Inbox
             </Link>
             <Link
               href="/calendars"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname === '/calendars',
+                  'bg-white text-primary shadow-sm': pathname === '/calendars',
                 }
               )}
             >
@@ -73,7 +129,7 @@ export default function Sidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname === '/ai',
+                  'bg-white text-primary shadow-sm': pathname === '/ai',
                 }
               )}
             >
@@ -85,7 +141,7 @@ export default function Sidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname === '/email-outreach',
+                  'bg-white text-primary shadow-sm': pathname === '/email-outreach',
                 }
               )}
             >
@@ -97,7 +153,7 @@ export default function Sidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname === '/tasks',
+                  'bg-white text-primary shadow-sm': pathname === '/tasks',
                 }
               )}
             >
@@ -105,40 +161,16 @@ export default function Sidebar() {
               Tasks
             </Link>
             <Link
-              href="/saved"
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
-                {
-                  'bg-primary-hover': pathname === '/saved',
-                }
-              )}
-            >
-              <Bookmark className="h-4 w-4" />
-              Company Research
-            </Link>
-            <Link
               href="/workspace"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
                 {
-                  'bg-primary-hover': pathname.startsWith('/workspace'),
+                  'bg-white text-primary shadow-sm': pathname.startsWith('/workspace'),
                 }
               )}
             >
               <PenSquare className="h-4 w-4" />
               Workspace
-            </Link>
-            <Link
-              href="/escape"
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-primary-hover',
-                {
-                  'bg-primary-hover': pathname === '/escape',
-                }
-              )}
-            >
-              <Gamepad2 className="h-4 w-4" />
-              Escape
             </Link>
           </nav>
         </div>

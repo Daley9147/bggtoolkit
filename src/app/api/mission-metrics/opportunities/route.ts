@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { getGhlAccessToken } from '@/lib/ghl/token-helper';
 
 export async function GET(request: Request) {
   const supabase = createClient();
@@ -14,49 +13,78 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'User not authenticated.' }, { status: 401 });
   }
 
-  // Use the new token helper to get Mission Metrics GHL tokens
-  const ghlIntegration = await getGhlAccessToken(user.id, 'mission_metrics');
-
-  if (!ghlIntegration) {
-    return NextResponse.json({ error: 'Mission Metrics GHL integration not found or tokens missing.' }, { status: 404 });
-  }
-
   try {
-    const baseUrl = 'https://services.leadconnectorhq.com/opportunities/search';
-    const url = new URL(baseUrl);
-    url.searchParams.append('location_id', ghlIntegration.location_id);
+    let queryBuilder = supabase
+      .from('opportunities')
+      .select(`
+        id,
+        name,
+        value,
+        status,
+        pipeline_id,
+        stage_id,
+        created_at,
+        updated_at,
+        contact:contacts (
+          id,
+          first_name,
+          last_name,
+          email,
+          phone,
+          organization_name
+        )
+      `)
+      .eq('user_id', user.id);
+
+    const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+    if (pipelineId && pipelineId !== 'all') {
+      if (!isUuid(pipelineId)) {
+        return NextResponse.json([]);
+      }
+      queryBuilder = queryBuilder.eq('pipeline_id', pipelineId);
+    }
+    
+    if (pipelineStageId && pipelineStageId !== 'all') {
+      if (!isUuid(pipelineStageId)) {
+        return NextResponse.json([]);
+      }
+      queryBuilder = queryBuilder.eq('stage_id', pipelineStageId);
+    }
 
     if (query) {
-      url.searchParams.append('q', query);
-    }
-    if (pipelineId && pipelineId !== 'all') {
-      url.searchParams.append('pipeline_id', pipelineId);
-    }
-    if (pipelineStageId && pipelineStageId !== 'all') {
-      url.searchParams.append('pipeline_stage_id', pipelineStageId);
+      queryBuilder = queryBuilder.ilike('name', `%${query}%`);
     }
 
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${ghlIntegration.access_token}`,
-        'Version': '2021-07-28',
-        'Accept': 'application/json',
-      },
-    });
+    const { data: opportunities, error } = await queryBuilder;
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('GHL Mission Metrics Opportunities API Error:', errorData);
-      return NextResponse.json({ error: 'Failed to fetch opportunities from Mission Metrics GHL.', details: errorData }, { status: response.status });
+    if (error) {
+      console.error('Error fetching opportunities:', error);
+      return NextResponse.json({ error: 'Failed to fetch opportunities' }, { status: 500 });
     }
 
-    const data = await response.json();
-    const opportunities = data.opportunities || [];
-    return NextResponse.json(opportunities);
+    // Map to match the shape expected by frontend (GHL style)
+    const formattedOpportunities = opportunities.map(opp => ({
+      id: opp.id,
+      name: opp.name,
+      monetaryValue: opp.value,
+      pipelineId: opp.pipeline_id,
+      pipelineStageId: opp.stage_id,
+      contactId: opp.contact?.id,
+      lastStageChangeAt: opp.updated_at,
+      contact: opp.contact ? {
+        id: opp.contact.id,
+        name: `${opp.contact.first_name || ''} ${opp.contact.last_name || ''}`.trim(),
+        companyName: opp.contact.organization_name,
+        email: opp.contact.email,
+        phone: opp.contact.phone,
+      } : undefined
+    }));
+
+    return NextResponse.json(formattedOpportunities);
 
   } catch (error) {
-    console.error('Error fetching GHL Mission Metrics opportunities:', error);
-    return NextResponse.json({ error: 'An unexpected error occurred while fetching Mission Metrics opportunities.' }, { status: 500 });
+    console.error('Unexpected error fetching opportunities:', error);
+    return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
   }
 }

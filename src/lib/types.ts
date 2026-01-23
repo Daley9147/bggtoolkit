@@ -20,9 +20,9 @@ export interface ProgramSection {
   icon: IconName;
   features: {
     feature: string;
-    elevate: string | boolean;
-    intensive: string | boolean;
-    boardroom: string | boolean;
+    clarity: string | boolean;
+    performance: string | boolean;
+    enterprise: string | boolean;
   }[];
 }
 
@@ -39,8 +39,7 @@ export interface ContentSection {
 
 export type SectionData = ContentSection | ProgramSection;
 
-export type OutreachTemplate = Tables<'outreach_templates'>;
-
-export type Company = Tables<'companies'> & {
-  outreach_templates: OutreachTemplate[];
-};
+export type Contact = Tables<'contacts'>;
+export type Opportunity = Tables<'opportunities'>;
+export type Pipeline = Tables<'pipelines'>;
+export type Stage = Tables<'stages'>;

@@ -7,10 +7,10 @@ export async function POST(request: Request) {
   const supabase = createClient();
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -23,14 +23,14 @@ export async function POST(request: Request) {
     }
 
     const uploadPromises = files.map(async (file) => {
-      const filePath = `public/${session.user.id}/${uuidv4()}-${file.name}`;
+      const filePath = `public/${user.id}/${uuidv4()}-${file.name}`;
       const { error } = await supabase.storage
         .from('signatures')
         .upload(filePath, file);
 
       if (error) {
-        console.error('Error uploading to Supabase Storage:', error);
-        throw new Error(`Failed to upload ${file.name}`);
+        console.error('Error uploading to Supabase Storage:', JSON.stringify(error, null, 2));
+        throw new Error(`Failed to upload ${file.name}: ${error.message}`);
       }
 
       const { data } = supabase.storage

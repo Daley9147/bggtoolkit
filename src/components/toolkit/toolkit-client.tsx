@@ -34,9 +34,9 @@ export default function ToolkitClient({ sections }: ToolkitClientProps) {
             programSection.features.some(
               (f) =>
                 f.feature.toLowerCase().includes(lowercasedFilter) ||
-                String(f.elevate).toLowerCase().includes(lowercasedFilter) ||
-                String(f.intensive).toLowerCase().includes(lowercasedFilter) ||
-                String(f.boardroom).toLowerCase().includes(lowercasedFilter)
+                String(f.clarity).toLowerCase().includes(lowercasedFilter) ||
+                String(f.performance).toLowerCase().includes(lowercasedFilter) ||
+                String(f.enterprise).toLowerCase().includes(lowercasedFilter)
             );
           return isMatch ? section : null;
         }

@@ -94,9 +94,9 @@ export function MissionMetricsBoard({
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, stage.id)}
           >
-            <div className="p-3 font-semibold text-sm uppercase tracking-wider text-muted-foreground bg-secondary/50 rounded-t-lg flex justify-between items-center">
+            <div className="p-3 font-semibold text-sm uppercase tracking-wider text-primary-foreground bg-primary rounded-t-lg flex justify-between items-center">
               <span>{stage.name}</span>
-              <span className="bg-background text-foreground text-xs px-2 py-0.5 rounded-full border">
+              <span className="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full border border-white/30">
                 {stageOpps.length}
               </span>
             </div>
@@ -109,20 +109,15 @@ export function MissionMetricsBoard({
                     draggable
                     onDragStart={(e) => handleDragStart(e, opp.id)}
                     className={cn(
-                      "cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow",
+                      "cursor-grab active:cursor-grabbing transition-shadow",
                       draggedOppId === opp.id && "opacity-50"
                     )}
                   >
-                    {/* Wrapped in a div to capture drag events more reliably than the custom component */}
-                    <div
-                      className="bg-card rounded-md border shadow-sm cursor-grab active:cursor-grabbing hover:shadow-md transition-all"
-                    >
-                      <OpportunityCard 
-                        opp={opp}
-                        pipelines={pipelines}
-                        handleOppClick={onOpportunityClick}
-                      />
-                    </div>
+                    <OpportunityCard 
+                      opp={opp}
+                      pipelines={pipelines}
+                      handleOppClick={onOpportunityClick}
+                    />
                   </div>
                 ))}
               </div>

@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { fetchUKNonProfitData } from '@/lib/charity-commission/api';
+import { fetchNonProfitData } from '@/lib/propublica/api';
 import { missionMetricsUkPrompt } from './prompts/mission-metrics-uk.prompt';
+import { missionMetricsUsPrompt } from './prompts/mission-metrics-us.prompt';
 import { fetchWebsiteContent } from './generate-outreach-plan';
 import { MissionMetricsInput, MissionMetricsOutput } from './mission-metrics.types';
 
@@ -25,11 +27,22 @@ export async function generateMissionMetricsReport(input: MissionMetricsInput): 
   const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
 
   // 1. Fetch Financial Data
-  console.log(`Fetching financial data for charity number: ${input.charityNumber}`);
-  const financialData = await fetchUKNonProfitData(input.charityNumber);
-  const financialSummary = financialData 
-    ? JSON.stringify(financialData.slice(0, 5)) // Last 5 years
-    : "No financial data found or API unavailable.";
+  console.log(`Fetching financial data for identifier: ${input.identifier} (Country: ${input.country})`);
+  let financialData: any = null;
+  let financialSummary = "No financial data found or API unavailable.";
+
+  if (input.country === 'UK') {
+    financialData = await fetchUKNonProfitData(input.identifier);
+    if (financialData) {
+      financialSummary = JSON.stringify(financialData.slice(0, 5)); // Last 5 years
+    }
+  } else if (input.country === 'US') {
+     // ProPublica logic
+    financialData = await fetchNonProfitData(input.identifier);
+    if (financialData) {
+       financialSummary = JSON.stringify(financialData); // ProPublica returns a single object for latest year
+    }
+  }
 
   // 2. Fetch Website Content (Home Page)
   let websiteContent = "Website content not available.";
@@ -54,13 +67,16 @@ export async function generateMissionMetricsReport(input: MissionMetricsInput): 
   }
 
   // 4. Construct the Prompt
+  const basePrompt = input.country === 'US' ? missionMetricsUsPrompt : missionMetricsUkPrompt;
+  const financialLabel = input.country === 'US' ? "ProPublica Financial Data (Latest Year)" : "Charity Commission Financial History (Last 5 Years)";
+
   const prompt = `
-${missionMetricsUkPrompt}
+${basePrompt}
 
 ---
 **INPUT DATA:**
 
-**Charity Commission Financial History (Last 5 Years):**
+**${financialLabel}:**
 ${financialSummary}
 
 **Website Content (Home Page/About):**
