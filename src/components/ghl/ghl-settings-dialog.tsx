@@ -54,7 +54,7 @@ export default function GhlSettingsDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>GHL Settings</DialogTitle>
+          <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
             Manage your GoHighLevel connection and settings here.
           </DialogDescription>

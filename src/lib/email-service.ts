@@ -26,7 +26,7 @@ export async function fetchEmails(userId: string, folder = 'INBOX', limit = 20) 
             port: creds.imap_port,
             tls: true,
             tlsOptions: { rejectUnauthorized: false }, 
-            authTimeout: 3000
+            authTimeout: 15000
         }
     };
 
@@ -134,7 +134,7 @@ export async function sendEmail(userId: string, to: string, subject: string, htm
                 port: creds.imap_port,
                 tls: true,
                 tlsOptions: { rejectUnauthorized: false }, 
-                authTimeout: 3000
+                authTimeout: 15000
             }
         };
 

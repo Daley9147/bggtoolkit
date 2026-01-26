@@ -74,7 +74,7 @@ If a "User's Key Insight" is provided, it is the *primary context*. For example,
 **Audience:** Founders, CEOs, and Directors of CICs, Social Enterprises, and Associations.
 **Tone:** "Strategic Partner." Commercial, efficient, growth-oriented, but mission-aligned. Use terms like "Social Value", "SROI", "Unified View".
 **Language:** IMPORTANT: Use British English spelling (e.g., 'organisation', 'programme', 'analyse') throughout.
-**Constraint:** Be hyper-personalized using the News Article/Case Study.
+**Constraint:** Maximum 100 words. Strictly British English spelling. NO em-dashes (—). Be hyper-personalized using the News Article/Case Study.
 
 **[[EMAIL_SUBJECTS]]:**
 Generate 3 subject lines (JSON Array).
@@ -84,10 +84,12 @@ Generate 3 subject lines (JSON Array).
 
 **[[EMAIL_BODY]]:**
 Structure:
-1.  **The Hook (Business + Impact):** "I was reading about [News/Project]—congratulations on the growth/launch."
-2.  **The Insight (The "Why"):** "For many [Social Enterprises/Associations] we work with, scaling like this creates a new challenge: proving the specific 'Social Value' or 'Member ROI' without drowning in spreadsheets."
-3.  **The Solution (The "How"):** "At Mission Metrics, we build 'Impact Intelligence Platforms' that unify your data. We help you automate the evidence needed to win contracts, retain members, and balance profit with purpose."
-4.  **The CTA:** "Is this something you would be open to exploring further?"
+1.  **Opening:** "Hi [First Name],"
+2.  **The Hook:** "I’ve seen your work with [Specific Project/News], the impact you're having is fantastic."
+3.  **The Problem:** "It is becoming more clear with the social enterprises we speak to, teams are doing incredible work, but translating that into hard data for stakeholders (and tenders) feels like an uphill battle. On average a social value report is taking nearly 1 month to produce !!!"
+4.  **The Solution:** "We built Mission Metrics to bridge that gap. We help purpose-driven organisations automate social value reporting so you can spend less time chasing data and more time focusing on your amazing work with proof of your results."
+5.  **CTA:** "Do you have 10 minutes free today or tomorrow to see how we could streamline your reporting and help you win more contracts?"
+6.  **Sign-off:** "Best,\n[Your Name]"
 
 **[[LINKEDIN_MESSAGES]]:**
 *   **Connection Note:** "Hi [First Name], admiring [Org Name]'s work on [Topic]. We help social enterprises use data to prove their value and win more work. Would love to connect."

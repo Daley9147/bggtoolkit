@@ -111,7 +111,6 @@ export default function MissionMetricsWorkspace({
   // Editable State
   const [editedEmailBody, setEditedEmailBody] = useState('');
   const [editedFollowUpBody, setEditedFollowUpBody] = useState('');
-  const [emailSignature, setEmailSignature] = useState('');
   const [isSavingEdits, setIsSavingEdits] = useState(false);
   
   const { toast } = useToast();
@@ -125,26 +124,10 @@ export default function MissionMetricsWorkspace({
   // Sync edited state when report loads
   useEffect(() => {
     if (missionMetricsReport) {
-        // Only append signature if it's not already there (simple check)
-        const signatureHtml = emailSignature ? `\n\n${emailSignature}` : '';
-        
-        // If the body already contains the signature (e.g. from a previous save), don't append it again
-        // Ideally we check if the report body ends with the signature, but formatted HTML might vary.
-        // For now, we just set the initial value. Users can edit it.
-        
-        // Check if report body seems to already include the signature to avoid duplication on re-renders
-        let initialEmailBody = missionMetricsReport.emailBody;
-        if (emailSignature && !initialEmailBody.includes(emailSignature)) {
-             // It's tricky to append HTML signature to markdown/text body directly here if the body is just text.
-             // But assuming the signature is HTML from Jodit, and the email body is text/markdown from AI.
-             // We will just append it.
-             initialEmailBody = `${initialEmailBody}${signatureHtml}`;
-        }
-        
-        setEditedEmailBody(initialEmailBody);
+        setEditedEmailBody(missionMetricsReport.emailBody);
         setEditedFollowUpBody(missionMetricsReport.followUpBody);
     }
-  }, [missionMetricsReport, emailSignature]);
+  }, [missionMetricsReport]);
 
   const fetchAllData = async () => {
     if (!opportunity) return;
@@ -212,15 +195,6 @@ export default function MissionMetricsWorkspace({
             setSpecificUrl(data.metadata?.specificUrl || '');
           }
         }
-      }),
-      // Fetch Email Signature
-      fetch('/api/user/profile').then(async (res) => {
-          if (res.ok) {
-              const profile = await res.json();
-              if (profile?.email_signature) {
-                  setEmailSignature(profile.email_signature);
-              }
-          }
       })
     ]);
   };

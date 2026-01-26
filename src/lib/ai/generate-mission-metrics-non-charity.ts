@@ -21,7 +21,7 @@ function stripMarkdown(text: string): string {
 
 export async function generateMissionMetricsNonCharityReport(input: MissionMetricsNonCharityInput): Promise<MissionMetricsOutput> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
   // 1. Fetch Website Content (Home Page)
   let websiteContent = "Website content not available.";

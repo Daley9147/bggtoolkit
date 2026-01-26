@@ -24,7 +24,7 @@ function stripMarkdown(text: string): string {
 
 export async function generateMissionMetricsReport(input: MissionMetricsInput): Promise<MissionMetricsOutput> {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-  const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
   // 1. Fetch Financial Data
   console.log(`Fetching financial data for identifier: ${input.identifier} (Country: ${input.country})`);

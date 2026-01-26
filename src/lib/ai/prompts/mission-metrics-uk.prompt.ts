@@ -72,7 +72,7 @@ If a "User's Key Insight" is provided, it is the *primary context*. For example,
 **Audience:** Mission-Driven Founders and Upper Management.
 **Tone:** "Partner, not Vendor." Empathetic, curious, supportive, and professional. Use terms like "Impact Evidence", "Unified View", "Automating Insights".
 **Language:** IMPORTANT: Use British English spelling (e.g., 'organisation', 'programme', 'analyse') throughout.
-**Constraint:** Be hyper-personalized using the News Article/Case Study.
+**Constraint:** Maximum 100 words. Strictly British English spelling. NO em-dashes (—). Be hyper-personalized using the News Article/Case Study.
 
 **[[EMAIL_SUBJECTS]]:**
 Generate 3 subject lines (JSON Array).
@@ -82,10 +82,12 @@ Generate 3 subject lines (JSON Array).
 
 **[[EMAIL_BODY]]:**
 Structure:
-1.  **The Hook (Appreciation):** "I was reading about [News/Project] and specifically [Detail]—it's incredible work."
-2.  **The Empathy (The "Why"):** "We find that for many leaders in the [Sub-sector] space, the success of such projects brings a new challenge: the exhausting burden of manually gathering the data to prove that success to funders."
-3.  **The Solution (The "How"):** "At Mission Metrics, we act as your impact evidence partners. We build 'Impact Intelligence Platforms' that automate this reporting, turning your day-to-day data into the rigorous evidence that secures sustainable funding."
-4.  **The CTA (Low Friction):** "Is this something you would be open to exploring further?"
+1.  **Opening:** "Hi [First Name],"
+2.  **The Hook:** "I’ve seen your work with [Specific Project/News], the impact you're having is fantastic."
+3.  **The Problem:** "It is becoming more clear with the charities we speak to, teams are doing incredible work, but translating that into hard data for stakeholders feels like an uphill battle. On average an impact report is taking nearly 1 month to produce !!!"
+4.  **The Solution:** "We built Mission Metrics to bridge that gap. We help not-for-profits automate grant applications and impact reporting so you can spend less time chasing data and more time focusing on your amazing work with proof of your results."
+5.  **CTA:** "Do you have 10 minutes free today or tomorrow to see how we could streamline your reporting and unlock higher tier grants?"
+6.  **Sign-off:** "Best,\n[Your Name]"
 
 **[[LINKEDIN_MESSAGES]]:**
 *   **Connection Note:** "Hi [First Name], admiring [Charity Name]'s work on [Topic]. We help non-profits automate their impact reporting to secure better funding. Would love to follow your progress."

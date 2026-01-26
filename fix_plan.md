@@ -68,7 +68,7 @@ export async function generateOutreachPlan({
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
   const prompt = `Your task is to analyze the provided website text from two sources: a primary company website and a specific initiative page (e.g., product, news). Provide structured insights and a personalized email draft. Base your analysis *only* on the text provided.
 

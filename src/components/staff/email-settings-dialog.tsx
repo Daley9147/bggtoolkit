@@ -113,25 +113,59 @@ export default function EmailSettingsDialog({ userId, userName, isOpen, onOpenCh
         {loading ? (
             <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
         ) : (
-            <div className="grid gap-6 py-4">
+            <div className="grid gap-6 py-4" key={userId}>
                 <div className="space-y-4">
                     <h3 className="text-sm font-semibold border-b pb-2">IMAP Settings (Incoming)</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="imap_host">IMAP Host</Label>
-                            <Input id="imap_host" name="imap_host" placeholder="imap.gmail.com" value={formData.imap_host} onChange={handleChange} />
+                            <Input 
+                                id="imap_host" 
+                                name="imap_host" 
+                                placeholder="imap.gmail.com" 
+                                value={formData.imap_host} 
+                                onChange={handleChange} 
+                                disabled={saving}
+                                autoComplete="off"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="imap_port">IMAP Port</Label>
-                            <Input id="imap_port" name="imap_port" type="number" placeholder="993" value={formData.imap_port} onChange={handleChange} />
+                            <Input 
+                                id="imap_port" 
+                                name="imap_port" 
+                                type="number" 
+                                placeholder="993" 
+                                value={formData.imap_port} 
+                                onChange={handleChange} 
+                                disabled={saving}
+                                autoComplete="off"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="imap_user">Username</Label>
-                            <Input id="imap_user" name="imap_user" placeholder="email@example.com" value={formData.imap_user} onChange={handleChange} />
+                            <Input 
+                                id="imap_user" 
+                                name="imap_user" 
+                                placeholder="email@example.com" 
+                                value={formData.imap_user} 
+                                onChange={handleChange} 
+                                disabled={saving}
+                                autoComplete="off"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="imap_password">Password</Label>
-                            <Input id="imap_password" name="imap_password" type="password" placeholder="••••••••" value={formData.imap_password} onChange={handleChange} />
+                            <Input 
+                                id="imap_password" 
+                                name="imap_password" 
+                                type="password" 
+                                placeholder="••••••••" 
+                                value={formData.imap_password} 
+                                onChange={handleChange} 
+                                disabled={saving}
+                                autoComplete="new-password"
+                            />
                         </div>
                     </div>
                 </div>
@@ -141,19 +175,53 @@ export default function EmailSettingsDialog({ userId, userName, isOpen, onOpenCh
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="smtp_host">SMTP Host</Label>
-                            <Input id="smtp_host" name="smtp_host" placeholder="smtp.gmail.com" value={formData.smtp_host} onChange={handleChange} />
+                            <Input 
+                                id="smtp_host" 
+                                name="smtp_host" 
+                                placeholder="smtp.gmail.com" 
+                                value={formData.smtp_host} 
+                                onChange={handleChange} 
+                                disabled={saving}
+                                autoComplete="off"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="smtp_port">SMTP Port</Label>
-                            <Input id="smtp_port" name="smtp_port" type="number" placeholder="465" value={formData.smtp_port} onChange={handleChange} />
+                            <Input 
+                                id="smtp_port" 
+                                name="smtp_port" 
+                                type="number" 
+                                placeholder="465" 
+                                value={formData.smtp_port} 
+                                onChange={handleChange} 
+                                disabled={saving}
+                                autoComplete="off"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="smtp_user">Username</Label>
-                            <Input id="smtp_user" name="smtp_user" placeholder="email@example.com" value={formData.smtp_user} onChange={handleChange} />
+                            <Input 
+                                id="smtp_user" 
+                                name="smtp_user" 
+                                placeholder="email@example.com" 
+                                value={formData.smtp_user} 
+                                onChange={handleChange} 
+                                disabled={saving}
+                                autoComplete="off"
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="smtp_password">Password</Label>
-                            <Input id="smtp_password" name="smtp_password" type="password" placeholder="••••••••" value={formData.smtp_password} onChange={handleChange} />
+                            <Input 
+                                id="smtp_password" 
+                                name="smtp_password" 
+                                type="password" 
+                                placeholder="••••••••" 
+                                value={formData.smtp_password} 
+                                onChange={handleChange} 
+                                disabled={saving}
+                                autoComplete="new-password"
+                            />
                         </div>
                     </div>
                 </div>

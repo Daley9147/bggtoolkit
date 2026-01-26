@@ -36,7 +36,7 @@ The system has four distinct workflows, each tailored to a specific target type.
 -   **Backend Process:**
     -   Scrapes the content of the two provided URLs.
     -   Builds the analysis around the `User's Key Insight` if provided.
--   **AI Model:** `gemini-3-pro-preview`
+-   **AI Model:** `gemini-3-flash-preview`
 
 ### b. Non-Profit Workflow
 
@@ -49,7 +49,7 @@ The system has four distinct workflows, each tailored to a specific target type.
     -   Calls the **ProPublica Non-Profit Explorer API** to fetch key financial data (Revenue, Expenses, Net Income).
     -   Scrapes the content of the homepage URL.
     -   Routes the ProPublica API call through a proxy to prevent IP blocking.
--   **AI Model:** `gemini-3-pro-preview`
+-   **AI Model:** `gemini-3-flash-preview`
 -   **Prompt File:** `src/lib/ai/prompts/non-profit.prompt.ts`
 -   **API Logic:** `src/lib/propublica/api.ts`
 
@@ -63,7 +63,7 @@ The system has four distinct workflows, each tailored to a specific target type.
 -   **Backend Process:**
     -   Scrapes the content of the funding announcement article.
     -   The analysis is prioritized around the funding announcement, not the company homepage.
--   **AI Model:** `gemini-3-pro-preview`
+-   **AI Model:** `gemini-3-flash-preview`
 -   **Prompt File:** `src/lib/ai/prompts/vc-backed.prompt.ts`
 
 ### d. Partnership Workflow
@@ -78,7 +78,7 @@ The system has four distinct workflows, each tailored to a specific target type.
     -   Scrapes the firm's website.
     -   Scrapes the partner's LinkedIn profile (if provided).
     -   Scrapes the recent investment article (if provided) to craft a unique opening line.
--   **AI Model:** `gemini-3-pro-preview` (or a similar high-tier model)
+-   **AI Model:** `gemini-3-flash-preview` (or a similar high-tier model)
 -   **Prompt File:** `src/lib/ai/prompts/partnership.prompt.ts`
 
 ---

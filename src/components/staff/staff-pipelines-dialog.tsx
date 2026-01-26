@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Pencil, ArrowLeft, Save } from 'lucide-react';
 import CsvUploader from '@/components/crm/csv-uploader';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Stage {
     id: string;
@@ -141,7 +142,7 @@ export default function StaffPipelinesDialog({ userId, userName, isOpen, onOpenC
 
       // 2. Upsert (Update existing + Insert new)
       const upsertData = tempStages.map((s, index) => ({
-          id: s.id.startsWith('temp') ? undefined : s.id, // undefined ID triggers insert
+          id: s.id.startsWith('temp') ? uuidv4() : s.id, // Generate UUID for new stages
           pipeline_id: editingPipeline.id,
           name: s.name,
           position: index
