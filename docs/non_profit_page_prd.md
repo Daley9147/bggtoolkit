@@ -30,7 +30,7 @@ We are introducing a dedicated landing page for the **Non-Profit & Charity Secto
 | **Revenue** | Profit & Margins | **Funding Diversity:** Reducing grant dependency & optimizing Gift Aid. |
 | **Operation** | Efficiency | **Resource Maximization:** Ensuring more "pence in the pound" reaches the frontline. |
 | **People** | Leadership & Hiring | **Volunteer & Staff Retention:** Preventing burnout in mission-driven teams. |
-| **Success** | Exit Strategy | **Mission Longevity:** Building an organization that survives its founder. |
+| **Success** | Exit Strategy | **Mission Longevity:** Building an organisation that survives its founder. |
 
 ---
 
@@ -58,7 +58,7 @@ We are introducing a dedicated landing page for the **Non-Profit & Charity Secto
 
 ### Section 4: The Offer (The Mentor Program)
 *   **Header:** Expert Mentorship, Not Expensive Consulting.
-*   **Copy:** You don't need a 100-page report. You need hands-on guidance. Our Growth Mentors are seasoned operators who have scaled organizations before. They work alongside you to fix specific bottlenecks.
+*   **Copy:** You don't need a 100-page report. You need hands-on guidance. Our Growth Mentors are seasoned operators who have scaled organisations before. They work alongside you to fix specific bottlenecks.
 *   **The "Trojan Horse" Offer:**
     *   *Highlight Box:* **Partner Access:** We offer 2-3 complimentary sessions to eligible non-profits to tackle one specific challenge (e.g., "Fixing Volunteer Churn" or " diversifying income").
 

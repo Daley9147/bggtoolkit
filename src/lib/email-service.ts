@@ -41,20 +41,20 @@ export async function fetchEmails(userId: string, folder = 'INBOX', limit = 20) 
             struct: true
         };
         
-        const messages = await connection.search(searchCriteria, fetchOptions);
+        const messages: imaps.Message[] = await connection.search(searchCriteria, fetchOptions);
         
         // Sort descending
         messages.sort((a, b) => b.attributes.date.getTime() - a.attributes.date.getTime());
         
         const recent = messages.slice(0, limit);
 
-        const parsedMessages = await Promise.all(recent.map(async (msg) => {
+        const parsedMessages = await Promise.all(recent.map(async (msg: imaps.Message) => {
             const raw = msg.parts.find((part: any) => part.which === '')?.body;
             
             if (!raw) {
                 return {
                     id: msg.attributes.uid,
-                    seq: msg.seqno,
+                    seq: msg.seqNo,
                     subject: '(No Content)',
                     from: 'Unknown',
                     date: msg.attributes.date,
@@ -69,7 +69,7 @@ export async function fetchEmails(userId: string, folder = 'INBOX', limit = 20) 
                 
                 return {
                     id: msg.attributes.uid,
-                    seq: msg.seqno,
+                    seq: msg.seqNo,
                     subject: parsed.subject || '(No Subject)',
                     from: parsed.from?.text || 'Unknown',
                     date: msg.attributes.date,
@@ -77,10 +77,10 @@ export async function fetchEmails(userId: string, folder = 'INBOX', limit = 20) 
                     html: parsed.html || parsed.textAsHtml || parsed.text // Fallback
                 };
             } catch (err) {
-                console.error('Parse error for msg', msg.seqno, err);
+                console.error('Parse error for msg', msg.seqNo, err);
                 return {
                     id: msg.attributes.uid,
-                    seq: msg.seqno,
+                    seq: msg.seqNo,
                     subject: '(Parse Error)',
                     from: 'Unknown',
                     date: msg.attributes.date,
@@ -148,7 +148,7 @@ export async function sendEmail(userId: string, to: string, subject: string, htm
         // To keep it simple without adding deps, we can try to use the mail object if possible, 
         // but we need to generate the raw MIME source.
         
-        // Let's use a new MailComposer instance from nodemailer to generate the raw source
+        // @ts-ignore
         const MailComposer = require('nodemailer/lib/mail-composer');
         const mail = new MailComposer({
             from: `"${creds.smtp_user}" <${creds.smtp_user}>`,

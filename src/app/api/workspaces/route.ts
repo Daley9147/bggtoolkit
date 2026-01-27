@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     .insert({
       user_id: user.id,
       title,
-      data,
+      content: data,
     })
     .select('id')
     .single();

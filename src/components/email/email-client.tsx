@@ -224,7 +224,7 @@ export default function EmailClient() {
                                 >
                                     <div className="font-medium">
                                         {contact.first_name} {contact.last_name}
-                                        {contact.organization_name && <span className="text-muted-foreground ml-2">({contact.organization_name})</span>}
+                                        {contact.organisation_name && <span className="text-muted-foreground ml-2">({contact.organisation_name})</span>}
                                     </div>
                                     <div className="text-xs text-muted-foreground">{contact.email}</div>
                                 </div>

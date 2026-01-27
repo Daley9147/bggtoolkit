@@ -57,7 +57,7 @@ export async function GET(
       state: contact.state,
       annual_revenue: contact.annual_revenue,
       tags: contact.tags || [],
-      companyName: contact.organization_name,
+      companyName: contact.organisation_name,
     };
 
     return NextResponse.json(formattedContact);

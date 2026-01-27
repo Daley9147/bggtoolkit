@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false });
 
     if (query) {
-      queryBuilder = queryBuilder.or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%,organization_name.ilike.%${query}%`);
+      queryBuilder = queryBuilder.or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%,organisation_name.ilike.%${query}%`);
     }
 
     const { data: contacts, error } = await queryBuilder;

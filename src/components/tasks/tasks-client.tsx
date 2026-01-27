@@ -68,7 +68,7 @@ export default function TasksClient() {
     fetchTasks()
   }, [])
 
-  const handleSaveTask = async (task: Task) => {
+  const handleSaveTask = async (task: Partial<Task> & { title: string; priority: 'Low' | 'Medium' | 'High'; status: 'Todo' | 'In Progress' | 'Completed'; due_date: string | null }) => {
     const originalTask = tasks.find(t => t.id === task.id);
 
     if (task.id) {

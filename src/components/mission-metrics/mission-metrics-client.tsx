@@ -4,30 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import MissionMetricsWorkspace from '@/components/mission-metrics/mission-metrics-workspace';
+import MissionMetricsWorkspace, { Opportunity } from '@/components/mission-metrics/mission-metrics-workspace';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import OpportunityCard from '@/components/ghl/opportunity-card'; // Reusing existing card for now
+import OpportunityCard from '@/components/mission-metrics/opportunity-card';
 import { MissionMetricsBoard } from './mission-metrics-board';
 import { LayoutGrid, List } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-// ... (interfaces remain the same)
-interface Opportunity {
-  id: string;
-  name: string;
-  monetaryValue: number;
-  pipelineId: string;
-  pipelineStageId: string;
-  contactId: string;
-  lastStageChangeAt: string;
-  contact?: {
-    name?: string;
-    companyName?: string;
-    email?: string;
-    phone?: string;
-  };
-}
 
 interface Pipeline {
   id: string;
@@ -230,18 +213,36 @@ export default function MissionMetricsClient() {
   }
 
   return (
-    <>
-      <div className="border rounded-lg flex flex-col h-full">
-        <div className="bg-primary text-primary-foreground p-6 shrink-0">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+    <div className="flex flex-col h-full gap-4">
+      <div className="flex justify-end">
+        <Select onValueChange={handlePipelineChange} value={selectedPipelineId}>
+          <SelectTrigger className="w-full md:w-64 bg-background">
+            <SelectValue placeholder="Select a pipeline" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Pipelines</SelectItem>
+            {pipelines.map((pipeline) => (
+              <SelectItem key={pipeline.id} value={pipeline.id}>
+                {pipeline.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="border rounded-lg flex flex-col flex-1 min-h-0">
+        <div className="bg-primary text-primary-foreground p-6 shrink-0 rounded-t-lg">
+          <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
                 <h2 className="font-headline text-xl font-semibold text-primary-foreground">
                 Opportunities
                 {isFetching && <span className="text-sm font-normal ml-2 opacity-75">(Updating...)</span>}
                 </h2>
             </div>
-            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto items-center">
-              <div className="bg-background/10 p-1 rounded-md flex gap-1">
+
+            {/* Bottom Row: View Toggle, Search, and Stage Selector */}
+            <div className="flex flex-col md:flex-row gap-4 w-full items-center">
+              <div className="bg-background/10 p-1 rounded-md flex gap-1 shrink-0">
                 <Button
                   variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="icon"
@@ -268,19 +269,6 @@ export default function MissionMetricsClient() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="bg-white text-gray-900 w-full md:w-64"
               />
-              <Select onValueChange={handlePipelineChange} value={selectedPipelineId}>
-                <SelectTrigger className="bg-white text-gray-900 w-full md:w-64">
-                  <SelectValue placeholder="Select a pipeline" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Pipelines</SelectItem>
-                  {pipelines.map((pipeline) => (
-                    <SelectItem key={pipeline.id} value={pipeline.id}>
-                      {pipeline.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               
               {viewMode === 'list' && (
                 <Select onValueChange={setSelectedStage} value={selectedStage} disabled={selectedPipelineId === 'all'}>
@@ -344,6 +332,6 @@ export default function MissionMetricsClient() {
         }}
         pipelines={pipelines}
       />
-    </>
+    </div>
   );
 }

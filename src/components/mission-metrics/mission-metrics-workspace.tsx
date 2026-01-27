@@ -15,7 +15,7 @@ import { MissionMetricsOutput } from '@/lib/ai/mission-metrics.types';
 import { useToast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 
-interface Opportunity {
+export interface Opportunity {
   id: string;
   name: string;
   monetaryValue: number;
@@ -28,6 +28,7 @@ interface Opportunity {
   contact: {
     id: string;
     name: string;
+    companyName?: string;
   };
   lastStageChangeAt: string;
 }
@@ -414,7 +415,7 @@ export default function MissionMetricsWorkspace({
                       />
                       
                       <Input
-                        placeholder="Organization Website URL (e.g., https://example.org)"
+                        placeholder="Organisation Website URL (e.g., https://example.org)"
                         value={websiteUrl}
                         onChange={(e) => setWebsiteUrl(e.target.value)}
                         required
@@ -425,7 +426,7 @@ export default function MissionMetricsWorkspace({
                         onChange={(e) => setSpecificUrl(e.target.value)}
                       />
                       <Textarea
-                        placeholder="Your key insight or notes about this organization (Optional)"
+                        placeholder="Your key insight or notes about this organisation (Optional)"
                         value={userInsight}
                         onChange={(e) => setUserInsight(e.target.value)}
                         rows={3}
@@ -535,7 +536,7 @@ export default function MissionMetricsWorkspace({
                   ) : (
                     !isGeneratingReport && (
                         <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
-                        <p>Enter organization details and click 'Generate' to create a custom Mission Metrics strategy.</p>
+                        <p>Enter organisation details and click 'Generate' to create a custom Mission Metrics strategy.</p>
                         </div>
                     )
                   )}

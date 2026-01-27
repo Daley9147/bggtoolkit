@@ -1,9 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const cookieStore = cookies()
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -11,7 +9,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { action, details } = await request.json()
+  const { action, details, entity_type, entity_id } = await request.json()
 
   if (!action) {
     return NextResponse.json({ error: 'Action is required' }, { status: 400 })
@@ -21,8 +19,10 @@ export async function POST(request: Request) {
     .from('logged_actions')
     .insert([{ 
       user_id: user.id, 
-      action,
-      details
+      action_type: action,
+      entity_type: entity_type || 'system',
+      entity_id: entity_id || null,
+      metadata: details || {}
     }])
 
   if (error) {

@@ -41,17 +41,17 @@ export const allSections: SectionData[] = [
       {
         id: 'mm-1',
         summary: 'Overview',
-        details: 'MissionMetrics exists to democratize powerful data analytics for the not-for-profit sector. We combine cutting-edge AI with deep sector expertise to help organizations of all sizes move from "guessing" to "knowing".',
+        details: 'MissionMetrics exists to democratize powerful data analytics for the not-for-profit sector. We combine cutting-edge AI with deep sector expertise to help organisations of all sizes move from "guessing" to "knowing".',
       },
       {
         id: 'mm-2',
         summary: 'Mission',
-        details: 'To provide clarity and confidence for data-driven decisions, regardless of an organization\'s size or budget.',
+        details: 'To provide clarity and confidence for data-driven decisions, regardless of an organisation\'s size or budget.',
       },
       {
         id: 'mm-3',
         summary: 'Core Value Proposition',
-        details: 'We help nonprofits organize messy data, automate reporting, and generate predictive insights to improve donor retention and program outcomes.',
+        details: 'We help nonprofits organize messy data, automate reporting, and generate predictive insights to improve donor retention and programme outcomes.',
       },
        {
         id: 'mm-4',
@@ -68,7 +68,7 @@ export const allSections: SectionData[] = [
       {
         id: 'engine-1',
         summary: 'What is it?',
-        details: 'The Mission Metrics Engine is our AI-powered intelligence core that connects to your data sources, learns your organization\'s voice, and automates complex analysis.',
+        details: 'The Mission Metrics Engine is our AI-powered intelligence core that connects to your data sources, learns your organisation\'s voice, and automates complex analysis.',
       },
       {
         id: 'engine-2',
@@ -83,7 +83,7 @@ export const allSections: SectionData[] = [
       {
         id: 'engine-4',
         summary: 'Step 3: AI Analysis',
-        details: 'Our AI analyzes trends and patterns to provide predictive modeling, helping you forecast donor behavior and program impact.',
+        details: 'Our AI analyses trends and patterns to provide predictive modeling, helping you forecast donor behavior and programme impact.',
       },
       {
         id: 'engine-5',
@@ -94,9 +94,9 @@ export const allSections: SectionData[] = [
   },
   {
     id: 'programs',
-    title: 'Plans & Pricing',
-    icon: 'Briefcase',
+    title: 'Our Programmes',
     description: 'We offer three tiers designed to meet the needs of nonprofits at different stages of their data journey.',
+    icon: 'Briefcase',
     features: [
       { feature: 'Target Audience', clarity: 'Small Nonprofits', performance: 'Growing Orgs', enterprise: 'Large/Complex Orgs' },
       { feature: 'Dashboards', clarity: '1 Overview Dashboard', performance: '3 Dept. Dashboards', enterprise: 'Fully Custom' },
@@ -132,7 +132,7 @@ export const allSections: SectionData[] = [
       {
         id: 'faq-4',
         summary: 'What is "Predictive Modeling"?',
-        details: 'It uses historical data to forecast future trends. For example, we can help predict which donors are at risk of churning or forecast the potential impact of a program intervention.',
+        details: 'It uses historical data to forecast future trends. For example, we can help predict which donors are at risk of churning or forecast the potential impact of a programme intervention.',
       },
       {
         id: 'faq-5',

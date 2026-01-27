@@ -62,7 +62,7 @@ export async function POST(request: Request) {
         charity_number: identifier, // storing identifier in charity_number column
         website_url: websiteUrl,
         specific_url: specificUrl || null,
-        report_json: report,
+        report_json: report as any,
       }, { onConflict: 'user_id, contact_id' }); 
       
     if (insertError) {

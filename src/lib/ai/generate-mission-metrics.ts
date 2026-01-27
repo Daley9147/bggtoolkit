@@ -3,7 +3,7 @@ import { fetchUKNonProfitData } from '@/lib/charity-commission/api';
 import { fetchNonProfitData } from '@/lib/propublica/api';
 import { missionMetricsUkPrompt } from './prompts/mission-metrics-uk.prompt';
 import { missionMetricsUsPrompt } from './prompts/mission-metrics-us.prompt';
-import { fetchWebsiteContent } from './generate-outreach-plan';
+import { fetchWebsiteContent } from './scraper';
 import { MissionMetricsInput, MissionMetricsOutput } from './mission-metrics.types';
 
 function parseJsonSafe(jsonString: string): any {

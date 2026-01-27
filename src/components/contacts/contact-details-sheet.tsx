@@ -12,7 +12,7 @@ const mapToContactDetails = (contact: Contact) => ({
   phone: contact.phone || '',
   website: contact.website || '',
   jobTitle: contact.job_title || '',
-  companyName: contact.organization_name || '',
+  companyName: contact.organisation_name || '',
   country: contact.country || '',
   num_employees: contact.num_employees || '',
   industry: contact.industry || '',

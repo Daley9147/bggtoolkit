@@ -8,7 +8,6 @@ import { Search } from 'lucide-react';
 import * as icons from 'lucide-react';
 import ProgramsTable from './programs-table';
 import BookmarkButton from './bookmark-button';
-import AiRefinementDialog from './ai-refinement-dialog';
 import ReactMarkdown from 'react-markdown';
 import DynamicIcon from '../common/dynamic-icon';
 
@@ -128,7 +127,6 @@ function ContentList({ section }: { section: ContentSection }) {
                     <ReactMarkdown>{item.details}</ReactMarkdown>
                    </div>
                    <div className="mt-2 flex items-center justify-end gap-2">
-                      <AiRefinementDialog content={`${item.summary}\n\n${item.details}`} />
                       <BookmarkButton item={{ ...item, sectionTitle: section.title }} />
                    </div>
                 </AccordionContent>

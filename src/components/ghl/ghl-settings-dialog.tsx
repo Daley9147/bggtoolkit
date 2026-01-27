@@ -56,7 +56,7 @@ export default function GhlSettingsDialog() {
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Manage your GoHighLevel connection and settings here.
+            Manage your account settings and preferences here.
           </DialogDescription>
         </DialogHeader>
         {isLoading ? (
@@ -74,18 +74,6 @@ export default function GhlSettingsDialog() {
             </Button>
           </div>
         )}
-        <DialogFooter>
-            <Button
-              variant="destructive"
-              onClick={async () => {
-                await fetch('/api/ghl/disconnect');
-                window.location.reload();
-              }}
-              className="w-full"
-            >
-              Disconnect GHL
-            </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

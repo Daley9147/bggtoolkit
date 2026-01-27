@@ -26,24 +26,11 @@ export async function GET(request: Request) {
       created_at,
       user_id,
       contact_id,
-      opportunity_id,
-      author_profile:profiles!notes_user_id_fkey ( full_name )
+      opportunity_id
     `)
     .order('created_at', { ascending: false });
 
-  // If both are provided, we might want notes that match EITHER? 
-  // Or match both? 
-  // Typically, if I am on an opportunity that is linked to a contact, I want to see:
-  // 1. Notes specifically linked to this opportunity.
-  // 2. Notes linked to this contact (even if not linked to this opportunity specifically? Maybe).
-  
-  // The user said: "assigned ... to the opportiuntuy".
-  // If I query `.eq('contact_id', contactId).eq('opportunity_id', opportunityId)`, I get intersection.
-  // If I want union, Supabase SDK `.or` syntax is needed.
-  
   if (contactId && opportunityId) {
-    // We want notes that are for this contact OR this opportunity.
-    // Syntax: .or(`contact_id.eq.${contactId},opportunity_id.eq.${opportunityId}`)
     query = query.or(`contact_id.eq.${contactId},opportunity_id.eq.${opportunityId}`);
   } else if (contactId) {
     query = query.eq('contact_id', contactId);
@@ -58,11 +45,28 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Failed to fetch notes.' }, { status: 500 });
   }
 
+  // Fetch profiles manually to get author names
+  const userIds = Array.from(new Set(notes.map((n: any) => n.user_id)));
+  let profilesMap: Record<string, string> = {};
+
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', userIds);
+    
+    if (profiles) {
+      profiles.forEach((p: any) => {
+        profilesMap[p.id] = p.full_name || 'Unknown User';
+      });
+    }
+  }
+
   const formattedNotes = notes.map((note: any) => ({
     id: note.id,
     body: note.body,
     dateAdded: note.created_at,
-    author: note.author_profile?.full_name || 'Unknown User',
+    author: profilesMap[note.user_id] || 'Unknown User',
     userId: note.user_id
   }));
 
@@ -96,13 +100,7 @@ export async function POST(request: Request) {
         opportunity_id: opportunityId || null,
         body: body,
       })
-      .select(`
-        id,
-        body,
-        created_at,
-        user_id,
-        author_profile:profiles!notes_user_id_fkey ( full_name )
-      `)
+      .select()
       .single();
 
     if (error) {
@@ -110,10 +108,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to add note.' }, { status: 500 });
     }
 
+    // Fetch author profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single();
+
     return NextResponse.json({
         id: newNote.id,
         body: newNote.body,
         dateAdded: newNote.created_at,
-        author: newNote.author_profile?.full_name || 'Unknown User',
+        author: profile?.full_name || 'Unknown User',
         userId: newNote.user_id
     });
+
+  } catch (error) {
+    console.error('Unexpected error adding note:', error);
+    return NextResponse.json({ error: 'An unexpected error occurred.' }, { status: 500 });
+  }
+}

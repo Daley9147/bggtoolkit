@@ -213,7 +213,7 @@ export default function ContactsClient() {
                         <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
-                            <TableHead>Organization</TableHead>
+                            <TableHead>Organisation</TableHead>
                             <TableHead>Job Title</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Phone</TableHead>
@@ -239,7 +239,7 @@ export default function ContactsClient() {
                                     <User className="h-4 w-4 text-muted-foreground" />
                                     {contact.first_name} {contact.last_name}
                                 </TableCell>
-                                <TableCell>{contact.organization_name || '-'}</TableCell>
+                                <TableCell>{contact.organisation_name || '-'}</TableCell>
                                 <TableCell>{contact.job_title || '-'}</TableCell>
                                 <TableCell>{contact.email || '-'}</TableCell>
                                 <TableCell>{contact.phone || '-'}</TableCell>

@@ -30,10 +30,11 @@ export async function PUT(
       return NextResponse.json({ error: 'Report not found.' }, { status: 404 });
     }
 
+    const existingReportJson = existingReport.report_json as any;
     const updatedReportJson = {
-      ...existingReport.report_json,
-      emailBody: emailBody !== undefined ? emailBody : existingReport.report_json.emailBody,
-      followUpBody: followUpBody !== undefined ? followUpBody : existingReport.report_json.followUpBody,
+      ...existingReportJson,
+      emailBody: emailBody !== undefined ? emailBody : existingReportJson.emailBody,
+      followUpBody: followUpBody !== undefined ? followUpBody : existingReportJson.followUpBody,
     };
 
     const { error: updateError } = await supabase

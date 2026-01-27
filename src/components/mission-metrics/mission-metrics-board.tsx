@@ -2,22 +2,10 @@
 
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import OpportunityCard from '@/components/ghl/opportunity-card';
+import OpportunityCard from '@/components/mission-metrics/opportunity-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-
-// Define types locally if not exported from elsewhere, or import them.
-// Ideally, these should be in a types file, but for now we'll match the client.
-interface Opportunity {
-  id: string;
-  name: string;
-  monetaryValue: number;
-  pipelineId: string;
-  pipelineStageId: string;
-  contactId: string;
-  lastStageChangeAt: string;
-  [key: string]: any; // Allow for other fields
-}
+import { Opportunity } from './mission-metrics-workspace';
 
 interface Pipeline {
   id: string;

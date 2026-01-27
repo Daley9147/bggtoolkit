@@ -46,12 +46,14 @@ export async function POST(request: Request) {
         if (pipeError) throw pipeError;
         pipeline = newPipeline;
 
-        const stages = ['New Lead', 'Discovery', 'Proposal', 'Negotiation', 'Won', 'Lost'];
-        await supabase.from('stages').insert(
-            stages.map((name, i) => ({ pipeline_id: pipeline.id, name, position: i }))
-        );
+        const stagesList = ['New Lead', 'Discovery', 'Proposal', 'Negotiation', 'Won', 'Lost'];
+        if (pipeline) {
+            await supabase.from('stages').insert(
+                stagesList.map((name, i) => ({ pipeline_id: (pipeline as any).id, name, position: i }))
+            );
         }
-        pipelineId = pipeline.id;
+        }
+        pipelineId = pipeline?.id;
     }
 
     const { data: stages } = await supabase
@@ -93,7 +95,7 @@ export async function POST(request: Request) {
           other_phone: getValue(row, ['other phone']),
           website: getValue(row, ['website', 'url', 'web']),
           identifier: identifier,
-          organization_name: getValue(row, ['company name', 'company', 'organization']),
+          organisation_name: getValue(row, ['company name', 'company', 'organisation']),
           country: getValue(row, ['company country', 'country']) || 'UK',
           num_employees: getValue(row, ['# employees', 'employees', 'number of employees']),
           industry: getValue(row, ['industry', 'sector']),
@@ -144,7 +146,7 @@ export async function POST(request: Request) {
           if (!insertError) contactId = newContact.id;
       }
 
-      if (contactId) {
+      if (contactId && pipelineId && defaultStageId) {
           // Create Opportunity
           const stageName = getValue(row, ['stage', 'status']) || '';
           const stageId = stages?.find(s => s.name.toLowerCase() === stageName.toLowerCase())?.id || defaultStageId;
@@ -152,7 +154,7 @@ export async function POST(request: Request) {
           await supabase.from('opportunities').insert({
             user_id: effectiveUserId,
             pipeline_id: pipelineId,
-            stage_id: stageId,
+            stage_id: stageId as string,
             contact_id: contactId,
             name: getValue(row, ['company name', 'company']) || `${contactData.first_name} ${contactData.last_name}` || 'New Opportunity',
             value: parseFloat(cleanValue(getValue(row, ['annual revenue', 'revenue', 'value']))) || 0,

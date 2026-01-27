@@ -39,7 +39,7 @@ async function checkReports() {
   console.log('\nFetching contacts...');
   const { data: contacts, error: contactError } = await supabase
     .from('contacts')
-    .select('id, organization_name, email');
+    .select('id, organisation_name, email');
 
     if (contactError) {
         console.error('Error fetching contacts:', contactError);
@@ -49,7 +49,7 @@ async function checkReports() {
     console.log(`Found ${contacts.length} contacts.`);
     contacts.forEach(c => {
         const matchingReport = reports.find(r => r.contact_id === c.id);
-        console.log(`- Contact: ${c.organization_name} (${c.email})`);
+        console.log(`- Contact: ${c.organisation_name} (${c.email})`);
         console.log(`  ID: ${c.id}`);
         console.log(`  Has Report? ${matchingReport ? 'YES' : 'NO'}`);
         if (matchingReport) {

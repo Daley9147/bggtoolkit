@@ -25,13 +25,16 @@ export async function GET(request: Request) {
         stage_id,
         created_at,
         updated_at,
+        pipeline_stage:stages (
+          name
+        ),
         contact:contacts (
           id,
           first_name,
           last_name,
           email,
           phone,
-          organization_name
+          organisation_name
         )
       `)
       .eq('user_id', user.id);
@@ -70,12 +73,15 @@ export async function GET(request: Request) {
       monetaryValue: opp.value,
       pipelineId: opp.pipeline_id,
       pipelineStageId: opp.stage_id,
+      pipelineStage: {
+        name: (opp.pipeline_stage as any)?.name || 'Unknown'
+      },
       contactId: opp.contact?.id,
       lastStageChangeAt: opp.updated_at,
       contact: opp.contact ? {
         id: opp.contact.id,
         name: `${opp.contact.first_name || ''} ${opp.contact.last_name || ''}`.trim(),
-        companyName: opp.contact.organization_name,
+        companyName: opp.contact.organisation_name,
         email: opp.contact.email,
         phone: opp.contact.phone,
       } : undefined

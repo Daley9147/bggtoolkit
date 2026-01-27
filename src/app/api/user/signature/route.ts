@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -28,8 +27,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const cookieStore = cookies()
-  const supabase = createServerClient(cookieStore)
+  const supabase = createClient()
 
   const {
     data: { session },
