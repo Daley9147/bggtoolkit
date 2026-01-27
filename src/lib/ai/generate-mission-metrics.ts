@@ -27,20 +27,22 @@ export async function generateMissionMetricsReport(input: MissionMetricsInput): 
   const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
   // 1. Fetch Financial Data
-  console.log(`Fetching financial data for identifier: ${input.identifier} (Country: ${input.country})`);
+  console.log(`Fetching financial data for identifier: ${input.identifier || 'None'} (Country: ${input.country})`);
   let financialData: any = null;
   let financialSummary = "No financial data found or API unavailable.";
 
-  if (input.country === 'UK') {
-    financialData = await fetchUKNonProfitData(input.identifier);
-    if (financialData) {
-      financialSummary = JSON.stringify(financialData.slice(0, 5)); // Last 5 years
-    }
-  } else if (input.country === 'US') {
-     // ProPublica logic
-    financialData = await fetchNonProfitData(input.identifier);
-    if (financialData) {
-       financialSummary = JSON.stringify(financialData); // ProPublica returns a single object for latest year
+  if (input.identifier) {
+    if (input.country === 'UK') {
+      financialData = await fetchUKNonProfitData(input.identifier);
+      if (financialData) {
+        financialSummary = JSON.stringify(financialData.slice(0, 5)); // Last 5 years
+      }
+    } else if (input.country === 'US') {
+       // ProPublica logic
+      financialData = await fetchNonProfitData(input.identifier);
+      if (financialData) {
+         financialSummary = JSON.stringify(financialData); // ProPublica returns a single object for latest year
+      }
     }
   }
 

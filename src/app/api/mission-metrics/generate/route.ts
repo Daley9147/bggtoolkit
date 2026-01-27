@@ -12,8 +12,8 @@ export async function POST(request: Request) {
 
   const { contactId, identifier, country, websiteUrl, specificUrl, userInsight } = await request.json();
 
-  if (!contactId || !identifier || !country || !websiteUrl) {
-    return NextResponse.json({ error: 'Contact ID, Identifier (Charity No/EIN), Country, and Website URL are required.' }, { status: 400 });
+  if (!contactId || !country || !websiteUrl) {
+    return NextResponse.json({ error: 'Contact ID, Country, and Website URL are required.' }, { status: 400 });
   }
 
   try {

@@ -96,7 +96,7 @@ export default function MissionMetricsWorkspace({
   const [stageUpdateError, setStageUpdateError] = useState<string | null>(null);
   const [contactDetails, setContactDetails] = useState<GhlContact | null>(null);
   const [customFieldDefs, setCustomFieldDefs] = useState<CustomField[]>([]);
-  const [notes, setNotes] = useState<{ id: string; body: string; dateAdded: string }[]>([]);
+  const [notes, setNotes] = useState<{ id: string; body: string; dateAdded: string; author?: string }[]>([]);
   
   // AI Generation State
   const [regionType, setRegionType] = useState<'uk-charity' | 'us-nonprofit'>('uk-charity');
@@ -182,9 +182,13 @@ export default function MissionMetricsWorkspace({
         });
 
     // 2. Fetch Other Data (Non-critical - Background)
+    const notesUrl = new URL('/api/mission-metrics/notes', window.location.origin);
+    if (contactId) notesUrl.searchParams.append('contactId', contactId);
+    if (opportunity.id) notesUrl.searchParams.append('opportunityId', opportunity.id);
+
     Promise.allSettled([
       fetchWithTimeout('/api/mission-metrics/custom-fields').then(async (res) => { if (res.ok) setCustomFieldDefs(await res.json()); }),
-      fetchWithTimeout(`/api/mission-metrics/notes/${contactId}`).then(async (res) => { if (res.ok) setNotes(await res.json()); }),
+      fetchWithTimeout(notesUrl.toString()).then(async (res) => { if (res.ok) setNotes(await res.json()); }),
       fetchWithTimeout(`/api/mission-metrics/report/${contactId}`).then(async (res) => {
         if (res.ok) {
           const data = await res.json();
@@ -237,10 +241,6 @@ export default function MissionMetricsWorkspace({
   const handleGenerateReport = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!identifier) {
-        setGenerationError(regionType === 'uk-charity' ? 'Charity Number is required.' : 'EIN is required.');
-        return;
-    }
     if (!websiteUrl) {
       setGenerationError('Website URL is required.');
       return;
@@ -328,8 +328,13 @@ export default function MissionMetricsWorkspace({
 
   const handleNoteAdded = async () => {
     if (!opportunity) return;
-    const contactId = opportunity.contactId || opportunity.contact.id;
-    const notesResponse = await fetchWithTimeout(`/api/mission-metrics/notes/${contactId}`);
+    const contactId = opportunity.contactId || (opportunity.contact && opportunity.contact.id);
+    
+    const notesUrl = new URL('/api/mission-metrics/notes', window.location.origin);
+    if (contactId) notesUrl.searchParams.append('contactId', contactId);
+    if (opportunity.id) notesUrl.searchParams.append('opportunityId', opportunity.id);
+
+    const notesResponse = await fetchWithTimeout(notesUrl.toString());
     if (notesResponse.ok) {
       setNotes(await notesResponse.json());
     }
@@ -403,10 +408,9 @@ export default function MissionMetricsWorkspace({
                       </div>
 
                       <Input
-                          placeholder={regionType === 'uk-charity' ? "Charity Number (e.g., 123456)" : "EIN (e.g., 12-3456789)"}
+                          placeholder={regionType === 'uk-charity' ? "Charity Number (e.g., 123456) (Optional)" : "EIN (e.g., 12-3456789) (Optional)"}
                           value={identifier}
                           onChange={(e) => setIdentifier(e.target.value)}
-                          required
                       />
                       
                       <Input
@@ -549,7 +553,8 @@ export default function MissionMetricsWorkspace({
                 <MissionMetricsNotesTab
                   notes={notes}
                   isLoading={isInitialLoading}
-                  contactId={opportunity.contactId || opportunity.contact.id}
+                  contactId={opportunity.contactId || (opportunity.contact && opportunity.contact.id)}
+                  opportunityId={opportunity.id}
                   onNoteAdded={handleNoteAdded}
                 />
               </TabsContent>

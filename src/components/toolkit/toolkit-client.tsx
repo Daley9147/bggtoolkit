@@ -67,7 +67,7 @@ export default function ToolkitClient({ sections }: ToolkitClientProps) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search across all sections (e.g., 'ROI', 'Boardroom', 'Lee’s background')"
+          placeholder="Search across all sections (e.g., 'Plans', 'Mission', 'Values')"
           className="w-full pl-10 h-12 text-base"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

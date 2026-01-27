@@ -9,12 +9,14 @@ interface Note {
   id: string;
   body: string;
   dateAdded: string;
+  author?: string;
 }
 
 interface MissionMetricsNotesTabProps {
   notes: Note[];
   isLoading: boolean;
-  contactId: string;
+  contactId?: string;
+  opportunityId?: string;
   onNoteAdded: () => void;
 }
 
@@ -22,6 +24,7 @@ export default function MissionMetricsNotesTab({
   notes,
   isLoading,
   contactId,
+  opportunityId,
   onNoteAdded,
 }: MissionMetricsNotesTabProps) {
   const [callNotes, setCallNotes] = useState('');
@@ -31,16 +34,20 @@ export default function MissionMetricsNotesTab({
   const { toast } = useToast();
 
   const handleLogCall = async () => {
-    if (!contactId || !callNotes.trim()) return;
+    if ((!contactId && !opportunityId) || !callNotes.trim()) return;
     setIsLoggingCall(true);
     setLogCallError(null);
     setLogCallSuccess(false);
     try {
-      const response = await fetch(`/api/mission-metrics/notes/${contactId}`,
+      const response = await fetch(`/api/mission-metrics/notes`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ body: callNotes }),
+          body: JSON.stringify({ 
+            body: callNotes,
+            contactId,
+            opportunityId
+          }),
         }
       );
       if (!response.ok) {
@@ -51,7 +58,7 @@ export default function MissionMetricsNotesTab({
       setLogCallSuccess(true);
       toast({
         title: 'Note Added',
-        description: 'Call notes successfully added to Mission Metrics GHL.',
+        description: 'Note successfully added.',
       });
       onNoteAdded(); // Refresh the notes list
     } catch (err: unknown) {
@@ -70,11 +77,11 @@ export default function MissionMetricsNotesTab({
   return (
     <div className="mt-4">
       <div className="mt-6">
-        <h4 className="font-semibold mb-2">Log Call Notes</h4>
+        <h4 className="font-semibold mb-2">Add Note</h4>
         <Textarea
           value={callNotes}
           onChange={(e) => setCallNotes(e.target.value)}
-          placeholder="Enter notes from your call..."
+          placeholder="Enter notes..."
           className="w-full"
           rows={5}
         />
@@ -84,10 +91,10 @@ export default function MissionMetricsNotesTab({
           className="mt-2"
         >
           {isLoggingCall
-            ? 'Logging...'
+            ? 'Saving...'
             : logCallSuccess
-            ? 'Logged to GHL!'
-            : 'Log Call to GHL'}
+            ? 'Saved!'
+            : 'Save Note'}
         </Button>
         {logCallError && (
           <p className="text-red-500 text-sm mt-2">{logCallError}</p>
@@ -110,17 +117,22 @@ export default function MissionMetricsNotesTab({
                 key={note.id}
                 className="p-3 bg-gray-50 rounded-lg border"
               >
+                <div className="flex justify-between items-start mb-1">
+                    <span className="text-xs font-semibold text-gray-600">
+                        {note.author || 'Unknown'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                        {new Date(note.dateAdded).toLocaleString()}
+                    </span>
+                </div>
                 <p className="text-sm text-gray-800 whitespace-pre-wrap">
                   {note.body}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  {new Date(note.dateAdded).toLocaleString()}
                 </p>
               </div>
             ))}
         </div>
       ) : (
-        <p>No notes found for this contact.</p>
+        <p>No notes found.</p>
       )}
     </div>
   );
