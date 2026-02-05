@@ -28,7 +28,21 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 });
     }
 
-    return NextResponse.json(contacts);
+    // Fetch profiles to map user_id to names
+    const userIds = Array.from(new Set(contacts.map(c => c.user_id)));
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', userIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+    const contactsWithAssignee = contacts.map(contact => ({
+      ...contact,
+      assignee: profileMap.get(contact.user_id) || null
+    }));
+
+    return NextResponse.json(contactsWithAssignee);
 
   } catch (error) {
     console.error('Unexpected error fetching contacts:', error);

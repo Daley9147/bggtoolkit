@@ -17,11 +17,18 @@ interface CrmList {
     count: number;
 }
 
+interface ContactWithAssignee extends Contact {
+    assignee?: {
+        full_name: string;
+        email: string;
+    } | null;
+}
+
 export default function ContactsClient() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') === 'lists' ? 'lists' : 'all';
   
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<ContactWithAssignee[]>([]);
   const [lists, setLists] = useState<CrmList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -172,82 +179,88 @@ export default function ContactsClient() {
             <Card>
                 <CardContent className="p-0">
                 {viewMode === 'lists' ? (
-                    <Table>
-                        <TableHeader>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>List Name</TableHead>
+                                    <TableHead>Contacts</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {isLoading ? (
+                                    <TableRow><TableCell colSpan={3} className="text-center h-24">Loading Lists...</TableCell></TableRow>
+                                ) : lists.length === 0 ? (
+                                    <TableRow><TableCell colSpan={3} className="text-center h-24">No lists found.</TableCell></TableRow>
+                                ) : (
+                                    lists.map((list) => (
+                                        <TableRow key={list.name}>
+                                            <TableCell className="font-medium">{list.name}</TableCell>
+                                            <TableCell>{list.count}</TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Button variant="outline" size="sm" onClick={() => { setSelectedList(list.name); setViewMode('list-details'); }}>
+                                                        <Eye className="h-4 w-4 mr-2" /> View
+                                                    </Button>
+                                                    <Button variant="outline" size="sm" onClick={() => handleDownloadCsv(list.name)}>
+                                                        <Download className="h-4 w-4 mr-2" /> CSV
+                                                    </Button>
+                                                    <Button variant="destructive" size="sm" onClick={() => handleDeleteList(list.name)}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
                             <TableRow>
-                                <TableHead>List Name</TableHead>
-                                <TableHead>Contacts</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Organisation</TableHead>
+                                <TableHead>Job Title</TableHead>
+                                <TableHead>Assigned To</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Phone</TableHead>
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
+                            </TableHeader>
+                            <TableBody>
                             {isLoading ? (
-                                <TableRow><TableCell colSpan={3} className="text-center h-24">Loading Lists...</TableCell></TableRow>
-                            ) : lists.length === 0 ? (
-                                <TableRow><TableCell colSpan={3} className="text-center h-24">No lists found.</TableCell></TableRow>
+                                <TableRow>
+                                <TableCell colSpan={6} className="text-center h-24">Loading...</TableCell>
+                                </TableRow>
+                            ) : contacts.length === 0 ? (
+                                <TableRow>
+                                <TableCell colSpan={6} className="text-center h-24">No contacts found.</TableCell>
+                                </TableRow>
                             ) : (
-                                lists.map((list) => (
-                                    <TableRow key={list.name}>
-                                        <TableCell className="font-medium">{list.name}</TableCell>
-                                        <TableCell>{list.count}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Button variant="outline" size="sm" onClick={() => { setSelectedList(list.name); setViewMode('list-details'); }}>
-                                                    <Eye className="h-4 w-4 mr-2" /> View
-                                                </Button>
-                                                <Button variant="outline" size="sm" onClick={() => handleDownloadCsv(list.name)}>
-                                                    <Download className="h-4 w-4 mr-2" /> CSV
-                                                </Button>
-                                                <Button variant="destructive" size="sm" onClick={() => handleDeleteList(list.name)}>
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
+                                contacts.map((contact) => (
+                                <TableRow 
+                                    key={contact.id} 
+                                    className="cursor-pointer hover:bg-muted/50"
+                                    onClick={() => setSelectedContact(contact)}
+                                >
+                                    <TableCell className="font-medium flex items-center gap-2 whitespace-nowrap">
+                                        <User className="h-4 w-4 text-muted-foreground" />
+                                        {contact.first_name} {contact.last_name}
+                                    </TableCell>
+                                    <TableCell className="whitespace-nowrap">{contact.organisation_name || '-'}</TableCell>
+                                    <TableCell className="whitespace-nowrap">{contact.job_title || '-'}</TableCell>
+                                    <TableCell className="whitespace-nowrap">{contact.assignee?.full_name || contact.assignee?.email || '-'}</TableCell>
+                                    <TableCell className="whitespace-nowrap">{contact.email || '-'}</TableCell>
+                                    <TableCell className="whitespace-nowrap">{contact.phone || '-'}</TableCell>
+                                </TableRow>
                                 ))
                             )}
-                        </TableBody>
-                    </Table>
-                ) : (
-                    <Table>
-                        <TableHeader>
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Organisation</TableHead>
-                            <TableHead>Job Title</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Phone</TableHead>
-                        </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                        {isLoading ? (
-                            <TableRow>
-                            <TableCell colSpan={5} className="text-center h-24">Loading...</TableCell>
-                            </TableRow>
-                        ) : contacts.length === 0 ? (
-                            <TableRow>
-                            <TableCell colSpan={5} className="text-center h-24">No contacts found.</TableCell>
-                            </TableRow>
-                        ) : (
-                            contacts.map((contact) => (
-                            <TableRow 
-                                key={contact.id} 
-                                className="cursor-pointer hover:bg-muted/50"
-                                onClick={() => setSelectedContact(contact)}
-                            >
-                                <TableCell className="font-medium flex items-center gap-2">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    {contact.first_name} {contact.last_name}
-                                </TableCell>
-                                <TableCell>{contact.organisation_name || '-'}</TableCell>
-                                <TableCell>{contact.job_title || '-'}</TableCell>
-                                <TableCell>{contact.email || '-'}</TableCell>
-                                <TableCell>{contact.phone || '-'}</TableCell>
-                            </TableRow>
-                            ))
-                        )}
-                        </TableBody>
-                    </Table>
+                            </TableBody>
+                        </Table>
+                    </div>
                 )}
                 </CardContent>
             </Card>

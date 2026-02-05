@@ -1,14 +1,36 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, Briefcase, LayoutDashboard, Bookmark, Calendar, PenSquare, Sparkles, ListTodo, Mail, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email === 'darrel@missionmetrics.io') {
+          setIsAdmin(true);
+      }
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        if (data?.role === 'admin') setIsAdmin(true);
+      }
+    };
+    checkRole();
+  }, []);
 
   return (
     <Sheet>
@@ -26,6 +48,18 @@ export default function MobileNav() {
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold mb-4">
             <span>Mission Metrics</span>
           </Link>
+          {isAdmin && (
+            <Link
+              href="/staff"
+              className={cn(
+                'mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 hover:bg-primary-hover',
+                { 'bg-primary-hover': pathname === '/staff' }
+              )}
+            >
+              <Users className="h-5 w-5" />
+              My Staff
+            </Link>
+          )}
           <Link
             href="/toolkit"
             className={cn(
